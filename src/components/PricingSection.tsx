@@ -1,5 +1,12 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Check, Music, Disc3, Lightbulb, Volume2, Send, MessageCircle } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import StrokeText from "./StrokeText";
+import AnimatedBorderCard from "./AnimatedBorderCard";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const included = [
   { icon: Music, text: "Show ao vivo da banda — 2 horas" },
@@ -19,23 +26,46 @@ const techDetails = [
 ];
 
 const PricingSection = () => {
+  const priceRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (!priceRef.current) return;
+
+    // Animate price number counting up
+    const target = { val: 0 };
+    gsap.to(target, {
+      val: 8850,
+      duration: 2,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: priceRef.current,
+        start: "top 80%",
+      },
+      onUpdate: () => {
+        if (priceRef.current) {
+          priceRef.current.textContent = `R$ ${Math.round(target.val).toLocaleString("pt-BR")}`;
+        }
+      },
+    });
+
+    return () => { ScrollTrigger.getAll().forEach(t => t.kill()); };
+  }, []);
+
   return (
     <section className="py-32 px-6 relative">
       <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
-        >
-          <p className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">
+        <div className="text-center mb-16">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4"
+          >
             Investimento
-          </p>
-          <h2 className="font-display text-4xl md:text-6xl lg:text-7xl font-light text-gold-gradient">
-            Sua Noite Perfeita
-          </h2>
-        </motion.div>
+          </motion.p>
+
+          <StrokeText text="Sua Noite Perfeita" fontSize="8rem" />
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -71,54 +101,54 @@ const PricingSection = () => {
             </div>
           </div>
 
-          {/* Pricing */}
+          {/* Pricing with animated counter */}
           <div className="border-t border-border pt-10">
             <div className="text-center mb-8">
               <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-2">
                 Valor total do investimento
               </p>
-              <p className="font-display text-5xl md:text-7xl font-light text-gold-gradient">
-                R$ 8.850
+              <p
+                ref={priceRef}
+                className="font-display text-5xl md:text-7xl font-light text-gold-gradient tabular-nums"
+              >
+                R$ 0
               </p>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4 mb-8">
-              <div className="p-6 rounded-sm gold-border-glow text-center hover:gold-glow transition-all duration-500">
-                <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">
-                  Entrada de 30%
-                </p>
-                <p className="font-display text-3xl text-foreground font-light">R$ 8.374<span className="text-lg">,75</span></p>
-                <p className="font-body text-xs text-primary mt-2">Economia de R$ 475,25</p>
-              </div>
-              <div className="p-6 rounded-sm gold-border-glow text-center hover:gold-glow transition-all duration-500 relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-primary px-3 py-1">
-                  <p className="font-ui text-[10px] tracking-wider uppercase text-primary-foreground">Melhor valor</p>
+              <AnimatedBorderCard delay={0.1}>
+                <div className="p-6 text-center">
+                  <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">
+                    Entrada de 30%
+                  </p>
+                  <p className="font-display text-3xl text-foreground font-light">R$ 8.374<span className="text-lg">,75</span></p>
+                  <p className="font-body text-xs text-primary mt-2">Economia de R$ 475,25</p>
                 </div>
-                <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">
-                  Entrada de 50%
-                </p>
-                <p className="font-display text-3xl text-foreground font-light">R$ 7.865</p>
-                <p className="font-body text-xs text-primary mt-2">Economia de R$ 985,00</p>
-              </div>
+              </AnimatedBorderCard>
+              <AnimatedBorderCard delay={0.3}>
+                <div className="p-6 text-center relative overflow-hidden">
+                  <div className="absolute top-0 right-0 bg-primary px-3 py-1">
+                    <p className="font-ui text-[10px] tracking-wider uppercase text-primary-foreground">Melhor valor</p>
+                  </div>
+                  <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">
+                    Entrada de 50%
+                  </p>
+                  <p className="font-display text-3xl text-foreground font-light">R$ 7.865</p>
+                  <p className="font-body text-xs text-primary mt-2">Economia de R$ 985,00</p>
+                </div>
+              </AnimatedBorderCard>
             </div>
 
             <div className="text-center space-y-3">
-              <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                className="inline-block"
+              <a
+                href="https://wa.me/5527999936682?text=Ol%C3%A1!%20Gostaria%20de%20aceitar%20a%20proposta%20musical%20para%20nosso%20casamento%20no%20valor%20de%20R%24%208.850.%20Podemos%20alinhar%20os%20pr%C3%B3ximos%20passos%3F"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 px-10 py-4 rounded-sm border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-500 breathing-glow font-ui text-sm tracking-[0.15em] uppercase"
               >
-                <a
-                  href="https://wa.me/5527999936682?text=Ol%C3%A1!%20Gostaria%20de%20aceitar%20a%20proposta%20musical%20para%20nosso%20casamento%20no%20valor%20de%20R%24%208.850.%20Podemos%20alinhar%20os%20pr%C3%B3ximos%20passos%3F"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 px-10 py-4 rounded-sm border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-500 breathing-glow font-ui text-sm tracking-[0.15em] uppercase"
-                >
-                  <Send className="w-4 h-4" />
-                  Aceitar Proposta
-                </a>
-              </motion.div>
+                <Send className="w-4 h-4" />
+                Aceitar Proposta
+              </a>
               <div>
                 <a
                   href="https://wa.me/5527999936682?text=Ol%C3%A1!%20Tenho%20algumas%20d%C3%BAvidas%20sobre%20a%20proposta%20musical.%20Podemos%20conversar%3F"

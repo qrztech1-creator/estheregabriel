@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { ExternalLink, ArrowRight, Music } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import StrokeText from "./StrokeText";
+import FloatingScene from "./FloatingScene";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -91,36 +93,40 @@ const songs: Song[] = [
 ];
 
 const SongsSection = () => {
-  const headingRef = useRef<HTMLHeadingElement>(null);
+  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    if (!headingRef.current) return;
-    
-    const chars = headingRef.current.querySelectorAll(".s-char");
-    gsap.from(chars, {
-      opacity: 0,
-      y: 40,
-      stagger: 0.03,
-      duration: 0.8,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: headingRef.current,
-        start: "top 80%",
-      },
+    cardsRef.current.forEach((card, i) => {
+      if (!card) return;
+      gsap.fromTo(card,
+        { y: 60, opacity: 0, rotationY: -15, scale: 0.9 },
+        {
+          y: 0,
+          opacity: 1,
+          rotationY: 0,
+          scale: 1,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 90%",
+          },
+          delay: i * 0.06,
+        }
+      );
     });
 
-    return () => {
-      ScrollTrigger.getAll().forEach(t => t.kill());
-    };
+    return () => { ScrollTrigger.getAll().forEach(t => t.kill()); };
   }, []);
 
-  const splitChars = (text: string) => text.split("").map((c, i) => (
-    <span key={i} className="s-char inline-block">{c === " " ? "\u00A0" : c}</span>
-  ));
-
   return (
-    <section className="py-32 px-6 relative">
-      <div className="max-w-6xl mx-auto">
+    <section className="py-32 px-6 relative overflow-hidden">
+      {/* Background 3D music notes */}
+      <div className="absolute inset-0 opacity-30">
+        <FloatingScene variant="notes" height="100%" />
+      </div>
+
+      <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-20">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -130,9 +136,9 @@ const SongsSection = () => {
           >
             Uma Amostra do Repertório
           </motion.p>
-          <h2 ref={headingRef} className="font-display text-4xl md:text-6xl lg:text-7xl font-light text-gold-gradient">
-            {splitChars("A Trilha Sonora")}
-          </h2>
+
+          <StrokeText text="A Trilha Sonora" fontSize="8rem" />
+
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -147,13 +153,11 @@ const SongsSection = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {songs.map((song, index) => (
-            <motion.div
+            <div
               key={`${song.artist}-${song.title}`}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
+              ref={(el) => { cardsRef.current[index] = el; }}
               className="glass-surface p-4 rounded-sm group hover:border-primary/40 transition-all duration-500 hover:scale-[1.02]"
+              style={{ perspective: "800px", transformStyle: "preserve-3d" }}
             >
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-sm overflow-hidden flex-shrink-0 ring-1 ring-border">
@@ -189,7 +193,7 @@ const SongsSection = () => {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 

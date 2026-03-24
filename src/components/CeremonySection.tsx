@@ -1,9 +1,16 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ceremonyViolin from "@/assets/ceremony-violin.jpg";
 import ceremonyPiano from "@/assets/ceremony-piano.jpg";
 import ceremonyCouple from "@/assets/ceremony-couple.jpg";
 import ceremonyVocal from "@/assets/ceremony-vocal.jpg";
 import ceremonyGuitar from "@/assets/ceremony-guitar.jpg";
+import StrokeText from "./StrokeText";
+import FloatingScene from "./FloatingScene";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const instruments = [
   { name: "Piano", image: ceremonyPiano },
@@ -13,34 +20,84 @@ const instruments = [
 ];
 
 const CeremonySection = () => {
+  const imgRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const heroImgRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Parallax on hero image
+    if (heroImgRef.current) {
+      const img = heroImgRef.current.querySelector("img");
+      if (img) {
+        gsap.to(img, {
+          y: "15%",
+          scale: 1.1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: heroImgRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1,
+          },
+        });
+      }
+    }
+
+    // 3D tilt on instrument cards
+    imgRefs.current.forEach((el, i) => {
+      if (!el) return;
+      gsap.fromTo(el,
+        { y: 80, opacity: 0, rotationY: 25, scale: 0.85 },
+        {
+          y: 0,
+          opacity: 1,
+          rotationY: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power3.out",
+          scrollTrigger: { trigger: el, start: "top 90%" },
+          delay: i * 0.12,
+        }
+      );
+    });
+
+    return () => { ScrollTrigger.getAll().forEach(t => t.kill()); };
+  }, []);
+
   return (
     <section className="py-32 px-6 relative overflow-hidden" style={{ background: "linear-gradient(180deg, hsl(0 0% 3.1%), hsl(30 10% 6%), hsl(0 0% 3.1%))" }}>
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
-        >
-          <p className="font-ui text-xs tracking-[0.3em] uppercase text-primary mb-4">
+      {/* Background 3D diamonds */}
+      <div className="absolute inset-0 opacity-30">
+        <FloatingScene variant="diamonds" height="100%" />
+      </div>
+
+      <div className="max-w-6xl mx-auto relative z-10">
+        <div className="text-center mb-16">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="font-ui text-xs tracking-[0.3em] uppercase text-primary mb-4"
+          >
             Opcional · Condição Especial
-          </p>
-          <h2 className="font-display text-4xl md:text-6xl lg:text-7xl font-light text-gold-gradient">
-            A Cerimônia
-          </h2>
-          <p className="font-body text-muted-foreground mt-6 max-w-2xl mx-auto leading-relaxed">
+          </motion.p>
+
+          <StrokeText text="A Cerimônia" fontSize="9rem" />
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="font-body text-muted-foreground mt-6 max-w-2xl mx-auto leading-relaxed"
+          >
             Ao fechar o pacote completo — cerimônia + festa — garantimos condições ainda melhores. 
             Transforme cada momento do seu casamento em uma experiência musical impecável, do altar à pista.
-          </p>
-        </motion.div>
+          </motion.p>
+        </div>
 
-        {/* Hero ceremony image */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1 }}
+        {/* Hero ceremony image with parallax */}
+        <div
+          ref={heroImgRef}
           className="relative rounded-sm overflow-hidden mb-16 gold-border-glow"
         >
           <img
@@ -58,18 +115,16 @@ const CeremonySection = () => {
               <span className="text-gold-gradient">do primeiro ao último acorde."</span>
             </p>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Instruments grid */}
+        {/* Instruments grid with 3D entrance */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
           {instruments.map((item, index) => (
-            <motion.div
+            <div
               key={item.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              ref={(el) => { imgRefs.current[index] = el; }}
               className="group relative rounded-sm overflow-hidden aspect-[3/4] gold-border-glow"
+              style={{ perspective: "800px", transformStyle: "preserve-3d" }}
             >
               <img
                 src={item.image}
@@ -83,11 +138,11 @@ const CeremonySection = () => {
               <div className="absolute bottom-4 left-4">
                 <p className="font-ui text-xs tracking-[0.2em] uppercase text-primary">{item.name}</p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
-        {/* Features list */}
+        {/* Features */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

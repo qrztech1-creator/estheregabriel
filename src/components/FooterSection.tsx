@@ -1,20 +1,51 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import FloatingScene from "./FloatingScene";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const FooterSection = () => {
+  const initialsRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (!initialsRef.current) return;
+
+    gsap.fromTo(initialsRef.current,
+      { scale: 0.6, opacity: 0, rotationY: -30 },
+      {
+        scale: 1,
+        opacity: 0.2,
+        rotationY: 0,
+        duration: 1.5,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: initialsRef.current,
+          start: "top 90%",
+        },
+      }
+    );
+
+    return () => { ScrollTrigger.getAll().forEach(t => t.kill()); };
+  }, []);
+
   return (
     <footer className="py-32 px-6 relative overflow-hidden">
+      {/* Background 3D */}
+      <div className="absolute inset-0 opacity-20">
+        <FloatingScene variant="waveform" height="100%" />
+      </div>
+
       <div className="max-w-6xl mx-auto text-center relative z-10">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1 }}
+        <p
+          ref={initialsRef}
+          className="font-display text-[15vw] md:text-[12vw] leading-none font-light text-gold-gradient select-none"
+          style={{ perspective: "800px" }}
         >
-          <p className="font-display text-[15vw] md:text-[12vw] leading-none font-light text-gold-gradient opacity-20 select-none">
-            E & G
-          </p>
-        </motion.div>
+          E & G
+        </p>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
