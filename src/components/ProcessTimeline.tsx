@@ -1,5 +1,12 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { CalendarDays, ListMusic, Users, Mic2, PartyPopper, CheckCircle2 } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import StrokeText from "./StrokeText";
+import AnimatedBorderCard from "./AnimatedBorderCard";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const steps = [
   {
@@ -42,29 +49,58 @@ const steps = [
 ];
 
 const ProcessTimeline = () => {
+  const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const lineRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Animate nodes with 3D flip
+    nodeRefs.current.forEach((el, i) => {
+      if (!el) return;
+      gsap.fromTo(el,
+        { rotationX: 90, opacity: 0, scale: 0.5 },
+        {
+          rotationX: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.8,
+          ease: "back.out(1.5)",
+          scrollTrigger: { trigger: el, start: "top 85%" },
+          delay: i * 0.08,
+        }
+      );
+    });
+
+    return () => { ScrollTrigger.getAll().forEach(t => t.kill()); };
+  }, []);
+
   return (
     <section className="py-32 px-6 relative">
       <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-20"
-        >
-          <p className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">
+        <div className="text-center mb-20">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4"
+          >
             O Processo
-          </p>
-          <h2 className="font-display text-4xl md:text-6xl lg:text-7xl font-light text-gold-gradient">
-            Da Ideia ao Palco
-          </h2>
-          <p className="font-body text-muted-foreground mt-6 max-w-xl mx-auto">
+          </motion.p>
+
+          <StrokeText text="Da Ideia ao Palco" fontSize="8rem" />
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="font-body text-muted-foreground mt-6 max-w-xl mx-auto"
+          >
             Veja como funciona o processo de organização musical do seu evento, do contrato ao grande dia.
-          </p>
-        </motion.div>
+          </motion.p>
+        </div>
 
         <div className="relative">
-          {/* Line */}
+          {/* Animated line */}
           <div className="absolute left-8 top-0 bottom-0 w-px">
             <motion.div
               initial={{ scaleY: 0 }}
@@ -76,32 +112,38 @@ const ProcessTimeline = () => {
           </div>
 
           {steps.map((step, index) => (
-            <motion.div
+            <div
               key={step.title}
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
               className="relative flex items-start gap-6 mb-12 last:mb-0"
             >
-              {/* Node */}
-              <div className="relative z-10 flex-shrink-0">
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center border ${
-                  step.active
-                    ? "bg-primary/20 border-primary gold-glow"
-                    : "bg-secondary border-border"
-                }`}>
+              {/* 3D rotating node */}
+              <div className="relative z-10 flex-shrink-0" style={{ perspective: "600px" }}>
+                <div
+                  ref={(el) => { nodeRefs.current[index] = el; }}
+                  className={`w-16 h-16 rounded-full flex items-center justify-center border ${
+                    step.active
+                      ? "bg-primary/20 border-primary gold-glow"
+                      : "bg-secondary border-border"
+                  }`}
+                  style={{ transformStyle: "preserve-3d" }}
+                >
                   <step.icon className={`w-6 h-6 ${step.active ? "text-primary" : "text-muted-foreground"}`} />
                 </div>
               </div>
 
               {/* Content */}
-              <div className="pt-2">
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="pt-2"
+              >
                 <p className="font-ui text-xs tracking-[0.2em] uppercase text-primary mb-1">{step.date}</p>
                 <h3 className="font-display text-2xl text-foreground font-light mb-2">{step.title}</h3>
                 <p className="font-body text-sm text-muted-foreground leading-relaxed">{step.description}</p>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           ))}
         </div>
       </div>

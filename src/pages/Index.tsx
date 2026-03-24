@@ -15,7 +15,7 @@ const Index = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Parallax on sections
+    // Parallax on section images
     const sections = document.querySelectorAll("section");
     sections.forEach((section) => {
       const bg = section.querySelector("img");
@@ -33,7 +33,7 @@ const Index = () => {
       }
     });
 
-    // Fade in glass-surface elements on scroll
+    // Animate glass surfaces border on scroll
     gsap.utils.toArray(".glass-surface").forEach((el: any) => {
       gsap.fromTo(
         el,
@@ -44,6 +44,24 @@ const Index = () => {
           scrollTrigger: {
             trigger: el,
             start: "top 85%",
+          },
+        }
+      );
+    });
+
+    // Smooth section reveals
+    gsap.utils.toArray("section").forEach((el: any, i: number) => {
+      if (i === 0) return; // skip hero
+      gsap.fromTo(el,
+        { opacity: 0.3 },
+        {
+          opacity: 1,
+          duration: 0.8,
+          scrollTrigger: {
+            trigger: el,
+            start: "top 90%",
+            end: "top 50%",
+            scrub: true,
           },
         }
       );
