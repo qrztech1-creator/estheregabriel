@@ -14,7 +14,225 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      block_order_preferences: {
+        Row: {
+          block_id: string
+          client_token_id: string
+          display_order: number
+          id: string
+        }
+        Insert: {
+          block_id: string
+          client_token_id: string
+          display_order: number
+          id?: string
+        }
+        Update: {
+          block_id?: string
+          client_token_id?: string
+          display_order?: number
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "block_order_preferences_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "playlist_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "block_order_preferences_client_token_id_fkey"
+            columns: ["client_token_id"]
+            isOneToOne: false
+            referencedRelation: "client_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_tokens: {
+        Row: {
+          client_name: string
+          created_at: string | null
+          id: string
+          token: string
+        }
+        Insert: {
+          client_name: string
+          created_at?: string | null
+          id?: string
+          token: string
+        }
+        Update: {
+          client_name?: string
+          created_at?: string | null
+          id?: string
+          token?: string
+        }
+        Relationships: []
+      }
+      dj_playlist_links: {
+        Row: {
+          client_token_id: string
+          created_at: string | null
+          id: string
+          name: string | null
+          spotify_url: string
+        }
+        Insert: {
+          client_token_id: string
+          created_at?: string | null
+          id?: string
+          name?: string | null
+          spotify_url: string
+        }
+        Update: {
+          client_token_id?: string
+          created_at?: string | null
+          id?: string
+          name?: string | null
+          spotify_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dj_playlist_links_client_token_id_fkey"
+            columns: ["client_token_id"]
+            isOneToOne: false
+            referencedRelation: "client_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playlist_blocks: {
+        Row: {
+          created_at: string | null
+          display_order: number
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order: number
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      playlist_songs: {
+        Row: {
+          artist: string | null
+          block_id: string
+          created_at: string | null
+          display_order: number
+          id: string
+          title: string
+        }
+        Insert: {
+          artist?: string | null
+          block_id: string
+          created_at?: string | null
+          display_order: number
+          id?: string
+          title: string
+        }
+        Update: {
+          artist?: string | null
+          block_id?: string
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_songs_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "playlist_blocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      song_preferences: {
+        Row: {
+          client_token_id: string
+          id: string
+          song_id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          client_token_id: string
+          id?: string
+          song_id: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          client_token_id?: string
+          id?: string
+          song_id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "song_preferences_client_token_id_fkey"
+            columns: ["client_token_id"]
+            isOneToOne: false
+            referencedRelation: "client_tokens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "song_preferences_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "playlist_songs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      song_suggestions: {
+        Row: {
+          artist: string | null
+          client_token_id: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          title: string
+        }
+        Insert: {
+          artist?: string | null
+          client_token_id: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          title: string
+        }
+        Update: {
+          artist?: string | null
+          client_token_id?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "song_suggestions_client_token_id_fkey"
+            columns: ["client_token_id"]
+            isOneToOne: false
+            referencedRelation: "client_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
