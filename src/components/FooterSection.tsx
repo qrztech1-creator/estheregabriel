@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { MessageCircle } from "lucide-react";
 
 const FooterSection = () => {
   return (
@@ -26,14 +27,15 @@ const FooterSection = () => {
             Home Music
           </p>
           <p className="font-body text-sm text-muted-foreground mb-6">
-            Curadoria musical para momentos inesquecíveis
+            Curadoria musical para momentos que merecem ser inesquecíveis
           </p>
           <a
-            href="https://wa.me/5527999936682"
+            href="https://wa.me/5527999936682?text=Ol%C3%A1!%20Vi%20a%20proposta%20no%20site%20e%20gostaria%20de%20conversar."
             target="_blank"
             rel="noopener noreferrer"
-            className="font-ui text-xs tracking-[0.2em] uppercase text-primary hover:text-foreground transition-colors"
+            className="inline-flex items-center gap-2 font-ui text-xs tracking-[0.2em] uppercase text-primary hover:text-foreground transition-colors"
           >
+            <MessageCircle className="w-4 h-4" />
             (27) 99993-6682
           </a>
         </motion.div>

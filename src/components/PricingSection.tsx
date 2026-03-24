@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Music, Disc3, Lightbulb, Volume2 } from "lucide-react";
+import { Check, Music, Disc3, Lightbulb, Volume2, Send, MessageCircle } from "lucide-react";
 
 const included = [
   { icon: Music, text: "Show ao vivo da banda — 2 horas" },
@@ -102,7 +102,7 @@ const PricingSection = () => {
               </div>
             </div>
 
-            <div className="text-center">
+            <div className="text-center space-y-3">
               <motion.div
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
@@ -110,14 +110,26 @@ const PricingSection = () => {
                 className="inline-block"
               >
                 <a
-                  href="https://wa.me/5527999936682"
+                  href="https://wa.me/5527999936682?text=Ol%C3%A1!%20Gostaria%20de%20aceitar%20a%20proposta%20musical%20para%20nosso%20casamento%20no%20valor%20de%20R%24%208.850.%20Podemos%20alinhar%20os%20pr%C3%B3ximos%20passos%3F"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-3 px-10 py-4 rounded-sm border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-500 breathing-glow font-ui text-sm tracking-[0.15em] uppercase"
                 >
+                  <Send className="w-4 h-4" />
                   Aceitar Proposta
                 </a>
               </motion.div>
+              <div>
+                <a
+                  href="https://wa.me/5527999936682?text=Ol%C3%A1!%20Tenho%20algumas%20d%C3%BAvidas%20sobre%20a%20proposta%20musical.%20Podemos%20conversar%3F"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors font-ui text-[10px] tracking-[0.15em] uppercase"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  Tenho dúvidas
+                </a>
+              </div>
               <p className="font-body text-xs text-muted-foreground mt-4">
                 Condições especiais válidas para fechamento em até 48h
               </p>
