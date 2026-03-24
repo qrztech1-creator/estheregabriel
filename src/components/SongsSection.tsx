@@ -1,5 +1,10 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, ArrowRight, Music } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface Song {
   title: string;
@@ -52,22 +57,6 @@ const songs: Song[] = [
     cover: "https://i.scdn.co/image/ab67616d0000b273fc3f54ea8ffa6688ab954217",
   },
   {
-    title: "Just The Way You Are",
-    artist: "Bruno Mars",
-    year: "2010",
-    spotifyUrl: "https://open.spotify.com/track/7BqBn9nzAq8spo5e7cZ0dJ",
-    youtubeUrl: "https://www.youtube.com/watch?v=LjhCEhWiKXk",
-    cover: "https://i.scdn.co/image/ab67616d0000b273f8861bcff39f3f498e9e8393",
-  },
-  {
-    title: "Somebody Told Me",
-    artist: "The Killers",
-    year: "2004",
-    spotifyUrl: "https://open.spotify.com/track/4Bkb8ZUSJQP0VYbGNTfhrI",
-    youtubeUrl: "https://www.youtube.com/watch?v=Y5fBPhc1usa",
-    cover: "https://i.scdn.co/image/ab67616d0000b2739c284a6855f4e7665d27a854",
-  },
-  {
     title: "Redenção",
     artist: "Fresno",
     year: "2008",
@@ -83,29 +72,78 @@ const songs: Song[] = [
     youtubeUrl: "https://www.youtube.com/watch?v=HgzGwKwLmgM",
     cover: "https://i.scdn.co/image/ab67616d0000b273008b06ec71019afd70153889",
   },
+  {
+    title: "Somebody Told Me",
+    artist: "The Killers",
+    year: "2004",
+    spotifyUrl: "https://open.spotify.com/track/4Bkb8ZUSJQP0VYbGNTfhrI",
+    youtubeUrl: "https://www.youtube.com/watch?v=Y5fBPhc1usa",
+    cover: "https://i.scdn.co/image/ab67616d0000b2739c284a6855f4e7665d27a854",
+  },
+  {
+    title: "Just The Way You Are",
+    artist: "Bruno Mars",
+    year: "2010",
+    spotifyUrl: "https://open.spotify.com/track/7BqBn9nzAq8spo5e7cZ0dJ",
+    youtubeUrl: "https://www.youtube.com/watch?v=LjhCEhWiKXk",
+    cover: "https://i.scdn.co/image/ab67616d0000b273f8861bcff39f3f498e9e8393",
+  },
 ];
 
 const SongsSection = () => {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (!headingRef.current) return;
+    
+    const chars = headingRef.current.querySelectorAll(".s-char");
+    gsap.from(chars, {
+      opacity: 0,
+      y: 40,
+      stagger: 0.03,
+      duration: 0.8,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger: headingRef.current,
+        start: "top 80%",
+      },
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(t => t.kill());
+    };
+  }, []);
+
+  const splitChars = (text: string) => text.split("").map((c, i) => (
+    <span key={i} className="s-char inline-block">{c === " " ? "\u00A0" : c}</span>
+  ));
+
   return (
     <section className="py-32 px-6 relative">
       <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-20"
-        >
-          <p className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">
-            Repertório Sugerido
-          </p>
-          <h2 className="font-display text-4xl md:text-6xl lg:text-7xl font-light text-gold-gradient">
-            A Trilha Sonora
+        <div className="text-center mb-20">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4"
+          >
+            Uma Amostra do Repertório
+          </motion.p>
+          <h2 ref={headingRef} className="font-display text-4xl md:text-6xl lg:text-7xl font-light text-gold-gradient">
+            {splitChars("A Trilha Sonora")}
           </h2>
-          <p className="font-body text-muted-foreground mt-6 max-w-xl mx-auto">
-            Hits cuidadosamente selecionados para criar a atmosfera perfeita. Vocês também poderão montar a playlist do DJ e sugerir músicas para a banda.
-          </p>
-        </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="font-body text-muted-foreground mt-6 max-w-xl mx-auto"
+          >
+            Hits selecionados para criar a atmosfera perfeita. 
+            A playlist completa com 16 blocos temáticos está disponível na área de personalização.
+          </motion.p>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {songs.map((song, index) => (
@@ -155,14 +193,25 @@ const SongsSection = () => {
           ))}
         </div>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+        {/* CTA to full playlist */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center text-sm text-muted-foreground mt-12 font-body"
+          className="text-center mt-16"
         >
-          Esta é apenas uma amostra. Vocês terão total liberdade para personalizar o repertório da banda e do DJ.
-        </motion.p>
+          <p className="font-body text-sm text-muted-foreground mb-6">
+            Quer ver todas as {">"}100 músicas organizadas em 16 blocos e personalizar o repertório?
+          </p>
+          <a
+            href="/playlist/esther-gabriel-2027"
+            className="inline-flex items-center gap-3 px-8 py-3 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 rounded-sm font-ui text-xs tracking-[0.15em] uppercase group"
+          >
+            <Music className="w-4 h-4" />
+            Personalizar Repertório
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </a>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,20 +1,25 @@
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Music, Radio, Disc3 } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const timelineItems = [
   {
     time: "18:00",
     duration: "30 min",
     title: "DJ Receptivo",
-    description: "Recepção dos convidados com playlist personalizada. Ambiente lounge, hits suaves e elegantes para criar a atmosfera perfeita enquanto todos chegam.",
+    description: "Playlist curada por vocês. Sons que criam atmosfera antes mesmo do primeiro brinde.",
     icon: Radio,
-    details: ["Playlist curada pelos noivos", "Ambiente lounge sofisticado", "Transição suave para a banda"],
+    details: ["Playlist personalizada pelos noivos", "Ambiente lounge sofisticado", "Transição suave para a banda"],
   },
   {
     time: "18:30",
     duration: "2 horas",
     title: "Banda ao Vivo",
-    description: "Show completo com a Banda Home Music. Repertório eclético dos anos 80, 90 e 2000 — do rock alternativo ao pop internacional. Uma experiência sonora inesquecível.",
+    description: "16 blocos musicais. Do rock alternativo ao pop, do nacional ao internacional. Cada nota pensada para manter a energia em ascensão.",
     icon: Music,
     details: ["The Killers, Arctic Monkeys, Bruno Mars", "Michael Jackson, Fresno e mais", "Medleys e blocos temáticos"],
   },
@@ -22,33 +27,68 @@ const timelineItems = [
     time: "20:30",
     duration: "1h30",
     title: "DJ Fecha a Noite",
-    description: "O DJ assume para fechar a festa com energia total. Playlist personalizada com os maiores hits para manter a pista lotada até o final.",
+    description: "A energia não para. O DJ assume com a playlist definitiva — montada por vocês — para fechar uma noite que ninguém vai esquecer.",
     icon: Disc3,
-    details: ["Playlist personalizada", "Hits dos anos 2000", "Energia máxima até o fim"],
+    details: ["Playlist montada pelo casal", "Hits dos anos 2000", "Energia máxima até o fim"],
   },
 ];
 
 const TimelineSection = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (!headingRef.current) return;
+    
+    gsap.fromTo(
+      headingRef.current,
+      { opacity: 0, y: 60, scale: 0.95 },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 1.2,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: headingRef.current,
+          start: "top 80%",
+        },
+      }
+    );
+
+    return () => {
+      ScrollTrigger.getAll().forEach(t => t.kill());
+    };
+  }, []);
+
   return (
-    <section className="py-32 px-6 relative">
+    <section ref={sectionRef} className="py-32 px-6 relative">
       <div className="max-w-5xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-20"
-        >
-          <p className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">
-            O Fluxo da Noite
-          </p>
-          <h2 className="font-display text-4xl md:text-6xl lg:text-7xl font-light text-gold-gradient">
-            4 Horas de Crescendo
+        <div className="text-center mb-20">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4"
+          >
+            Arquitetura Sonora
+          </motion.p>
+          <h2
+            ref={headingRef}
+            className="font-display text-4xl md:text-6xl lg:text-8xl font-light text-gold-gradient"
+          >
+            Uma Noite Orquestrada
           </h2>
-          <p className="font-body text-muted-foreground mt-6 max-w-xl mx-auto">
-            Cada momento cuidadosamente orquestrado para criar uma experiência musical inesquecível.
-          </p>
-        </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="font-body text-muted-foreground mt-6 max-w-xl mx-auto"
+          >
+            Quatro horas desenhadas para elevar cada momento — da chegada ao último acorde.
+          </motion.p>
+        </div>
 
         {/* Timeline */}
         <div className="relative">
@@ -87,7 +127,7 @@ const TimelineSection = () => {
               </div>
 
               {/* Content */}
-              <div className={`ml-24 md:ml-0 md:w-[calc(50%-4rem)] ${index % 2 === 0 ? "md:pr-16" : "md:pl-16"} ${index % 2 === 0 ? "" : "md:text-left"}`}>
+              <div className={`ml-24 md:ml-0 md:w-[calc(50%-4rem)] ${index % 2 === 0 ? "md:pr-16" : "md:pl-16"}`}>
                 <div className="glass-surface p-8 rounded-sm hover:border-primary/40 transition-all duration-500 group">
                   <div className="flex items-baseline gap-3 mb-3">
                     <span className="font-ui text-2xl font-bold text-primary tabular-nums">{item.time}</span>
