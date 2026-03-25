@@ -73,17 +73,17 @@ const GallerySection = () => {
           <StrokeText text="Galeria" fontSize="12rem" />
         </div>
 
-        <div className="columns-2 md:columns-3 gap-3 space-y-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {images.map((src, i) => (
             <div
               key={i}
               ref={(el) => { itemRefs.current[i] = el; }}
-              className="break-inside-avoid rounded-sm overflow-hidden gold-border-glow group"
+              className="rounded-sm overflow-hidden gold-border-glow group aspect-[4/3]"
             >
               <img
                 src={src}
                 alt={`Momento ${i + 1}`}
-                className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 loading="lazy"
               />
             </div>

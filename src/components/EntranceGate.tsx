@@ -87,9 +87,9 @@ const EntranceGate = ({ onEnter }: EntranceGateProps) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 2 }}
-              className="font-body text-[10px] text-muted-foreground/50"
+              className="font-body text-[11px] text-muted-foreground/60 max-w-xs text-center leading-relaxed"
             >
-              🎵 com trilha sonora
+              Prepare-se para ver como será a trilha sonora do grande dia com a Home Music!
             </motion.p>
           </motion.div>
 
