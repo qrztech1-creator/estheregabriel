@@ -23,7 +23,7 @@ const ProposalResponses = ({ proposalId, onBack }: Props) => {
   useEffect(() => { if (selectedClient) loadClientData(selectedClient); }, [selectedClient]);
 
   const loadProposal = async () => {
-    const { data: prop } = await supabase.from("proposals").select("*").eq("id", proposalId).single();
+    const { data: prop } = await supabase.from("proposals").select("*").eq("id", proposalId).maybeSingle();
     setProposal(prop);
     const { data: tokens } = await (supabase.from("client_tokens") as any).select("*").eq("proposal_id", proposalId);
     setClients(tokens || []);

@@ -38,7 +38,7 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
   }, [proposalId]);
 
   const loadProposal = async () => {
-    const { data } = await supabase.from("proposals").select("*").eq("id", proposalId).single();
+    const { data } = await supabase.from("proposals").select("*").eq("id", proposalId).maybeSingle();
     if (data) {
       setProposal(data);
       setForm({

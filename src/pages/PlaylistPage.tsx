@@ -66,15 +66,17 @@ const PlaylistPage = () => {
         .from("client_tokens")
         .select("*")
         .eq("token", token!)
-        .single();
+        .maybeSingle();
 
       if (!tokenData) { navigate("/"); return; }
       setClientTokenId(tokenData.id);
       setClientName(tokenData.client_name);
 
+      const proposalId = tokenData.proposal_id;
+
       const [blocksRes, songsRes, prefsRes, suggestionsRes, djLinksRes, blockOrdersRes] = await Promise.all([
-        supabase.from("playlist_blocks").select("*").order("display_order"),
-        supabase.from("playlist_songs").select("*").order("display_order"),
+        supabase.from("playlist_blocks").select("*").eq("proposal_id", proposalId).order("display_order"),
+        supabase.from("playlist_songs").select("*").eq("proposal_id", proposalId).order("display_order"),
         supabase.from("song_preferences").select("*").eq("client_token_id", tokenData.id),
         supabase.from("song_suggestions").select("*").eq("client_token_id", tokenData.id).order("created_at", { ascending: false }),
         supabase.from("dj_playlist_links").select("*").eq("client_token_id", tokenData.id).order("created_at", { ascending: false }),
