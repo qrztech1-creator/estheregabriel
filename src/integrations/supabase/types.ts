@@ -195,6 +195,11 @@ export type Database = {
         Row: {
           audio_url: string | null
           bride_name: string
+          client_email: string | null
+          client_instagram: string | null
+          client_phone: string | null
+          contract_status: string | null
+          contract_value: number | null
           created_at: string | null
           duration_label: string | null
           event_date: string
@@ -207,6 +212,8 @@ export type Database = {
           guest_count: number
           id: string
           included_services: Json
+          last_viewed_at: string | null
+          notes: string | null
           optional_extras: Json
           partnership_instagram: string | null
           partnership_name: string | null
@@ -220,11 +227,17 @@ export type Database = {
           tech_details: Json
           updated_at: string | null
           venue_name: string
+          view_count: number | null
           whatsapp_number: string
         }
         Insert: {
           audio_url?: string | null
           bride_name: string
+          client_email?: string | null
+          client_instagram?: string | null
+          client_phone?: string | null
+          contract_status?: string | null
+          contract_value?: number | null
           created_at?: string | null
           duration_label?: string | null
           event_date: string
@@ -237,6 +250,8 @@ export type Database = {
           guest_count?: number
           id?: string
           included_services?: Json
+          last_viewed_at?: string | null
+          notes?: string | null
           optional_extras?: Json
           partnership_instagram?: string | null
           partnership_name?: string | null
@@ -250,11 +265,17 @@ export type Database = {
           tech_details?: Json
           updated_at?: string | null
           venue_name: string
+          view_count?: number | null
           whatsapp_number?: string
         }
         Update: {
           audio_url?: string | null
           bride_name?: string
+          client_email?: string | null
+          client_instagram?: string | null
+          client_phone?: string | null
+          contract_status?: string | null
+          contract_value?: number | null
           created_at?: string | null
           duration_label?: string | null
           event_date?: string
@@ -267,6 +288,8 @@ export type Database = {
           guest_count?: number
           id?: string
           included_services?: Json
+          last_viewed_at?: string | null
+          notes?: string | null
           optional_extras?: Json
           partnership_instagram?: string | null
           partnership_name?: string | null
@@ -280,6 +303,7 @@ export type Database = {
           tech_details?: Json
           updated_at?: string | null
           venue_name?: string
+          view_count?: number | null
           whatsapp_number?: string
         }
         Relationships: []
