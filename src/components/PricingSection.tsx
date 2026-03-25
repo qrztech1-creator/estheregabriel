@@ -132,14 +132,11 @@ const PricingSection = () => {
     return () => clearTimeout(timer);
   }, [revealed, selectedPlan, plan.total]);
 
-  // Fixed deadline countdown: 01/04/2026 at 10:00 BRT (UTC-3)
+  // Fixed deadline countdown: 01/04/2026 at 10:00 BRT (UTC-3) — always running
   useEffect(() => {
-    if (!revealed || countdownStarted) return;
-    // April 1, 2026 at 10:00 BRT = 13:00 UTC
     const expiry = new Date("2026-04-01T13:00:00Z").getTime();
     setProposalExpiry(expiry);
-    setCountdownStarted(true);
-  }, [revealed, countdownStarted]);
+  }, []);
 
   useEffect(() => {
     if (!proposalExpiry) return;
