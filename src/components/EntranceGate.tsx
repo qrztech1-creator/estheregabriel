@@ -6,15 +6,16 @@ import logo from "@/assets/logo-homemusic.png";
 
 interface EntranceGateProps {
   onEnter: () => void;
+  brideName?: string;
+  groomName?: string;
 }
 
-const EntranceGate = ({ onEnter }: EntranceGateProps) => {
+const EntranceGate = ({ onEnter, brideName = "Esther", groomName = "Gabriel" }: EntranceGateProps) => {
   const [exiting, setExiting] = useState(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const lineRefs = useRef<(SVGLineElement | null)[]>([]);
 
   useEffect(() => {
-    // Animate title characters with GSAP like the Hero
     if (titleRef.current) {
       const chars = titleRef.current.querySelectorAll(".char");
       gsap.set(chars, { opacity: 0, y: 60, rotationX: -90, scale: 0.5 });
@@ -33,7 +34,6 @@ const EntranceGate = ({ onEnter }: EntranceGateProps) => {
         stagger: 0.02, duration: 1, ease: "power2.out",
       }, "-=0.1");
 
-      // Repeating glow
       gsap.to(chars, {
         textShadow: "0 0 30px hsla(43, 59%, 52%, 0.5), 0 0 60px hsla(43, 59%, 52%, 0.2)",
         stagger: 0.03, duration: 1, ease: "power2.inOut",
@@ -41,7 +41,6 @@ const EntranceGate = ({ onEnter }: EntranceGateProps) => {
       });
     }
 
-    // Decorative lines
     lineRefs.current.forEach((line, i) => {
       if (!line) return;
       const length = line.getTotalLength();
@@ -62,6 +61,8 @@ const EntranceGate = ({ onEnter }: EntranceGateProps) => {
       </span>
     ));
 
+  const displayText = `${brideName} & ${groomName}`;
+
   return (
     <AnimatePresence>
       {!exiting ? (
@@ -71,10 +72,7 @@ const EntranceGate = ({ onEnter }: EntranceGateProps) => {
           transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background overflow-hidden"
         >
-          {/* Particle field background */}
           <ParticleField />
-
-          {/* Decorative SVG lines */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-[1]" preserveAspectRatio="none">
             <line ref={(el) => { lineRefs.current[0] = el; }} x1="10%" y1="20%" x2="10%" y2="80%" stroke="hsl(43, 59%, 52%)" strokeWidth="0.5" opacity="0.15" />
             <line ref={(el) => { lineRefs.current[1] = el; }} x1="90%" y1="15%" x2="90%" y2="85%" stroke="hsl(43, 59%, 52%)" strokeWidth="0.5" opacity="0.15" />
@@ -82,7 +80,6 @@ const EntranceGate = ({ onEnter }: EntranceGateProps) => {
             <line ref={(el) => { lineRefs.current[3] = el; }} x1="70%" y1="50%" x2="95%" y2="50%" stroke="hsl(43, 59%, 52%)" strokeWidth="0.5" opacity="0.1" />
           </svg>
 
-          {/* Ambient glow */}
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.06]"
               style={{ background: "radial-gradient(circle, hsl(43, 59%, 52%), transparent 70%)" }}
@@ -90,7 +87,6 @@ const EntranceGate = ({ onEnter }: EntranceGateProps) => {
           </div>
 
           <div className="flex flex-col items-center gap-10 relative z-10 px-6 text-center">
-            {/* Logo */}
             <motion.img
               src={logo}
               alt="Home Music"
@@ -100,7 +96,6 @@ const EntranceGate = ({ onEnter }: EntranceGateProps) => {
               transition={{ duration: 1, delay: 0.2 }}
             />
 
-            {/* Subtitle */}
             <motion.p
               initial={{ opacity: 0, y: 10, letterSpacing: "0.1em" }}
               animate={{ opacity: 1, y: 0, letterSpacing: "0.4em" }}
@@ -110,16 +105,14 @@ const EntranceGate = ({ onEnter }: EntranceGateProps) => {
               Uma experiência musical exclusiva para
             </motion.p>
 
-            {/* Names with GSAP char animation */}
             <h1
               ref={titleRef}
               className="font-display text-5xl md:text-7xl font-light leading-tight"
               style={{ color: "hsl(43, 59%, 52%)" }}
             >
-              {splitText("Esther & Gabriel")}
+              {splitText(displayText)}
             </h1>
 
-            {/* Divider */}
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
@@ -127,7 +120,6 @@ const EntranceGate = ({ onEnter }: EntranceGateProps) => {
               className="w-24 h-px bg-primary/30 origin-center"
             />
 
-            {/* CTA */}
             <motion.button
               onClick={handleEnter}
               initial={{ opacity: 0, y: 15 }}
@@ -141,7 +133,6 @@ const EntranceGate = ({ onEnter }: EntranceGateProps) => {
               <div className="absolute inset-0 rounded-sm breathing-glow pointer-events-none" />
             </motion.button>
 
-            {/* Hint */}
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

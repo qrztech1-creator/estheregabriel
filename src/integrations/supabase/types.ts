@@ -193,6 +193,7 @@ export type Database = {
       }
       proposals: {
         Row: {
+          audio_url: string | null
           bride_name: string
           created_at: string | null
           duration_label: string | null
@@ -222,6 +223,7 @@ export type Database = {
           whatsapp_number: string
         }
         Insert: {
+          audio_url?: string | null
           bride_name: string
           created_at?: string | null
           duration_label?: string | null
@@ -251,6 +253,7 @@ export type Database = {
           whatsapp_number?: string
         }
         Update: {
+          audio_url?: string | null
           bride_name?: string
           created_at?: string | null
           duration_label?: string | null
