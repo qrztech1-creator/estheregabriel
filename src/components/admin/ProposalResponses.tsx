@@ -79,14 +79,14 @@ const ProposalResponses = ({ proposalId, onBack }: Props) => {
         </select>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-card border border-border rounded-xl p-4"><p className="text-sm text-muted-foreground">Total</p><p className="text-2xl font-bold">{preferences.length}</p></div>
-        <div className="bg-card border border-border rounded-xl p-4"><p className="text-sm text-green-400">Aprovadas</p><p className="text-2xl font-bold text-green-400">{stats.approved}</p></div>
-        <div className="bg-card border border-border rounded-xl p-4"><p className="text-sm text-red-400">Rejeitadas</p><p className="text-2xl font-bold text-red-400">{stats.rejected}</p></div>
-        <div className="bg-card border border-border rounded-xl p-4"><p className="text-sm text-muted-foreground">Sugestões</p><p className="text-2xl font-bold">{suggestions.length}</p></div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+        <div className="bg-card border border-border rounded-xl p-3 sm:p-4"><p className="text-xs sm:text-sm text-muted-foreground">Total</p><p className="text-xl sm:text-2xl font-bold">{preferences.length}</p></div>
+        <div className="bg-card border border-border rounded-xl p-3 sm:p-4"><p className="text-xs sm:text-sm text-green-400">Aprovadas</p><p className="text-xl sm:text-2xl font-bold text-green-400">{stats.approved}</p></div>
+        <div className="bg-card border border-border rounded-xl p-3 sm:p-4"><p className="text-xs sm:text-sm text-red-400">Rejeitadas</p><p className="text-xl sm:text-2xl font-bold text-red-400">{stats.rejected}</p></div>
+        <div className="bg-card border border-border rounded-xl p-3 sm:p-4"><p className="text-xs sm:text-sm text-muted-foreground">Sugestões</p><p className="text-xl sm:text-2xl font-bold">{suggestions.length}</p></div>
       </div>
 
-      <div className="flex gap-2 mb-6 overflow-x-auto">
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-1 -mx-1 px-1">
         {([
           { key: "preferences" as const, label: "Curadoria", icon: Music, count: preferences.length },
           { key: "suggestions" as const, label: "Sugestões", icon: MessageCircle, count: suggestions.length },
@@ -94,8 +94,8 @@ const ProposalResponses = ({ proposalId, onBack }: Props) => {
           { key: "blocks" as const, label: "Ordem", icon: ArrowUpDown, count: blockOrders.length },
         ]).map(tab => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${activeTab === tab.key ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
-            <tab.icon className="w-4 h-4" />{tab.label}{tab.count > 0 && <span className="text-xs px-1.5 py-0.5 rounded-full bg-muted">{tab.count}</span>}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${activeTab === tab.key ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
+            <tab.icon className="w-3.5 h-3.5" />{tab.label}{tab.count > 0 && <span className="text-xs px-1.5 py-0.5 rounded-full bg-muted">{tab.count}</span>}
           </button>
         ))}
       </div>
