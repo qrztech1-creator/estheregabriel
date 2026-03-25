@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import StrokeText from "./StrokeText";
 import AnimatedBorderCard from "./AnimatedBorderCard";
+import carolSuhetImg from "@/assets/carol-suhet.png";
 
 gsap.registerPlugin(ScrollTrigger);
 
