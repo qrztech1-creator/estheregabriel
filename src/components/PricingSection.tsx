@@ -64,7 +64,7 @@ const plans: PricingPlan[] = [
     savings50: 981.47,
     aVista: 8295.00,
     savingsAVista: 1185.00,
-    recommended: true,
+    
   },
   {
     id: "banda-2h-dj-3h",
@@ -89,6 +89,7 @@ const plans: PricingPlan[] = [
     savings50: 1198.40,
     aVista: 10486.00,
     savingsAVista: 1498.00,
+    recommended: true,
   },
 ];
 
@@ -105,7 +106,7 @@ const PricingSection = () => {
   const [proposalTime, setProposalTime] = useState({ d: "0", h: "00", m: "00", s: "00" });
   const [countdownStarted, setCountdownStarted] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(1); // default to recommended
+  const [selectedPlan, setSelectedPlan] = useState(3); // default to recommended
 
   const plan = plans[selectedPlan];
 
