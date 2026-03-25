@@ -35,7 +35,7 @@ const images = [
   gallery1, gallery2, gallery3, gallery4, gallery5,
   gallery6, gallery7, gallery8, gallery9, gallery10,
   gallery11, gallery12, gallery13, gallery14, gallery15,
-];
+].filter((src, i, arr) => arr.indexOf(src) === i);
 
 const GallerySection = () => {
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
