@@ -8,6 +8,8 @@ import BackgroundMusic from "@/components/BackgroundMusic";
 import EntranceGate from "@/components/EntranceGate";
 import Index from "./pages/Index.tsx";
 import PlaylistPage from "./pages/PlaylistPage.tsx";
+import AdminLogin from "./pages/AdminLogin.tsx";
+import AdminDashboard from "./pages/AdminDashboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
