@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import StrokeText from "./StrokeText";
 import AnimatedBorderCard from "./AnimatedBorderCard";
+import carolSuhetImg from "@/assets/carol-suhet.png";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -192,7 +193,7 @@ const PricingSection = () => {
               >
                 {/* Partnership badge */}
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-sm bg-primary/10 border border-primary/20 mb-4">
+                  <div className="inline-flex items-center gap-3 px-4 py-2 rounded-sm bg-primary/10 border border-primary/20 mb-4">
                     <span className="font-ui text-[10px] tracking-[0.2em] uppercase text-primary">
                       Oferta em parceria com
                     </span>
@@ -200,8 +201,9 @@ const PricingSection = () => {
                       href="https://www.instagram.com/carolsuhetcerimonialista/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-display text-sm text-primary hover:text-foreground transition-colors duration-150 underline underline-offset-2"
+                      className="inline-flex items-center gap-2 font-display text-sm text-primary hover:text-foreground transition-colors duration-150 underline underline-offset-2"
                     >
+                      <img src={carolSuhetImg} alt="Carol Suhet" className="w-6 h-6 rounded-full object-cover ring-1 ring-primary/30" />
                       Carol Suhet
                     </a>
                   </div>
