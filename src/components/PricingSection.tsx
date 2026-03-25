@@ -389,7 +389,7 @@ const PricingSection = () => {
                     <div className="flex items-center justify-center gap-2 mb-3">
                       <AlertTriangle className="w-4 h-4 text-destructive animate-pulse" />
                       <p className="font-ui text-xs tracking-[0.2em] uppercase text-destructive">
-                        Condições especiais por tempo limitado
+                        Proposta válida até 01/04
                       </p>
                     </div>
                     <div className="flex items-center justify-center gap-4 mb-3">
