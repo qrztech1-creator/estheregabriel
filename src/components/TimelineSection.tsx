@@ -84,7 +84,7 @@ const TimelineSection = () => {
             4 Horas de Música Imersiva
           </motion.p>
 
-          <StrokeText text="A Noite É Sua" fontSize="10rem" />
+          <StrokeText text="A Noite É Sua" fontSize="12rem" />
 
           <motion.p
             initial={{ opacity: 0 }}

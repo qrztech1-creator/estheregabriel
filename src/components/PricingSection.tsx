@@ -109,7 +109,7 @@ const PricingSection = () => {
             O Investimento na Noite Perfeita
           </motion.p>
 
-          <StrokeText text="Nosso Combinado" fontSize="10rem" />
+          <StrokeText text="Nosso Combinado" fontSize="12rem" />
         </div>
 
         {/* Services included - always visible */}

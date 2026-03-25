@@ -80,7 +80,7 @@ const ProcessTimeline = () => {
             Cada Passo Rumo à Festa
           </motion.p>
 
-          <StrokeText text="Do Sim ao Palco" fontSize="10rem" />
+          <StrokeText text="Do Sim ao Palco" fontSize="12rem" />
 
           <motion.p
             initial={{ opacity: 0 }}
