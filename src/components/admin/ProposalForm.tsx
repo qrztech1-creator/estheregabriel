@@ -234,7 +234,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
           {form.pricing_plans.map((plan: any, i: number) => (
             <div key={i} className="border border-border rounded-lg p-4 space-y-3 relative">
               <button onClick={() => set("pricing_plans", form.pricing_plans.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><Label>Nome</Label><Input value={plan.label} onChange={e => updatePlan(i, "label", e.target.value)} /></div>
                 <div><Label>Descrição</Label><Input value={plan.description} onChange={e => updatePlan(i, "description", e.target.value)} /></div>
                 <div><Label>Valor Total (R$)</Label><Input type="number" value={plan.total} onChange={e => updatePlanTotal(i, Number(e.target.value))} /></div>
@@ -278,7 +278,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
           {form.event_timeline.map((item: any, i: number) => (
             <div key={i} className="border border-border rounded p-3 space-y-2 relative">
               <button onClick={() => set("event_timeline", form.event_timeline.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <Input value={item.time} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], time: e.target.value }; set("event_timeline", arr); }} placeholder="Horário" />
                 <Input value={item.duration} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], duration: e.target.value }; set("event_timeline", arr); }} placeholder="Duração" />
                 <Input value={item.title} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], title: e.target.value }; set("event_timeline", arr); }} placeholder="Título" />
@@ -293,7 +293,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
           {form.process_steps.map((step: any, i: number) => (
             <div key={i} className="border border-border rounded p-3 space-y-2 relative">
               <button onClick={() => set("process_steps", form.process_steps.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <Input value={step.title} onChange={e => { const arr = [...form.process_steps]; arr[i] = { ...arr[i], title: e.target.value }; set("process_steps", arr); }} placeholder="Título" />
                 <Input value={step.date} onChange={e => { const arr = [...form.process_steps]; arr[i] = { ...arr[i], date: e.target.value }; set("process_steps", arr); }} placeholder="Data/Período" />
                 <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={step.active || false} onChange={e => { const arr = [...form.process_steps]; arr[i] = { ...arr[i], active: e.target.checked }; set("process_steps", arr); }} /> Ativo</label>
@@ -327,14 +327,14 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
             </div>
           ))}
           <Button variant="outline" size="sm" onClick={() => set("optional_extras", [...form.optional_extras, { icon: "Monitor", title: "", description: "", details: [] }])}>+ Adicionar</Button>
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <div><Label>Título do pacote</Label><Input value={form.extras_bundle_title} onChange={e => set("extras_bundle_title", e.target.value)} /></div>
             <div><Label>Preço do pacote (R$)</Label><Input type="number" value={form.extras_bundle_price} onChange={e => set("extras_bundle_price", Number(e.target.value))} /></div>
           </div>
         </Section>
 
         <Section id="partnership" title="🤝 Parceria">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><Label>Nome</Label><Input value={form.partnership_name} onChange={e => set("partnership_name", e.target.value)} /></div>
             <div><Label>Instagram (URL)</Label><Input value={form.partnership_instagram} onChange={e => set("partnership_instagram", e.target.value)} /></div>
             <div className="col-span-2"><Label>URL da foto</Label><Input value={form.partnership_photo_url} onChange={e => set("partnership_photo_url", e.target.value)} /></div>
