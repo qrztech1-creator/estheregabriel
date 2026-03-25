@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, Plus, List, Music } from "lucide-react";
+import { LogOut, Plus, List } from "lucide-react";
+import logo from "@/assets/logo-homemusic.png";
 import { Button } from "@/components/ui/button";
 import ProposalList from "@/components/admin/ProposalList";
 import ProposalForm from "@/components/admin/ProposalForm";
@@ -38,8 +39,8 @@ const AdminDashboard = () => {
       <header className="border-b border-border bg-card sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Music className="w-6 h-6 text-primary" />
-            <h1 className="text-lg font-bold">Home Music — Admin</h1>
+            <img src={logo} alt="Home Music" className="h-7 w-auto" />
+            <span className="text-lg font-bold">Admin</span>
           </div>
           <div className="flex items-center gap-2">
             <Button variant={view === "list" ? "default" : "ghost"} size="sm" onClick={() => setView("list")}>

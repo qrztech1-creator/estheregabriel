@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, X, ChevronUp, ChevronDown, Music, Plus, Send, ExternalLink, MessageCircle, Trash2, Link2 } from "lucide-react";
+import logo from "@/assets/logo-homemusic.png";
 import { toast } from "sonner";
 
 interface Block {
@@ -236,8 +237,7 @@ const PlaylistPage = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-3">
         <div className="max-w-5xl mx-auto flex items-center justify-between glass-surface px-4 py-2.5 rounded-sm">
           <div className="flex items-center gap-3">
-            <Music className="w-4 h-4 text-primary" />
-            <span className="font-display text-lg text-foreground">Home Music</span>
+            <img src={logo} alt="Home Music" className="h-7 w-auto" />
           </div>
           <div className="flex items-center gap-3">
             <span className="font-body text-xs text-muted-foreground hidden sm:block">{clientName}</span>
