@@ -11,7 +11,7 @@ gsap.registerPlugin(ScrollTrigger);
 const included = [
   { icon: Music, text: "Show ao vivo da banda — 2 horas" },
   { icon: Disc3, text: "DJ com playlist personalizada — 2 horas" },
-  { icon: Lightbulb, text: "Iluminação cênica para o palco" },
+  { icon: Lightbulb, text: "Iluminação cênica para o palco", badge: "Cortesia" },
   { icon: Volume2, text: "Sonorização completa para 150 convidados" },
 ];
 
@@ -41,7 +41,7 @@ const PricingSection = () => {
       if (!priceRef.current) return;
       const target = { val: 0 };
       gsap.to(target, {
-        val: 8850,
+        val: 9480,
         duration: 2.5,
         ease: "power2.out",
         onUpdate: () => {
@@ -124,7 +124,14 @@ const PricingSection = () => {
             {included.map((item) => (
               <div key={item.text} className="flex items-start gap-3 p-4 rounded-sm bg-secondary/30 hover:bg-secondary/50 transition-colors duration-150">
                 <item.icon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                <p className="font-body text-sm text-foreground">{item.text}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-body text-sm text-foreground">{item.text}</p>
+                  {"badge" in item && item.badge && (
+                    <span className="font-ui text-[9px] tracking-[0.1em] uppercase px-2 py-0.5 rounded-sm bg-primary/20 text-primary border border-primary/30">
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -183,6 +190,23 @@ const PricingSection = () => {
                 transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
                 className="border-t border-border pt-8"
               >
+                {/* Partnership badge */}
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-sm bg-primary/10 border border-primary/20 mb-4">
+                    <span className="font-ui text-[10px] tracking-[0.2em] uppercase text-primary">
+                      Oferta em parceria com
+                    </span>
+                    <a
+                      href="https://www.instagram.com/carolsuhetcerimonialista/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-display text-sm text-primary hover:text-foreground transition-colors duration-150 underline underline-offset-2"
+                    >
+                      Carol Suhet
+                    </a>
+                  </div>
+                </div>
+
                 {/* Pricing */}
                 <div className="text-center mb-6">
                   <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-2">
@@ -199,20 +223,20 @@ const PricingSection = () => {
                       <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">
                         Entrada de 30%
                       </p>
-                      <p className="font-display text-3xl text-foreground font-light">R$ 8.374<span className="text-lg">,75</span></p>
-                      <p className="font-body text-xs text-primary mt-2">Economia de R$ 475,25</p>
+                      <p className="font-display text-3xl text-foreground font-light">R$ 8.974<span className="text-lg">,50</span></p>
+                      <p className="font-body text-xs text-primary mt-2">Economia de R$ 505,50</p>
                     </div>
                   </AnimatedBorderCard>
                   <AnimatedBorderCard delay={0.3}>
                     <div className="p-6 text-center relative overflow-hidden hover:bg-secondary/20 transition-colors duration-150 rounded-sm">
                       <div className="absolute top-0 right-0 bg-primary px-3 py-1">
-                        <p className="font-ui text-[10px] tracking-wider uppercase text-primary-foreground">Melhor valor</p>
+                        <p className="font-ui text-[10px] tracking-wider uppercase text-primary-foreground">Desconto maior</p>
                       </div>
                       <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">
                         Entrada de 50%
                       </p>
-                      <p className="font-display text-3xl text-foreground font-light">R$ 7.865</p>
-                      <p className="font-body text-xs text-primary mt-2">Economia de R$ 985,00</p>
+                      <p className="font-display text-3xl text-foreground font-light">R$ 8.498<span className="text-lg">,53</span></p>
+                      <p className="font-body text-xs text-primary mt-2">Economia de R$ 981,47</p>
                     </div>
                   </AnimatedBorderCard>
                 </div>
@@ -255,7 +279,7 @@ const PricingSection = () => {
 
                 <div className="text-center space-y-3">
                   <a
-                    href="https://wa.me/5527999936682?text=Ol%C3%A1!%20Gostaria%20de%20aceitar%20a%20proposta%20musical%20para%20nosso%20casamento%20no%20valor%20de%20R%24%208.850.%20Podemos%20alinhar%20os%20pr%C3%B3ximos%20passos%3F"
+                    href="https://wa.me/5527999936682?text=Ol%C3%A1!%20Gostaria%20de%20aceitar%20a%20proposta%20musical%20para%20nosso%20casamento%20no%20valor%20de%20R%24%209.480.%20Podemos%20alinhar%20os%20pr%C3%B3ximos%20passos%3F"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-3 px-10 py-4 rounded-sm border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-150 breathing-glow font-ui text-sm tracking-[0.15em] uppercase hover:shadow-[0_0_30px_hsla(43,59%,52%,0.3)]"
