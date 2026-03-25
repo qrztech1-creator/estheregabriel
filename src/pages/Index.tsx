@@ -4,10 +4,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import HeroSection from "@/components/HeroSection";
 import TimelineSection from "@/components/TimelineSection";
 import SongsSection from "@/components/SongsSection";
+import GallerySection from "@/components/GallerySection";
 import ProcessTimeline from "@/components/ProcessTimeline";
 import PricingSection from "@/components/PricingSection";
 import CeremonySection from "@/components/CeremonySection";
 import FooterSection from "@/components/FooterSection";
+import logo from "@/assets/logo-homemusic.png";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -68,7 +70,7 @@ const Index = () => {
     <div ref={containerRef} className="grain-overlay">
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between glass-surface px-6 py-3 rounded-sm">
-          <span className="font-display text-lg text-foreground">Home Music</span>
+          <img src={logo} alt="Home Music" className="h-8 md:h-10 w-auto" />
           <div className="flex items-center gap-3">
             <a
               href="/playlist/esther-gabriel-2027"
@@ -96,8 +98,8 @@ const Index = () => {
 
       <TimelineSection />
       <SongsSection />
+      <GallerySection />
       <ProcessTimeline />
-      {/* Pricing BEFORE Ceremony (ceremony is the upsell after) */}
       <PricingSection />
       <CeremonySection />
       <FooterSection />

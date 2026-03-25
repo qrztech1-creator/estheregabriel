@@ -4,9 +4,9 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ceremonyViolin from "@/assets/ceremony-violin.jpg";
 import ceremonyPiano from "@/assets/ceremony-piano.jpg";
-import ceremonyCouple from "@/assets/ceremony-couple.jpg";
 import ceremonyVocal from "@/assets/ceremony-vocal.jpg";
 import ceremonyGuitar from "@/assets/ceremony-guitar.jpg";
+import capaYoutube from "@/assets/capa-youtube.png";
 import StrokeText from "./StrokeText";
 import FloatingScene from "./FloatingScene";
 
@@ -24,16 +24,6 @@ const CeremonySection = () => {
   const heroImgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (heroImgRef.current) {
-      const img = heroImgRef.current.querySelector("img");
-      if (img) {
-        gsap.to(img, {
-          y: "15%", scale: 1.1, ease: "none",
-          scrollTrigger: { trigger: heroImgRef.current, start: "top bottom", end: "bottom top", scrub: 1 },
-        });
-      }
-    }
-
     imgRefs.current.forEach((el, i) => {
       if (!el) return;
       gsap.fromTo(el,
@@ -76,23 +66,22 @@ const CeremonySection = () => {
             transition={{ delay: 0.3 }}
             className="font-body text-muted-foreground mt-4 max-w-2xl mx-auto leading-relaxed"
           >
-            Ao fechar o pacote completo — cerimônia + festa — garantimos condições ainda melhores. 
+            Ao fechar o pacote completo — cerimônia + festa — garantimos condições ainda melhores.
             Transforme cada momento do seu casamento em uma experiência musical impecável, do altar à pista.
           </motion.p>
         </div>
 
+        {/* YouTube Cover - full width, preserving aspect ratio */}
         <div ref={heroImgRef} className="relative rounded-sm overflow-hidden mb-10 gold-border-glow">
           <img
-            src={ceremonyCouple}
-            alt="Casal apreciando música ao vivo no casamento"
-            className="w-full h-[50vh] object-cover"
+            src={capaYoutube}
+            alt="A trilha sonora que vocês merecem, do primeiro ao último acorde"
+            className="w-full h-auto object-contain"
             loading="lazy"
-            width={1200}
-            height={800}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-          <div className="absolute bottom-8 left-8 right-8">
-            <p className="font-display text-2xl md:text-4xl text-foreground font-light">
+          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+          <div className="absolute bottom-6 left-6 right-6 md:bottom-8 md:left-8 md:right-8">
+            <p className="font-display text-xl md:text-3xl lg:text-4xl text-foreground font-light">
               "A trilha sonora que vocês merecem,<br />
               <span className="text-gold-gradient">do primeiro ao último acorde."</span>
             </p>
