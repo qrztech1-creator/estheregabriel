@@ -32,25 +32,28 @@ const PricingSection = () => {
   const [proposalTime, setProposalTime] = useState({ h: "48", m: "00", s: "00" });
   const [countdownStarted, setCountdownStarted] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [priceAnimated, setPriceAnimated] = useState(false);
 
-  // Price counter animation - only after reveal
+  // Price counter animation - only after reveal with delay for DOM mount
   useEffect(() => {
-    if (!revealed || !priceRef.current || priceAnimated) return;
-    setPriceAnimated(true);
+    if (!revealed) return;
 
-    const target = { val: 0 };
-    gsap.to(target, {
-      val: 8850,
-      duration: 2,
-      ease: "power2.out",
-      onUpdate: () => {
-        if (priceRef.current) {
-          priceRef.current.textContent = `R$ ${Math.round(target.val).toLocaleString("pt-BR")}`;
-        }
-      },
-    });
-  }, [revealed, priceAnimated]);
+    const timer = setTimeout(() => {
+      if (!priceRef.current) return;
+      const target = { val: 0 };
+      gsap.to(target, {
+        val: 8850,
+        duration: 2,
+        ease: "power2.out",
+        onUpdate: () => {
+          if (priceRef.current) {
+            priceRef.current.textContent = `R$ ${Math.round(target.val).toLocaleString("pt-BR")}`;
+          }
+        },
+      });
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [revealed]);
 
   // 48h countdown - activate when revealed
   useEffect(() => {
@@ -94,9 +97,9 @@ const PricingSection = () => {
   }, [proposalExpiry]);
 
   return (
-    <section className="py-32 px-6 relative">
+    <section className="py-12 px-6 relative">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -106,7 +109,7 @@ const PricingSection = () => {
             O Investimento na Noite Perfeita
           </motion.p>
 
-          <StrokeText text="Nosso Combinado" fontSize="8rem" />
+          <StrokeText text="Nosso Combinado" fontSize="10rem" />
         </div>
 
         {/* Services included - always visible */}
@@ -117,7 +120,7 @@ const PricingSection = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="glass-surface p-8 md:p-12 rounded-sm"
         >
-          <div className="grid sm:grid-cols-2 gap-4 mb-10">
+          <div className="grid sm:grid-cols-2 gap-4 mb-8">
             {included.map((item) => (
               <div key={item.text} className="flex items-start gap-3 p-4 rounded-sm bg-secondary/30 hover:bg-secondary/50 transition-colors duration-150">
                 <item.icon className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
@@ -126,7 +129,7 @@ const PricingSection = () => {
             ))}
           </div>
 
-          <div className="mb-10">
+          <div className="mb-8">
             <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-4">
               Estrutura técnica inclusa
             </p>
@@ -147,9 +150,9 @@ const PricingSection = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="border-t border-border pt-10"
+                className="border-t border-border pt-8"
               >
-                <div className="text-center py-8">
+                <div className="text-center py-6">
                   <div className="w-20 h-20 rounded-full border border-primary/30 mx-auto flex items-center justify-center mb-6 breathing-glow">
                     <Lock className="w-8 h-8 text-primary" />
                   </div>
@@ -178,10 +181,10 @@ const PricingSection = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
-                className="border-t border-border pt-10"
+                className="border-t border-border pt-8"
               >
                 {/* Pricing */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-6">
                   <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-2">
                     Valor total do investimento
                   </p>
@@ -190,7 +193,7 @@ const PricingSection = () => {
                   </p>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-4 mb-8">
+                <div className="grid sm:grid-cols-2 gap-4 mb-6">
                   <AnimatedBorderCard delay={0.1}>
                     <div className="p-6 text-center hover:bg-secondary/20 transition-colors duration-150 rounded-sm">
                       <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">
@@ -215,7 +218,7 @@ const PricingSection = () => {
                 </div>
 
                 {/* 48h Urgency Countdown */}
-                <div ref={countdownSectionRef} className="mb-8">
+                <div ref={countdownSectionRef} className="mb-6">
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}

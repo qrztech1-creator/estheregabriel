@@ -56,11 +56,8 @@ const ProcessTimeline = () => {
       gsap.fromTo(el,
         { rotationX: 90, opacity: 0, scale: 0.5 },
         {
-          rotationX: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.8,
-          ease: "back.out(1.5)",
+          rotationX: 0, opacity: 1, scale: 1,
+          duration: 0.8, ease: "back.out(1.5)",
           scrollTrigger: { trigger: el, start: "top 85%" },
           delay: i * 0.08,
         }
@@ -71,9 +68,9 @@ const ProcessTimeline = () => {
   }, []);
 
   return (
-    <section className="py-28 px-6 relative">
+    <section className="py-12 px-6 relative">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-20">
+        <div className="text-center mb-12">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -83,14 +80,14 @@ const ProcessTimeline = () => {
             Cada Passo Rumo à Festa
           </motion.p>
 
-          <StrokeText text="Do Sim ao Palco" fontSize="8rem" />
+          <StrokeText text="Do Sim ao Palco" fontSize="10rem" />
 
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="font-body text-muted-foreground mt-6 max-w-xl mx-auto"
+            className="font-body text-muted-foreground mt-4 max-w-xl mx-auto"
           >
             Da assinatura do contrato ao grande dia — acompanhe como transformamos cada detalhe em uma experiência impecável.
           </motion.p>
@@ -108,7 +105,7 @@ const ProcessTimeline = () => {
           </div>
 
           {steps.map((step, index) => (
-            <div key={step.title} className="relative flex items-start gap-6 mb-12 last:mb-0">
+            <div key={step.title} className="relative flex items-start gap-6 mb-8 last:mb-0">
               <div className="relative z-10 flex-shrink-0" style={{ perspective: "600px" }}>
                 <div
                   ref={(el) => { nodeRefs.current[index] = el; }}

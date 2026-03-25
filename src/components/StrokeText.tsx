@@ -12,7 +12,7 @@ interface StrokeTextProps {
   triggerStart?: string;
 }
 
-const StrokeText = ({ text, className = "", fontSize = "8rem", delay = 0, triggerStart = "top 80%" }: StrokeTextProps) => {
+const StrokeText = ({ text, className = "", fontSize = "10rem", delay = 0, triggerStart = "top 80%" }: StrokeTextProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -31,7 +31,6 @@ const StrokeText = ({ text, className = "", fontSize = "8rem", delay = 0, trigge
       strokeWidth: 1,
     });
 
-    // Initial scroll-triggered animation
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
@@ -54,10 +53,8 @@ const StrokeText = ({ text, className = "", fontSize = "8rem", delay = 0, trigge
       ease: "power2.out",
     }, "-=0.5");
 
-    // Replay stroke-draw animation every 10 seconds
     const replay = () => {
       const reTl = gsap.timeline();
-      // Reset to stroke
       reTl.to(textEl, {
         fill: "transparent",
         strokeWidth: 1,
@@ -65,13 +62,11 @@ const StrokeText = ({ text, className = "", fontSize = "8rem", delay = 0, trigge
         duration: 0.4,
         ease: "power2.in",
       });
-      // Redraw
       reTl.to(textEl, {
         strokeDashoffset: 0,
         duration: 1.8,
         ease: "power2.inOut",
       });
-      // Refill
       reTl.to(textEl, {
         fill: "hsl(43, 59%, 52%)",
         strokeWidth: 0,
@@ -92,14 +87,14 @@ const StrokeText = ({ text, className = "", fontSize = "8rem", delay = 0, trigge
     <div ref={containerRef} className={`relative overflow-visible ${className}`}>
       <svg
         ref={svgRef}
-        viewBox="0 0 1200 200"
+        viewBox="0 0 1200 220"
         preserveAspectRatio="xMidYMid meet"
         className="w-full"
         style={{ overflow: "visible" }}
       >
         <text
           x="600"
-          y="150"
+          y="170"
           textAnchor="middle"
           fontFamily="'Cormorant Garamond', serif"
           fontSize={fontSize}
