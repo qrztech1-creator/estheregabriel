@@ -102,7 +102,7 @@ const PricingSection = () => {
   const priceRef = useRef<HTMLParagraphElement>(null);
   const countdownSectionRef = useRef<HTMLDivElement>(null);
   const [proposalExpiry, setProposalExpiry] = useState<number | null>(null);
-  const [proposalTime, setProposalTime] = useState({ h: "48", m: "00", s: "00" });
+  const [proposalTime, setProposalTime] = useState({ d: "0", h: "00", m: "00", s: "00" });
   const [countdownStarted, setCountdownStarted] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(1); // default to recommended
@@ -131,18 +131,11 @@ const PricingSection = () => {
     return () => clearTimeout(timer);
   }, [revealed, selectedPlan, plan.total]);
 
-  // 48h countdown
+  // Fixed deadline countdown: 01/04/2026 at 10:00 BRT (UTC-3)
   useEffect(() => {
     if (!revealed || countdownStarted) return;
-    const storageKey = "proposal_expiry_eg2027_v2";
-    const stored = localStorage.getItem(storageKey);
-    let expiry: number;
-    if (stored) {
-      expiry = parseInt(stored, 10);
-    } else {
-      expiry = Date.now() + 48 * 60 * 60 * 1000;
-      localStorage.setItem(storageKey, String(expiry));
-    }
+    // April 1, 2026 at 10:00 BRT = 13:00 UTC
+    const expiry = new Date("2026-04-01T13:00:00Z").getTime();
     setProposalExpiry(expiry);
     setCountdownStarted(true);
   }, [revealed, countdownStarted]);
@@ -152,13 +145,15 @@ const PricingSection = () => {
     const tick = () => {
       const diff = proposalExpiry - Date.now();
       if (diff <= 0) {
-        setProposalTime({ h: "00", m: "00", s: "00" });
+        setProposalTime({ d: "0", h: "00", m: "00", s: "00" });
         return;
       }
-      const h = Math.floor(diff / (1000 * 60 * 60));
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const s = Math.floor((diff % (1000 * 60)) / 1000);
       setProposalTime({
+        d: String(d),
         h: String(h).padStart(2, "0"),
         m: String(m).padStart(2, "0"),
         s: String(s).padStart(2, "0"),
@@ -394,11 +389,12 @@ const PricingSection = () => {
                     <div className="flex items-center justify-center gap-2 mb-3">
                       <AlertTriangle className="w-4 h-4 text-destructive animate-pulse" />
                       <p className="font-ui text-xs tracking-[0.2em] uppercase text-destructive">
-                        Condições especiais por tempo limitado
+                        Proposta válida até 01/04
                       </p>
                     </div>
                     <div className="flex items-center justify-center gap-4 mb-3">
                       {[
+                        { val: proposalTime.d, label: "Dias" },
                         { val: proposalTime.h, label: "Horas" },
                         { val: proposalTime.m, label: "Min" },
                         { val: proposalTime.s, label: "Seg" },

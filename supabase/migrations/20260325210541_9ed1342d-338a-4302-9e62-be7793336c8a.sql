@@ -1,0 +1,1 @@
+DELETE FROM playlist_songs WHERE artist = 'Queen';
