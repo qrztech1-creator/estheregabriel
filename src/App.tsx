@@ -28,6 +28,8 @@ const App = () => {
           <Routes>
             <Route path="/" element={entered ? <Index /> : <div className="h-screen bg-background" />} />
             <Route path="/playlist/:token" element={<PlaylistPage />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
