@@ -113,7 +113,8 @@ const EntranceGate = ({ onEnter }: EntranceGateProps) => {
             {/* Names with GSAP char animation */}
             <h1
               ref={titleRef}
-              className="font-display text-5xl md:text-7xl font-light text-gold-gradient leading-tight"
+              className="font-display text-5xl md:text-7xl font-light leading-tight"
+              style={{ color: "hsl(43, 59%, 52%)" }}
             >
               {splitText("Esther & Gabriel")}
             </h1>
