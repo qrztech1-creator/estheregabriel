@@ -102,8 +102,8 @@ const Index = () => {
       <ProcessTimeline />
       <PricingSection />
       <LedPanelSection />
-      <CeremonySection />
       <GallerySection />
+      <CeremonySection />
       <FooterSection />
     </div>
   );

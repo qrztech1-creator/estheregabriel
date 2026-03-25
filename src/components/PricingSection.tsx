@@ -192,12 +192,26 @@ const PricingSection = () => {
                 className="border-t border-border pt-8"
               >
                 {/* Partnership badge */}
-                <div className="text-center mb-6">
+                <div className="text-center mb-4">
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-sm bg-primary/10 border border-primary/20">
                     <span className="font-ui text-[10px] tracking-[0.2em] uppercase text-primary">
                       Oferta em parceria com Carol Suhet
                     </span>
                   </div>
+                </div>
+
+                {/* Carol Suhet photo */}
+                <div className="flex justify-center mb-6">
+                  <a
+                    href="https://www.instagram.com/carolsuhetcerimonialista/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group"
+                  >
+                    <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-primary/40 ring-offset-2 ring-offset-background group-hover:ring-primary transition-all duration-300">
+                      <img src={carolSuhetImg} alt="Carol Suhet - Cerimonialista" className="w-full h-full object-cover" />
+                    </div>
+                  </a>
                 </div>
 
                 {/* Pricing */}
@@ -297,29 +311,6 @@ const PricingSection = () => {
           </AnimatePresence>
         </motion.div>
 
-        {/* Carol Suhet profile - below pricing container */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
-          className="flex flex-col items-center mt-8"
-        >
-          <a
-            href="https://www.instagram.com/carolsuhetcerimonialista/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex flex-col items-center gap-3"
-          >
-            <div className="w-20 h-20 rounded-full overflow-hidden ring-2 ring-primary/40 ring-offset-2 ring-offset-background group-hover:ring-primary transition-all duration-300">
-              <img src={carolSuhetImg} alt="Carol Suhet - Cerimonialista" className="w-full h-full object-cover" />
-            </div>
-            <div className="text-center">
-              <p className="font-display text-sm text-foreground group-hover:text-primary transition-colors duration-150">Carol Suhet</p>
-              <p className="font-ui text-[9px] tracking-[0.2em] uppercase text-muted-foreground">Cerimonialista</p>
-            </div>
-          </a>
-        </motion.div>
       </div>
     </section>
   );
