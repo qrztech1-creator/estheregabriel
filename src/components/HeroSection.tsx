@@ -269,19 +269,19 @@ const HeroSection = () => {
 
         <h1
           ref={titleRef}
-          className="font-display text-5xl md:text-7xl lg:text-8xl font-light leading-[0.9] tracking-tight text-gold-gradient mb-3"
+          className="font-display text-5xl md:text-7xl lg:text-8xl font-light leading-[0.9] tracking-tight mb-3"
           style={{ perspective: "1000px" }}
         >
-          {splitText("Esther")}
+          <span className="text-primary">{splitText("Esther")}</span>
           <motion.span
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 3.2, type: "spring" }}
-            className="block text-2xl md:text-3xl text-foreground/30 font-light italic my-2"
+            className="block text-2xl md:text-3xl text-primary/40 font-light italic my-2"
           >
             &
           </motion.span>
-          {splitText("Gabriel")}
+          <span className="text-primary">{splitText("Gabriel")}</span>
         </h1>
 
         <motion.div
