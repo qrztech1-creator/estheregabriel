@@ -106,7 +106,7 @@ const PricingSection = () => {
   const [proposalTime, setProposalTime] = useState({ d: "0", h: "00", m: "00", s: "00" });
   const [countdownStarted, setCountdownStarted] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(1); // default to recommended
+  const [selectedPlan, setSelectedPlan] = useState(3); // default to recommended
 
   const plan = plans[selectedPlan];
 
