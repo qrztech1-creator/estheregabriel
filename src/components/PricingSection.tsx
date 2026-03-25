@@ -42,7 +42,7 @@ const PricingSection = () => {
       const target = { val: 0 };
       gsap.to(target, {
         val: 8850,
-        duration: 2,
+        duration: 2.5,
         ease: "power2.out",
         onUpdate: () => {
           if (priceRef.current) {
@@ -50,7 +50,7 @@ const PricingSection = () => {
           }
         },
       });
-    }, 100);
+    }, 600);
 
     return () => clearTimeout(timer);
   }, [revealed]);

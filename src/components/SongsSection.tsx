@@ -40,7 +40,7 @@ const songs: Song[] = [
   { title: "Every Breath You Take", artist: "The Police", videoId: "OMOGaugKpzs" },
   { title: "In the End", artist: "Linkin Park", videoId: "eVTXPUF4Oz4" },
   { title: "Don't Stop Believin'", artist: "Journey", videoId: "1k8craCGpgs" },
-  { title: "I'll Be Over You", artist: "Toto", videoId: "4gMgiXfqyzZLMhsksGmbQV" },
+  { title: "I'll Be Over You", artist: "Toto", videoId: "qFwJOyZbMZk" },
   { title: "Californication", artist: "Red Hot Chili Peppers", videoId: "YlUKcNNmywk" },
   { title: "I Don't Want to Miss a Thing", artist: "Aerosmith", videoId: "JkK8g6FMEXE" },
   { title: "Take on Me", artist: "A-ha", videoId: "djV11Xbc914" },
