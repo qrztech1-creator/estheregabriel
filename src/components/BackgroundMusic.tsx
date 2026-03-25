@@ -1,34 +1,25 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 
-const BackgroundMusic = () => {
+interface BackgroundMusicProps {
+  startPlaying?: boolean;
+}
+
+const BackgroundMusic = ({ startPlaying = false }: BackgroundMusicProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
+  const [started, setStarted] = useState(false);
 
-  useEffect(() => {
-    const tryPlay = () => {
-      if (hasInteracted) return;
-      setHasInteracted(true);
+  // Start playing when prop changes
+  if (startPlaying && !started) {
+    setStarted(true);
+    setTimeout(() => {
       if (audioRef.current) {
         audioRef.current.volume = 0.25;
         audioRef.current.play().then(() => setPlaying(true)).catch(() => {});
       }
-      document.removeEventListener("click", tryPlay);
-      document.removeEventListener("scroll", tryPlay);
-      document.removeEventListener("touchstart", tryPlay);
-    };
-
-    document.addEventListener("click", tryPlay);
-    document.addEventListener("scroll", tryPlay);
-    document.addEventListener("touchstart", tryPlay);
-
-    return () => {
-      document.removeEventListener("click", tryPlay);
-      document.removeEventListener("scroll", tryPlay);
-      document.removeEventListener("touchstart", tryPlay);
-    };
-  }, [hasInteracted]);
+    }, 0);
+  }
 
   const toggle = () => {
     if (!audioRef.current) return;
@@ -39,6 +30,8 @@ const BackgroundMusic = () => {
       audioRef.current.play().then(() => setPlaying(true)).catch(() => {});
     }
   };
+
+  if (!started) return <audio ref={audioRef} src="/audio/background-music.mp3" loop preload="auto" />;
 
   return (
     <>
