@@ -1,31 +1,39 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, Plus, List } from "lucide-react";
+import { LogOut, Plus, List, BarChart3, Menu, X } from "lucide-react";
 import logo from "@/assets/logo-homemusic.png";
 import { Button } from "@/components/ui/button";
 import ProposalList from "@/components/admin/ProposalList";
 import ProposalForm from "@/components/admin/ProposalForm";
 import ProposalResponses from "@/components/admin/ProposalResponses";
+import ProposalDetail from "@/components/admin/ProposalDetail";
+import AdminAnalytics from "@/components/admin/AdminAnalytics";
 
-type View = "list" | "create" | "detail";
+type View = "list" | "create" | "detail" | "responses" | "analytics";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<View>("list");
+  const [view, setView] = useState<View>("analytics");
   const [selectedProposalId, setSelectedProposalId] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) navigate("/admin/login");
+      if (!session) navigate("/");
       else setLoading(false);
     });
   }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate("/admin/login");
+    navigate("/");
+  };
+
+  const switchView = (v: View) => {
+    setView(v);
+    setMobileMenuOpen(false);
   };
 
   if (loading) return (
@@ -34,31 +42,69 @@ const AdminDashboard = () => {
     </div>
   );
 
+  const navItems = [
+    { key: "analytics" as const, label: "Dashboard", icon: BarChart3 },
+    { key: "list" as const, label: "Propostas", icon: List },
+    { key: "create" as const, label: "Nova", icon: Plus },
+  ];
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-card sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="Home Music" className="h-7 w-auto" />
-            <span className="text-lg font-bold">Admin</span>
+      {/* Header */}
+      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <img src={logo} alt="Home Music" className="h-6 sm:h-7 w-auto" />
+            <span className="text-sm sm:text-lg font-bold hidden sm:inline">Admin</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant={view === "list" ? "default" : "ghost"} size="sm" onClick={() => setView("list")}>
-              <List className="w-4 h-4 mr-2" /> Propostas
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-1">
+            {navItems.map(item => (
+              <Button
+                key={item.key}
+                variant={view === item.key ? "default" : "ghost"}
+                size="sm"
+                onClick={() => switchView(item.key)}
+                className="gap-2"
+              >
+                <item.icon className="w-4 h-4" />
+                {item.label}
+              </Button>
+            ))}
+            <div className="w-px h-6 bg-border mx-2" />
+            <Button variant="ghost" size="icon" onClick={handleLogout} title="Sair">
+              <LogOut className="w-4 h-4" />
             </Button>
-            <Button variant={view === "create" ? "default" : "ghost"} size="sm" onClick={() => setView("create")}>
-              <Plus className="w-4 h-4 mr-2" /> Nova
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="flex md:hidden items-center gap-1">
+            {navItems.map(item => (
+              <Button
+                key={item.key}
+                variant={view === item.key ? "default" : "ghost"}
+                size="icon"
+                className="h-9 w-9"
+                onClick={() => switchView(item.key)}
+              >
+                <item.icon className="w-4 h-4" />
+              </Button>
+            ))}
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleLogout}>
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
       </header>
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {view === "list" && <ProposalList onView={(id) => { setSelectedProposalId(id); setView("detail"); }} />}
-        {view === "create" && <ProposalForm onCreated={() => setView("list")} onCancel={() => setView("list")} />}
-        {view === "detail" && selectedProposalId && <ProposalResponses proposalId={selectedProposalId} onBack={() => setView("list")} />}
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
+        {view === "analytics" && <AdminAnalytics onViewProposal={(id) => { setSelectedProposalId(id); setView("detail"); }} />}
+        {view === "list" && <ProposalList onView={(id) => { setSelectedProposalId(id); setView("responses"); }} onEdit={(id) => { setSelectedProposalId(id); setView("detail"); }} />}
+        {view === "create" && <ProposalForm onCreated={() => switchView("list")} onCancel={() => switchView("list")} />}
+        {view === "responses" && selectedProposalId && <ProposalResponses proposalId={selectedProposalId} onBack={() => switchView("list")} />}
+        {view === "detail" && selectedProposalId && <ProposalDetail proposalId={selectedProposalId} onBack={() => switchView("list")} />}
       </div>
     </div>
   );
