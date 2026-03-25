@@ -90,8 +90,8 @@ const Index = () => {
 
       <HeroSection />
 
-      <div className="flex items-center justify-center py-2">
-        <div className="w-px h-14 timeline-line" />
+      <div className="flex items-center justify-center py-1">
+        <div className="w-px h-8 timeline-line" />
       </div>
 
       <TimelineSection />

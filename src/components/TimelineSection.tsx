@@ -47,28 +47,20 @@ const TimelineSection = () => {
       gsap.fromTo(el,
         { rotationY: -180, scale: 0.3, opacity: 0 },
         {
-          rotationY: 0,
-          scale: 1,
-          opacity: 1,
-          duration: 1,
-          ease: "back.out(2)",
+          rotationY: 0, scale: 1, opacity: 1,
+          duration: 1, ease: "back.out(2)",
           scrollTrigger: { trigger: el, start: "top 85%" },
           delay: i * 0.15,
         }
       );
     });
 
-    // Repeating title glow every 10s
     titleRefs.current.forEach((el) => {
       if (!el) return;
       gsap.to(el, {
         textShadow: "0 0 25px hsla(43, 59%, 52%, 0.4)",
-        duration: 1,
-        ease: "power2.inOut",
-        yoyo: true,
-        repeat: -1,
-        repeatDelay: 9,
-        delay: 5,
+        duration: 1, ease: "power2.inOut",
+        yoyo: true, repeat: -1, repeatDelay: 9, delay: 5,
       });
     });
 
@@ -76,13 +68,13 @@ const TimelineSection = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-28 px-6 relative">
+    <section ref={sectionRef} className="py-12 px-6 relative">
       <div className="absolute inset-0 opacity-40">
         <FloatingScene variant="waveform" height="100%" />
       </div>
 
       <div className="max-w-5xl mx-auto relative z-10">
-        <div className="text-center mb-20">
+        <div className="text-center mb-12">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -92,14 +84,14 @@ const TimelineSection = () => {
             4 Horas de Música Imersiva
           </motion.p>
 
-          <StrokeText text="A Noite É Sua" fontSize="8rem" />
+          <StrokeText text="A Noite É Sua" fontSize="10rem" />
 
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="font-body text-muted-foreground mt-6 max-w-xl mx-auto"
+            className="font-body text-muted-foreground mt-4 max-w-xl mx-auto"
           >
             Cada minuto orquestrado para criar a festa que vocês sempre sonharam — do primeiro acorde ao último drop.
           </motion.p>
@@ -119,7 +111,7 @@ const TimelineSection = () => {
           {timelineItems.map((item, index) => (
             <div
               key={item.title}
-              className={`relative flex items-start gap-8 mb-20 ${
+              className={`relative flex items-start gap-8 mb-12 ${
                 index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
               }`}
             >
@@ -135,7 +127,7 @@ const TimelineSection = () => {
 
               <div className={`ml-24 md:ml-0 md:w-[calc(50%-4rem)] ${index % 2 === 0 ? "md:pr-16" : "md:pl-16"}`}>
                 <AnimatedBorderCard delay={index * 0.2}>
-                  <div className="p-8 hover:bg-secondary/10 transition-colors duration-150 rounded-sm">
+                  <div className="p-6 hover:bg-secondary/10 transition-colors duration-150 rounded-sm">
                     <div className="flex items-baseline gap-3 mb-3">
                       <span className="font-ui text-2xl font-bold text-primary tabular-nums">{item.time}</span>
                       <span className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground">{item.duration}</span>
