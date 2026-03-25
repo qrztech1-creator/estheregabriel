@@ -180,24 +180,24 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold">Nova Proposta</h2>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+        <h2 className="text-lg sm:text-xl font-semibold">Nova Proposta</h2>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={loadTemplate}><FileDown className="w-4 h-4 mr-2" /> Carregar Modelo</Button>
+          <Button variant="outline" size="sm" onClick={loadTemplate}><FileDown className="w-4 h-4 mr-2" /> Modelo</Button>
           <Button variant="ghost" size="sm" onClick={onCancel}>Cancelar</Button>
         </div>
       </div>
 
       <div className="space-y-4">
         <Section id="casal" title="👫 Dados do Casal *">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><Label>Nome da noiva *</Label><Input value={form.bride_name} onChange={e => set("bride_name", e.target.value)} placeholder="Ex: Ana" /></div>
             <div><Label>Nome do noivo *</Label><Input value={form.groom_name} onChange={e => set("groom_name", e.target.value)} placeholder="Ex: Lucas" /></div>
           </div>
         </Section>
 
         <Section id="evento" title="📅 Detalhes do Evento *">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><Label>Data do evento *</Label><Input type="date" value={form.event_date} onChange={e => set("event_date", e.target.value)} /></div>
             <div><Label>Local *</Label><Input value={form.venue_name} onChange={e => set("venue_name", e.target.value)} placeholder="Ex: Espaço XYZ" /></div>
             <div><Label>Horário início</Label><Input value={form.event_start_time} onChange={e => set("event_start_time", e.target.value)} /></div>
@@ -208,10 +208,10 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
         </Section>
 
         <Section id="proposta" title="⏰ Configuração da Proposta">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><Label>Prazo da proposta</Label><Input type="datetime-local" value={form.proposal_deadline} onChange={e => set("proposal_deadline", e.target.value)} /></div>
             <div><Label>WhatsApp</Label><Input value={form.whatsapp_number} onChange={e => set("whatsapp_number", e.target.value)} /></div>
-            <div><Label>Slug (URL)</Label><Input value={form.slug} onChange={e => set("slug", e.target.value)} placeholder="auto-gerado se vazio" /></div>
+            <div className="sm:col-span-2"><Label>Slug (URL)</Label><Input value={form.slug} onChange={e => set("slug", e.target.value)} placeholder="auto-gerado se vazio" /></div>
           </div>
         </Section>
 
