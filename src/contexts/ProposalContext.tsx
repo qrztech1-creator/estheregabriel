@@ -26,6 +26,7 @@ export interface ProposalData {
   optional_extras: any[];
   extras_bundle_title: string | null;
   extras_bundle_price: number | null;
+  audio_url: string | null;
 }
 
 const ProposalContext = createContext<ProposalData | null>(null);

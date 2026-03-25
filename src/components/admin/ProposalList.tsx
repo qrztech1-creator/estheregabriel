@@ -14,7 +14,7 @@ const ProposalList = ({ onView }: Props) => {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await (supabase.from as any)("proposals").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase.from("proposals").select("*").order("created_at", { ascending: false });
     setProposals(data || []);
     setLoading(false);
   };
@@ -38,7 +38,7 @@ const ProposalList = ({ onView }: Props) => {
         <p className="text-center text-muted-foreground py-12">Nenhuma proposta criada ainda. Clique em "Nova" para criar.</p>
       ) : (
         <div className="space-y-3">
-          {proposals.map(p => (
+          {proposals.map((p: any) => (
             <div key={p.id} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
               <div>
                 <h3 className="font-medium">{p.bride_name} & {p.groom_name}</h3>

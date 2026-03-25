@@ -19,18 +19,13 @@ const ProposalResponses = ({ proposalId, onBack }: Props) => {
   const [blockOrders, setBlockOrders] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"preferences" | "suggestions" | "links" | "blocks">("preferences");
 
-  useEffect(() => {
-    loadProposal();
-  }, [proposalId]);
-
-  useEffect(() => {
-    if (selectedClient) loadClientData(selectedClient);
-  }, [selectedClient]);
+  useEffect(() => { loadProposal(); }, [proposalId]);
+  useEffect(() => { if (selectedClient) loadClientData(selectedClient); }, [selectedClient]);
 
   const loadProposal = async () => {
-    const { data: prop } = await (supabase.from as any)("proposals").select("*").eq("id", proposalId).single();
+    const { data: prop } = await supabase.from("proposals").select("*").eq("id", proposalId).single();
     setProposal(prop);
-    const { data: tokens } = await supabase.from("client_tokens").select("*").eq("proposal_id" as any, proposalId);
+    const { data: tokens } = await (supabase.from("client_tokens") as any).select("*").eq("proposal_id", proposalId);
     setClients(tokens || []);
     if (tokens?.length) setSelectedClient(tokens[0].id);
   };
@@ -59,7 +54,6 @@ const ProposalResponses = ({ proposalId, onBack }: Props) => {
   };
 
   const refresh = () => { if (selectedClient) loadClientData(selectedClient); toast.success("Atualizado!"); };
-
   const getStatusIcon = (s: string) => s === "approved" ? <ThumbsUp className="w-4 h-4 text-green-400" /> : s === "rejected" ? <ThumbsDown className="w-4 h-4 text-red-400" /> : <MinusCircle className="w-4 h-4 text-muted-foreground" />;
   const getStatusLabel = (s: string) => s === "approved" ? "Aprovada" : s === "rejected" ? "Rejeitada" : "Pendente";
 
@@ -75,13 +69,13 @@ const ProposalResponses = ({ proposalId, onBack }: Props) => {
     <div>
       <div className="flex items-center gap-3 mb-6">
         <Button variant="ghost" size="sm" onClick={onBack}><ArrowLeft className="w-4 h-4 mr-1" /> Voltar</Button>
-        <h2 className="text-xl font-semibold">{proposal.bride_name} & {proposal.groom_name}</h2>
+        <h2 className="text-xl font-semibold">{(proposal as any).bride_name} & {(proposal as any).groom_name}</h2>
         <Button variant="ghost" size="icon" onClick={refresh}><RefreshCw className="w-4 h-4" /></Button>
       </div>
 
       {clients.length > 1 && (
         <select value={selectedClient || ""} onChange={e => setSelectedClient(e.target.value)} className="w-full max-w-xs bg-card border border-border rounded-lg px-3 py-2 text-foreground mb-4">
-          {clients.map(c => <option key={c.id} value={c.id}>{c.client_name}</option>)}
+          {clients.map((c: any) => <option key={c.id} value={c.id}>{c.client_name}</option>)}
         </select>
       )}
 
@@ -109,7 +103,7 @@ const ProposalResponses = ({ proposalId, onBack }: Props) => {
       {activeTab === "preferences" && (
         <div className="space-y-2">
           {preferences.length === 0 ? <p className="text-muted-foreground text-center py-12">Nenhuma curadoria ainda.</p> :
-            preferences.map(p => (
+            preferences.map((p: any) => (
               <div key={p.id} className="bg-card border border-border rounded-xl px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">{getStatusIcon(p.status)}<div><p className="font-medium text-sm">{p.song_title}</p><p className="text-xs text-muted-foreground">{p.song_artist} — {p.block_name}</p></div></div>
                 <span className={`text-xs px-2 py-1 rounded-full ${p.status === "approved" ? "bg-green-500/10 text-green-400" : p.status === "rejected" ? "bg-red-500/10 text-red-400" : "bg-muted text-muted-foreground"}`}>{getStatusLabel(p.status)}</span>
@@ -121,7 +115,7 @@ const ProposalResponses = ({ proposalId, onBack }: Props) => {
       {activeTab === "suggestions" && (
         <div className="space-y-2">
           {suggestions.length === 0 ? <p className="text-muted-foreground text-center py-12">Nenhuma sugestão.</p> :
-            suggestions.map(s => (
+            suggestions.map((s: any) => (
               <div key={s.id} className="bg-card border border-border rounded-xl px-4 py-3">
                 <p className="font-medium text-sm">{s.title}</p>
                 {s.artist && <p className="text-xs text-muted-foreground">{s.artist}</p>}
@@ -134,7 +128,7 @@ const ProposalResponses = ({ proposalId, onBack }: Props) => {
       {activeTab === "links" && (
         <div className="space-y-2">
           {djLinks.length === 0 ? <p className="text-muted-foreground text-center py-12">Nenhum link.</p> :
-            djLinks.map(l => (
+            djLinks.map((l: any) => (
               <div key={l.id} className="bg-card border border-border rounded-xl px-4 py-3">
                 {l.name && <p className="font-medium text-sm">{l.name}</p>}
                 <a href={l.spotify_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline break-all">{l.spotify_url}</a>
@@ -146,7 +140,7 @@ const ProposalResponses = ({ proposalId, onBack }: Props) => {
       {activeTab === "blocks" && (
         <div className="space-y-2">
           {blockOrders.length === 0 ? <p className="text-muted-foreground text-center py-12">Nenhuma reordenação.</p> :
-            blockOrders.map((bo, i) => (
+            blockOrders.map((bo: any, i: number) => (
               <div key={bo.id} className="bg-card border border-border rounded-xl px-4 py-3 flex items-center gap-3">
                 <span className="text-lg font-bold text-primary">{i + 1}</span>
                 <p className="font-medium text-sm">{bo.block_name}</p>

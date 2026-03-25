@@ -13,6 +13,8 @@ import ProcessTimeline from "@/components/ProcessTimeline";
 import PricingSection from "@/components/PricingSection";
 import LedPanelSection from "@/components/LedPanelSection";
 import FooterSection from "@/components/FooterSection";
+import EntranceGate from "@/components/EntranceGate";
+import BackgroundMusic from "@/components/BackgroundMusic";
 import logo from "@/assets/logo-homemusic.png";
 import { Music } from "lucide-react";
 
@@ -23,24 +25,25 @@ const ProposalPage = () => {
   const navigate = useNavigate();
   const [proposal, setProposal] = useState<ProposalData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [entered, setEntered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!slug) { navigate("/"); return; }
-    (supabase.from as any)("proposals")
+    supabase.from("proposals")
       .select("*")
       .eq("slug", slug)
       .eq("status", "active")
       .single()
-      .then(({ data, error }: any) => {
+      .then(({ data, error }) => {
         if (error || !data) { navigate("/"); return; }
-        setProposal(data as ProposalData);
+        setProposal(data as unknown as ProposalData);
         setLoading(false);
       });
   }, [slug]);
 
   useEffect(() => {
-    if (!proposal) return;
+    if (!proposal || !entered) return;
     const timeout = setTimeout(() => {
       gsap.utils.toArray("section").forEach((el: any, i: number) => {
         if (i === 0) return;
@@ -51,7 +54,7 @@ const ProposalPage = () => {
       });
     }, 100);
     return () => { clearTimeout(timeout); ScrollTrigger.getAll().forEach(t => t.kill()); };
-  }, [proposal]);
+  }, [proposal, entered]);
 
   if (loading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
@@ -61,10 +64,21 @@ const ProposalPage = () => {
 
   if (!proposal) return null;
 
+  if (!entered) {
+    return (
+      <EntranceGate
+        onEnter={() => setEntered(true)}
+        brideName={proposal.bride_name}
+        groomName={proposal.groom_name}
+      />
+    );
+  }
+
   const whatsappMsg = encodeURIComponent(`Olá! Gostaria de aceitar a proposta musical para nosso casamento. Podemos conversar?`);
 
   return (
     <ProposalProvider value={proposal}>
+      <BackgroundMusic startPlaying audioUrl={proposal.audio_url || "/audio/background-music.mp3"} />
       <div ref={containerRef} className="grain-overlay">
         <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
           <div className="max-w-7xl mx-auto flex items-center justify-between glass-surface px-6 py-3 rounded-sm">

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ChevronDown, X, FileDown } from "lucide-react";
+import { ChevronDown, X, FileDown, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
   const [submitting, setSubmitting] = useState(false);
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(["casal", "evento"]));
   const [copyRepertoire, setCopyRepertoire] = useState(true);
+  const [mp3File, setMp3File] = useState<File | null>(null);
 
   const [form, setForm] = useState({
     bride_name: "",
@@ -85,7 +86,17 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
     setSubmitting(true);
     try {
       const slug = form.slug || generateSlug(form.bride_name, form.groom_name, form.event_date);
-      const { data: proposal, error } = await (supabase.from as any)("proposals").insert({
+
+      let audio_url: string | null = null;
+      if (mp3File) {
+        const path = `${slug}/background.mp3`;
+        const { error: uploadError } = await supabase.storage.from("proposal-audio").upload(path, mp3File, { upsert: true });
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from("proposal-audio").getPublicUrl(path);
+        audio_url = urlData.publicUrl;
+      }
+
+      const insertData: any = {
         slug,
         bride_name: form.bride_name,
         groom_name: form.groom_name,
@@ -109,35 +120,36 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
         optional_extras: form.optional_extras,
         extras_bundle_title: form.extras_bundle_title || null,
         extras_bundle_price: form.extras_bundle_price || null,
-      }).select().single();
+        audio_url,
+      };
 
+      const { data: proposal, error } = await supabase.from("proposals").insert(insertData).select().single();
       if (error) throw error;
+      const proposalRow = proposal as any;
 
       await supabase.from("client_tokens").insert({
         token: slug,
         client_name: `${form.bride_name} & ${form.groom_name}`,
-        proposal_id: proposal.id,
+        proposal_id: proposalRow.id,
       } as any);
 
       if (copyRepertoire) {
-        const { data: srcProposal } = await (supabase.from as any)("proposals")
-          .select("id").neq("id", proposal.id).order("created_at").limit(1).single();
+        const { data: srcProposals } = await (supabase.from("proposals") as any).select("id").neq("id", proposalRow.id).order("created_at").limit(1);
+        const srcProposal = srcProposals?.[0];
         if (srcProposal) {
-          const { data: srcBlocks } = await supabase.from("playlist_blocks")
-            .select("*").eq("proposal_id" as any, srcProposal.id).order("display_order");
+          const { data: srcBlocks } = await (supabase.from("playlist_blocks") as any).select("*").eq("proposal_id", (srcProposal as any).id).order("display_order");
           if (srcBlocks) {
             for (const block of srcBlocks) {
               const { data: newBlock } = await supabase.from("playlist_blocks").insert({
-                name: block.name, display_order: block.display_order, proposal_id: proposal.id,
+                name: block.name, display_order: block.display_order, proposal_id: proposalRow.id,
               } as any).select().single();
               if (newBlock) {
-                const { data: srcSongs } = await supabase.from("playlist_songs")
-                  .select("*").eq("block_id", block.id).order("display_order");
+                const { data: srcSongs } = await supabase.from("playlist_songs").select("*").eq("block_id", block.id).order("display_order");
                 if (srcSongs?.length) {
                   await supabase.from("playlist_songs").insert(
                     srcSongs.map((s: any) => ({
                       block_id: (newBlock as any).id, title: s.title, artist: s.artist,
-                      display_order: s.display_order, proposal_id: proposal.id,
+                      display_order: s.display_order, proposal_id: proposalRow.id,
                     }))
                   );
                 }
@@ -200,6 +212,21 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
             <div><Label>Prazo da proposta</Label><Input type="datetime-local" value={form.proposal_deadline} onChange={e => set("proposal_deadline", e.target.value)} /></div>
             <div><Label>WhatsApp</Label><Input value={form.whatsapp_number} onChange={e => set("whatsapp_number", e.target.value)} /></div>
             <div><Label>Slug (URL)</Label><Input value={form.slug} onChange={e => set("slug", e.target.value)} placeholder="auto-gerado se vazio" /></div>
+          </div>
+        </Section>
+
+        <Section id="audio" title="🎵 Música de Fundo (MP3)">
+          <div>
+            <Label>Arquivo MP3 para a página do casal</Label>
+            <div className="mt-2 flex items-center gap-4">
+              <label className="flex items-center gap-2 px-4 py-2 rounded-sm border border-border bg-card hover:bg-secondary/20 cursor-pointer transition-colors">
+                <Upload className="w-4 h-4 text-primary" />
+                <span className="text-sm text-foreground">{mp3File ? mp3File.name : "Selecionar arquivo"}</span>
+                <input type="file" accept="audio/mpeg,audio/mp3" className="hidden" onChange={e => setMp3File(e.target.files?.[0] || null)} />
+              </label>
+              {mp3File && <button onClick={() => setMp3File(null)} className="text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Este áudio tocará automaticamente quando o casal iniciar a experiência da página.</p>
           </div>
         </Section>
 
