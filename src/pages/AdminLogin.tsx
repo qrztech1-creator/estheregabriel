@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,13 @@ const AdminLogin = () => {
     toast.success("Login realizado com sucesso!");
     navigate("/admin");
   };
+
+  // Check if already logged in
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) navigate("/admin");
+    });
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
