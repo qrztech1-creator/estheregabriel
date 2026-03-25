@@ -93,8 +93,11 @@ const LedPanelSection = () => {
           transition={{ delay: 0.4 }}
           className="text-center mt-8"
         >
-          <p className="font-body text-xs text-muted-foreground mb-4">
-            Orçamento sob consulta — valores alinhados conforme a necessidade do evento.
+          <p className="font-body text-xs text-muted-foreground mb-2">
+            Pista de dança com iluminação + Tela de LED 3×2
+          </p>
+          <p className="font-display text-3xl text-foreground font-light mb-4">
+            R$ 2.800
           </p>
           <a
             href="https://wa.me/5527999936682?text=Ol%C3%A1!%20Tenho%20interesse%20no%20painel%20de%20LED%20e%20ilumina%C3%A7%C3%A3o%20de%20pista%20para%20nosso%20casamento.%20Podemos%20conversar%3F"

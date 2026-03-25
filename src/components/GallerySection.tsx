@@ -31,7 +31,7 @@ import gallery15 from "@/assets/gallery-15.jpg";
 gsap.registerPlugin(ScrollTrigger);
 
 const images = [
-  hero1, hero2, hero3, hero4, hero5, hero6, hero7, hero8,
+  hero1, hero2, hero4, hero6, hero7, hero8,
   gallery1, gallery2, gallery3, gallery4, gallery5,
   gallery6, gallery7, gallery8, gallery9, gallery10,
   gallery11, gallery12, gallery13, gallery14, gallery15,
