@@ -15,53 +15,83 @@ interface Song {
 }
 
 const songs: Song[] = [
-  // Country & Especiais (favoritos do casal)
-  { title: "She Got the Best of Me", artist: "Luke Combs", videoId: "sD3kO4U5Oh4" },
-  { title: "What Hurts the Most", artist: "Rascal Flatts", videoId: "7qH4qyi1-Ys" },
-  { title: "Bless the Broken Road", artist: "Rascal Flatts", videoId: "I_yO3m-WcbY" },
-  { title: "Life Is a Highway", artist: "Rascal Flatts", videoId: "5tXh_MfrMe0" },
-  // Nacionais
-  { title: "Razões e Emoções", artist: "NX Zero", videoId: "7KbY8QT0CGI" },
-  { title: "Cedo ou Tarde", artist: "NX Zero", videoId: "XdglM81b4g8" },
-  // Pop & R&B
-  { title: "Love Never Felt So Good", artist: "Michael Jackson", videoId: "oG08ukJPtR8" },
+  // A-ha
+  { title: "Take on Me", artist: "A-ha", videoId: "djV11Xbc914" },
+  // Aerosmith
+  { title: "I Don't Want to Miss a Thing", artist: "Aerosmith", videoId: "JkK8g6FMEXE" },
+  // Amy Winehouse
+  { title: "Valerie", artist: "Amy Winehouse", videoId: "bixuI_GV5I0" },
+  // Arctic Monkeys
+  { title: "Do I Wanna Know?", artist: "Arctic Monkeys", videoId: "pqrUQrAcfo4" },
+  // Audioslave
+  { title: "Like a Stone", artist: "Audioslave", videoId: "7QU1nvuxaMA" },
+  // Backstreet Boys
+  { title: "I Want It That Way", artist: "Backstreet Boys", videoId: "4fndeDfaWCg" },
+  // Bee Gees
+  { title: "Stayin' Alive", artist: "Bee Gees", videoId: "fNFzfwLM72c" },
+  // Ben E. King
+  { title: "Stand By Me", artist: "Ben E. King", videoId: "hwZNL7QVJjE" },
+  // Bon Jovi
+  { title: "Livin' on a Prayer", artist: "Bon Jovi", videoId: "lDK9QqIzhwk" },
+  // Bruno Mars
   { title: "Locked Out of Heaven", artist: "Bruno Mars", videoId: "e-fA-gBCkj0" },
   { title: "Treasure", artist: "Bruno Mars", videoId: "VFmHB5KVe_g" },
+  { title: "Uptown Funk", artist: "Bruno Mars", videoId: "OPf0YbXqDm0" },
+  // Bryan Adams
+  { title: "Heaven", artist: "Bryan Adams", videoId: "3eT464L1YRA" },
+  // Charlie Brown Jr.
+  { title: "Ela Vai Voltar", artist: "Charlie Brown Jr.", videoId: "PBBmhJkMYWI" },
+  { title: "Lutar Pelo Que É Meu", artist: "Charlie Brown Jr.", videoId: "iUaHMOWRjkI" },
+  { title: "Pontes Indestrutíveis", artist: "Charlie Brown Jr.", videoId: "T7XAOQ6k8YE" },
+  { title: "Zóio de Lula", artist: "Charlie Brown Jr.", videoId: "BhEXEDAja28" },
+  // Creedence
+  { title: "Have You Ever Seen the Rain?", artist: "Creedence", videoId: "u1V8YRJnr4Q" },
+  // Daft Punk
   { title: "Get Lucky", artist: "Daft Punk", videoId: "5NV6Rdv1a3I" },
-  { title: "I Want It That Way", artist: "Backstreet Boys", videoId: "4fndeDfaWCg" },
+  // Guns N' Roses
+  { title: "Sweet Child O' Mine", artist: "Guns N' Roses", videoId: "1w7OgIMMRc4" },
+  // Harry Styles
   { title: "As It Was", artist: "Harry Styles", videoId: "H5v3kku4y6Q" },
-  // Rock & Indie
-  { title: "I Want to Break Free", artist: "Queen", videoId: "WUOtCLOXgm8" },
-  { title: "We Are the Champions", artist: "Queen", videoId: "04854XqcfCY" },
-  { title: "That's What You Get", artist: "Paramore", videoId: "1kz6hNDlEEg" },
+  // Journey
+  { title: "Don't Stop Believin'", artist: "Journey", videoId: "1k8craCGpgs" },
+  // Kings of Leon
+  { title: "Use Somebody", artist: "Kings of Leon", videoId: "gnhXHvRoUd0" },
+  // Linkin Park
+  { title: "In the End", artist: "Linkin Park", videoId: "eVTXPUF4Oz4" },
+  // Luke Combs
+  { title: "She Got the Best of Me", artist: "Luke Combs", videoId: "sD3kO4U5Oh4" },
+  // Michael Jackson
+  { title: "Love Never Felt So Good", artist: "Michael Jackson", videoId: "oG08ukJPtR8" },
+  // NX Zero
+  { title: "Cedo ou Tarde", artist: "NX Zero", videoId: "XdglM81b4g8" },
+  { title: "Razões e Emoções", artist: "NX Zero", videoId: "7KbY8QT0CGI" },
+  // Oasis
+  { title: "Wonderwall", artist: "Oasis", videoId: "6hzrDeceEKc" },
+  // Paramore
+  { title: "Decode", artist: "Paramore", videoId: "RvnkAtWcKYg" },
   { title: "Playing God", artist: "Paramore", videoId: "iDy2wCQYSrU" },
   { title: "Still Into You", artist: "Paramore", videoId: "OblL026SvD4" },
-  { title: "Decode", artist: "Paramore", videoId: "RvnkAtWcKYg" },
-  { title: "Like a Stone", artist: "Audioslave", videoId: "7QU1nvuxaMA" },
-  { title: "Use Somebody", artist: "Kings of Leon", videoId: "gnhXHvRoUd0" },
-  { title: "In the End", artist: "Linkin Park", videoId: "eVTXPUF4Oz4" },
-  { title: "Don't Stop Believin'", artist: "Journey", videoId: "1k8craCGpgs" },
-  { title: "Californication", artist: "Red Hot Chili Peppers", videoId: "YlUKcNNmywk" },
-  { title: "I Don't Want to Miss a Thing", artist: "Aerosmith", videoId: "JkK8g6FMEXE" },
-  { title: "Reptilia", artist: "The Strokes", videoId: "b8-tXG8KrWs" },
-  { title: "Mr. Brightside", artist: "The Killers", videoId: "j8tZs6G_h7U" },
-  { title: "Do I Wanna Know?", artist: "Arctic Monkeys", videoId: "pqrUQrAcfo4" },
-  { title: "Sweet Child O' Mine", artist: "Guns N' Roses", videoId: "1w7OgIMMRc4" },
-  // Clássicos & Retrô
-  { title: "Valerie", artist: "Amy Winehouse", videoId: "bixuI_GV5I0" },
-  { title: "Stand By Me", artist: "Ben E. King", videoId: "hwZNL7QVJjE" },
-  { title: "Have You Ever Seen the Rain?", artist: "Creedence", videoId: "u1V8YRJnr4Q" },
-  { title: "Everybody Wants to Rule the World", artist: "Tears for Fears", videoId: "aGCdLKXNF3w" },
-  { title: "Stayin' Alive", artist: "Bee Gees", videoId: "fNFzfwLM72c" },
-  { title: "Wonderwall", artist: "Oasis", videoId: "6hzrDeceEKc" },
-  { title: "Heaven", artist: "Bryan Adams", videoId: "3eT464L1YRA" },
-  { title: "Every Breath You Take", artist: "The Police", videoId: "OMOGaugKpzs" },
-  { title: "I'll Be Over You", artist: "Toto", videoId: "r7XhWUDj-Ts" },
-  { title: "Take on Me", artist: "A-ha", videoId: "djV11Xbc914" },
-  // Extras kept from original
-  { title: "Uptown Funk", artist: "Bruno Mars", videoId: "OPf0YbXqDm0" },
+  { title: "That's What You Get", artist: "Paramore", videoId: "1kz6hNDlEEg" },
+  // Queen
   { title: "Don't Stop Me Now", artist: "Queen", videoId: "HgzGwKwLmgM" },
-  { title: "Livin' on a Prayer", artist: "Bon Jovi", videoId: "lDK9QqIzhwk" },
+  { title: "I Want to Break Free", artist: "Queen", videoId: "WUOtCLOXgm8" },
+  { title: "We Are the Champions", artist: "Queen", videoId: "04854XqcfCY" },
+  // Rascal Flatts
+  { title: "Bless the Broken Road", artist: "Rascal Flatts", videoId: "I_yO3m-WcbY" },
+  { title: "Life Is a Highway", artist: "Rascal Flatts", videoId: "5tXh_MfrMe0" },
+  { title: "What Hurts the Most", artist: "Rascal Flatts", videoId: "7qH4qyi1-Ys" },
+  // Red Hot Chili Peppers
+  { title: "Californication", artist: "Red Hot Chili Peppers", videoId: "YlUKcNNmywk" },
+  // Tears for Fears
+  { title: "Everybody Wants to Rule the World", artist: "Tears for Fears", videoId: "aGCdLKXNF3w" },
+  // The Killers
+  { title: "Mr. Brightside", artist: "The Killers", videoId: "j8tZs6G_h7U" },
+  // The Police
+  { title: "Every Breath You Take", artist: "The Police", videoId: "OMOGaugKpzs" },
+  // The Strokes
+  { title: "Reptilia", artist: "The Strokes", videoId: "b8-tXG8KrWs" },
+  // Toto
+  { title: "I'll Be Over You", artist: "Toto", videoId: "r7XhWUDj-Ts" },
 ];
 
 const SongsSection = () => {
