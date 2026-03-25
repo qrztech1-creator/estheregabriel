@@ -4,7 +4,6 @@ import { CalendarDays, ListMusic, Users, Mic2, PartyPopper, CheckCircle2 } from 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import StrokeText from "./StrokeText";
-import AnimatedBorderCard from "./AnimatedBorderCard";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,7 +19,7 @@ const steps = [
     icon: ListMusic,
     title: "Definição de Repertório",
     date: "Abril — Junho 2026",
-    description: "Noivos montam a playlist do DJ e sugerem músicas para a banda. Trocas e refinamentos.",
+    description: "Vocês montam a playlist do DJ e sugerem músicas para a banda. Troca de ideias e refinamentos.",
   },
   {
     icon: Users,
@@ -50,10 +49,8 @@ const steps = [
 
 const ProcessTimeline = () => {
   const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const lineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Animate nodes with 3D flip
     nodeRefs.current.forEach((el, i) => {
       if (!el) return;
       gsap.fromTo(el,
@@ -74,7 +71,7 @@ const ProcessTimeline = () => {
   }, []);
 
   return (
-    <section className="py-32 px-6 relative">
+    <section className="py-28 px-6 relative">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-20">
           <motion.p
@@ -83,10 +80,10 @@ const ProcessTimeline = () => {
             viewport={{ once: true }}
             className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4"
           >
-            O Processo
+            Cada Passo Rumo à Festa
           </motion.p>
 
-          <StrokeText text="Da Ideia ao Palco" fontSize="8rem" />
+          <StrokeText text="Do Sim ao Palco" fontSize="8rem" />
 
           <motion.p
             initial={{ opacity: 0 }}
@@ -95,12 +92,11 @@ const ProcessTimeline = () => {
             transition={{ delay: 0.3 }}
             className="font-body text-muted-foreground mt-6 max-w-xl mx-auto"
           >
-            Veja como funciona o processo de organização musical do seu evento, do contrato ao grande dia.
+            Da assinatura do contrato ao grande dia — acompanhe como transformamos cada detalhe em uma experiência impecável.
           </motion.p>
         </div>
 
         <div className="relative">
-          {/* Animated line */}
           <div className="absolute left-8 top-0 bottom-0 w-px">
             <motion.div
               initial={{ scaleY: 0 }}
@@ -112,11 +108,7 @@ const ProcessTimeline = () => {
           </div>
 
           {steps.map((step, index) => (
-            <div
-              key={step.title}
-              className="relative flex items-start gap-6 mb-12 last:mb-0"
-            >
-              {/* 3D rotating node */}
+            <div key={step.title} className="relative flex items-start gap-6 mb-12 last:mb-0">
               <div className="relative z-10 flex-shrink-0" style={{ perspective: "600px" }}>
                 <div
                   ref={(el) => { nodeRefs.current[index] = el; }}
@@ -131,7 +123,6 @@ const ProcessTimeline = () => {
                 </div>
               </div>
 
-              {/* Content */}
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
