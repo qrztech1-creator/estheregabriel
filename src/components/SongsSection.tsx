@@ -15,6 +15,11 @@ interface Song {
 }
 
 const songs: Song[] = [
+  // Country & Especiais (favoritos do casal)
+  { title: "She Got the Best of Me", artist: "Luke Combs", videoId: "sD3kO4U5Oh4" },
+  { title: "What Hurts the Most", artist: "Rascal Flatts", videoId: "7qH4qyi1-Ys" },
+  { title: "Bless the Broken Road", artist: "Rascal Flatts", videoId: "I_yO3m-WcbY" },
+  { title: "Life Is a Highway", artist: "Rascal Flatts", videoId: "5tXh_MfrMe0" },
   // Nacionais
   { title: "Razões e Emoções", artist: "NX Zero", videoId: "7KbY8QT0CGI" },
   { title: "Cedo ou Tarde", artist: "NX Zero", videoId: "XdglM81b4g8" },

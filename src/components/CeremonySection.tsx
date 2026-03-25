@@ -90,9 +90,12 @@ const CeremonySection = () => {
             className="w-full h-auto object-contain"
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
-          <div className="absolute bottom-6 left-6 right-6 md:bottom-8 md:left-8 md:right-8">
-            <p className="font-display text-xl md:text-3xl lg:text-4xl text-foreground font-light">
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/30 to-transparent" />
+          <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8">
+            <p
+              className="font-display text-lg md:text-3xl lg:text-4xl text-foreground font-light drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]"
+              style={{ textShadow: "0 2px 12px rgba(0,0,0,0.95), 0 0 30px rgba(0,0,0,0.7)" }}
+            >
               "A trilha sonora que vocês merecem,<br />
               <span className="text-gold-gradient">do primeiro ao último acorde."</span>
             </p>
