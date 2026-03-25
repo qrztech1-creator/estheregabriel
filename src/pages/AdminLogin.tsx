@@ -29,12 +29,11 @@ const AdminLogin = () => {
   };
 
   // Check if already logged in
-  useState(() => {
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) navigate("/admin");
     });
-  });
-  };
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
