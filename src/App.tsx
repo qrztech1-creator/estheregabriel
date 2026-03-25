@@ -8,6 +8,7 @@ import BackgroundMusic from "@/components/BackgroundMusic";
 import EntranceGate from "@/components/EntranceGate";
 import Index from "./pages/Index.tsx";
 import PlaylistPage from "./pages/PlaylistPage.tsx";
+import ProposalPage from "./pages/ProposalPage.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -27,10 +28,10 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={entered ? <Index /> : <div className="h-screen bg-background" />} />
+            <Route path="/proposta/:slug" element={<ProposalPage />} />
             <Route path="/playlist/:token" element={<PlaylistPage />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminDashboard />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
