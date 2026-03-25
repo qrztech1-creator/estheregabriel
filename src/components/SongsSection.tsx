@@ -73,9 +73,6 @@ const songs: Song[] = [
   { title: "Still Into You", artist: "Paramore", videoId: "OblL026SvD4" },
   { title: "That's What You Get", artist: "Paramore", videoId: "1kz6hNDlEEg" },
   // Queen
-  { title: "Don't Stop Me Now", artist: "Queen", videoId: "HgzGwKwLmgM" },
-  { title: "I Want to Break Free", artist: "Queen", videoId: "WUOtCLOXgm8" },
-  { title: "We Are the Champions", artist: "Queen", videoId: "04854XqcfCY" },
   // Rascal Flatts
   { title: "Bless the Broken Road", artist: "Rascal Flatts", videoId: "I_yO3m-WcbY" },
   { title: "Life Is a Highway", artist: "Rascal Flatts", videoId: "5tXh_MfrMe0" },

@@ -394,6 +394,7 @@ const PricingSection = () => {
                     </div>
                     <div className="flex items-center justify-center gap-4 mb-3">
                       {[
+                        { val: proposalTime.d, label: "Dias" },
                         { val: proposalTime.h, label: "Horas" },
                         { val: proposalTime.m, label: "Min" },
                         { val: proposalTime.s, label: "Seg" },
