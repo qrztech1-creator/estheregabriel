@@ -145,13 +145,15 @@ const PricingSection = () => {
     const tick = () => {
       const diff = proposalExpiry - Date.now();
       if (diff <= 0) {
-        setProposalTime({ h: "00", m: "00", s: "00" });
+        setProposalTime({ d: "0", h: "00", m: "00", s: "00" });
         return;
       }
-      const h = Math.floor(diff / (1000 * 60 * 60));
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const s = Math.floor((diff % (1000 * 60)) / 1000);
       setProposalTime({
+        d: String(d),
         h: String(h).padStart(2, "0"),
         m: String(m).padStart(2, "0"),
         s: String(s).padStart(2, "0"),
