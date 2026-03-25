@@ -102,7 +102,7 @@ const PricingSection = () => {
   const priceRef = useRef<HTMLParagraphElement>(null);
   const countdownSectionRef = useRef<HTMLDivElement>(null);
   const [proposalExpiry, setProposalExpiry] = useState<number | null>(null);
-  const [proposalTime, setProposalTime] = useState({ h: "48", m: "00", s: "00" });
+  const [proposalTime, setProposalTime] = useState({ d: "0", h: "00", m: "00", s: "00" });
   const [countdownStarted, setCountdownStarted] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(1); // default to recommended
@@ -131,18 +131,11 @@ const PricingSection = () => {
     return () => clearTimeout(timer);
   }, [revealed, selectedPlan, plan.total]);
 
-  // 48h countdown
+  // Fixed deadline countdown: 01/04/2026 at 10:00 BRT (UTC-3)
   useEffect(() => {
     if (!revealed || countdownStarted) return;
-    const storageKey = "proposal_expiry_eg2027_v2";
-    const stored = localStorage.getItem(storageKey);
-    let expiry: number;
-    if (stored) {
-      expiry = parseInt(stored, 10);
-    } else {
-      expiry = Date.now() + 48 * 60 * 60 * 1000;
-      localStorage.setItem(storageKey, String(expiry));
-    }
+    // April 1, 2026 at 10:00 BRT = 13:00 UTC
+    const expiry = new Date("2026-04-01T13:00:00Z").getTime();
     setProposalExpiry(expiry);
     setCountdownStarted(true);
   }, [revealed, countdownStarted]);
