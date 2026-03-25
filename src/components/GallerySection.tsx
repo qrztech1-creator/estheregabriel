@@ -4,6 +4,14 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import StrokeText from "./StrokeText";
 
+import hero1 from "@/assets/hero-1.png";
+import hero2 from "@/assets/hero-2.png";
+import hero3 from "@/assets/hero-3.png";
+import hero4 from "@/assets/hero-4.png";
+import hero5 from "@/assets/hero-5.png";
+import hero6 from "@/assets/hero-6.png";
+import hero7 from "@/assets/hero-7.png";
+import hero8 from "@/assets/hero-8.png";
 import gallery1 from "@/assets/gallery-1.jpg";
 import gallery2 from "@/assets/gallery-2.jpg";
 import gallery3 from "@/assets/gallery-3.jpg";
@@ -23,6 +31,7 @@ import gallery15 from "@/assets/gallery-15.jpg";
 gsap.registerPlugin(ScrollTrigger);
 
 const images = [
+  hero1, hero2, hero3, hero4, hero5, hero6, hero7, hero8,
   gallery1, gallery2, gallery3, gallery4, gallery5,
   gallery6, gallery7, gallery8, gallery9, gallery10,
   gallery11, gallery12, gallery13, gallery14, gallery15,

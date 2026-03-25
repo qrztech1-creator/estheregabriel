@@ -8,6 +8,7 @@ import GallerySection from "@/components/GallerySection";
 import ProcessTimeline from "@/components/ProcessTimeline";
 import PricingSection from "@/components/PricingSection";
 import CeremonySection from "@/components/CeremonySection";
+import LedPanelSection from "@/components/LedPanelSection";
 import FooterSection from "@/components/FooterSection";
 import logo from "@/assets/logo-homemusic.png";
 
@@ -98,10 +99,11 @@ const Index = () => {
 
       <TimelineSection />
       <SongsSection />
-      <GallerySection />
       <ProcessTimeline />
       <PricingSection />
+      <LedPanelSection />
       <CeremonySection />
+      <GallerySection />
       <FooterSection />
     </div>
   );

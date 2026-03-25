@@ -66,8 +66,19 @@ const CeremonySection = () => {
             transition={{ delay: 0.3 }}
             className="font-body text-muted-foreground mt-4 max-w-2xl mx-auto leading-relaxed"
           >
-            Ao fechar o pacote completo — cerimônia + festa — garantimos condições ainda melhores.
-            Transforme cada momento do seu casamento em uma experiência musical impecável, do altar à pista.
+            A cerimônia é um momento único e merece atenção especial. Para alinhar cada detalhe —
+            repertório, entrada da noiva, cortejo e saída — será necessário uma reunião exclusiva
+            para entender exatamente como vocês desejam que tudo aconteça.
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+            className="font-body text-sm text-primary/80 mt-3 max-w-xl mx-auto"
+          >
+            ⚠️ Esta é apenas uma citação — o orçamento será feito sob medida após a reunião.
+            Os descontos de 30% e 50% continuam vigentes caso fechem o pacote da festa.
           </motion.p>
         </div>
 
