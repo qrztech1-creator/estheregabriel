@@ -59,7 +59,7 @@ const PricingSection = () => {
   useEffect(() => {
     if (!revealed || countdownStarted) return;
 
-    const storageKey = "proposal_expiry_eg2027";
+    const storageKey = "proposal_expiry_eg2027_v2";
     const stored = localStorage.getItem(storageKey);
     let expiry: number;
     if (stored) {
