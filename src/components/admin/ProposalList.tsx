@@ -6,9 +6,10 @@ import { toast } from "sonner";
 
 interface Props {
   onView: (id: string) => void;
+  onEdit?: (id: string) => void;
 }
 
-const ProposalList = ({ onView }: Props) => {
+const ProposalList = ({ onView, onEdit }: Props) => {
   const [proposals, setProposals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
