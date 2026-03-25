@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import StrokeText from "./StrokeText";
 import AnimatedBorderCard from "./AnimatedBorderCard";
 import { useProposal } from "@/contexts/ProposalContext";
+import carolPhoto from "@/assets/carol-suhet.png";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -90,8 +91,8 @@ const PricingSection = () => {
   const e50 = formatBRL(plan.entry50 || 0);
   const eAV = formatBRL(plan.aVista || 0);
 
-  // Try to import carol-suhet image for backward compat
-  let partnerPhotoSrc: string | null = partnershipPhotoUrl || null;
+  // Use uploaded photo URL, or fallback to local carol-suhet asset if partnership is Carol Suhet
+  const partnerPhotoSrc: string | null = partnershipPhotoUrl || (partnershipName?.includes("Carol Suhet") ? carolPhoto : null);
 
   return (
     <section className="py-12 px-6 relative">
