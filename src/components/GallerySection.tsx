@@ -70,7 +70,7 @@ const GallerySection = () => {
             Momentos que Contam Histórias
           </motion.p>
 
-          <StrokeText text="Galeria" fontSize="10rem" />
+          <StrokeText text="Galeria" fontSize="12rem" />
         </div>
 
         <div className="columns-2 md:columns-3 gap-3 space-y-3">

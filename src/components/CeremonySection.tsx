@@ -57,7 +57,7 @@ const CeremonySection = () => {
             Opcional · Condição Especial
           </motion.p>
 
-          <StrokeText text="A Cerimônia" fontSize="11rem" />
+          <StrokeText text="A Cerimônia" fontSize="12rem" />
 
           <motion.p
             initial={{ opacity: 0 }}

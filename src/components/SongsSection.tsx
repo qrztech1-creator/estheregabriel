@@ -15,40 +15,45 @@ interface Song {
 }
 
 const songs: Song[] = [
-  { title: "Razões e Emoções", artist: "NX Zero", videoId: "K4x1dvxFgHQ" },
-  { title: "Cedo ou Tarde", artist: "NX Zero", videoId: "aEEvXp2STKI" },
+  // Nacionais
+  { title: "Razões e Emoções", artist: "NX Zero", videoId: "7KbY8QT0CGI" },
+  { title: "Cedo ou Tarde", artist: "NX Zero", videoId: "XdglM81b4g8" },
+  // Pop & R&B
   { title: "Love Never Felt So Good", artist: "Michael Jackson", videoId: "oG08ukJPtR8" },
-  { title: "I Want to Break Free", artist: "Queen", videoId: "f4Mc-NYPHaQ" },
+  { title: "Locked Out of Heaven", artist: "Bruno Mars", videoId: "e-fA-gBCkj0" },
+  { title: "Treasure", artist: "Bruno Mars", videoId: "VFmHB5KVe_g" },
+  { title: "Get Lucky", artist: "Daft Punk", videoId: "5NV6Rdv1a3I" },
+  { title: "I Want It That Way", artist: "Backstreet Boys", videoId: "4fndeDfaWCg" },
+  { title: "As It Was", artist: "Harry Styles", videoId: "H5v3kku4y6Q" },
+  // Rock & Indie
+  { title: "I Want to Break Free", artist: "Queen", videoId: "WUOtCLOXgm8" },
   { title: "We Are the Champions", artist: "Queen", videoId: "04854XqcfCY" },
-  { title: "That's What You Get", artist: "Paramore", videoId: "1kz6hN4K-8A" },
-  { title: "Playing God", artist: "Paramore", videoId: "oHrq34gMtzY" },
+  { title: "That's What You Get", artist: "Paramore", videoId: "1kz6hNDlEEg" },
+  { title: "Playing God", artist: "Paramore", videoId: "iDy2wCQYSrU" },
   { title: "Still Into You", artist: "Paramore", videoId: "OblL026SvD4" },
   { title: "Decode", artist: "Paramore", videoId: "RvnkAtWcKYg" },
-  { title: "Valerie", artist: "Amy Winehouse", videoId: "dAITHeJQBRo" },
-  { title: "Stand By Me", artist: "Ben E. King", videoId: "hwZNL7QVJjE" },
-  { title: "Have You Ever Seen the Rain?", artist: "Creedence", videoId: "Gu2pVPWGYMQ" },
-  { title: "Everybody Wants to Rule the World", artist: "Tears for Fears", videoId: "aGCdLKXNF3w" },
-  { title: "Locked Out of Heaven", artist: "Bruno Mars", videoId: "e-fA-gBCkj0" },
-  { title: "Treasure", artist: "Bruno Mars", videoId: "nPvuNsRccVw" },
-  { title: "Get Lucky", artist: "Daft Punk", videoId: "5NV6Rdv1a3I" },
-  { title: "Stayin' Alive", artist: "Bee Gees", videoId: "I_izvAbhExY" },
-  { title: "Wonderwall", artist: "Oasis", videoId: "bx1Bh8ZvH84" },
-  { title: "I Want It That Way", artist: "Backstreet Boys", videoId: "4fndeDfaWCg" },
   { title: "Like a Stone", artist: "Audioslave", videoId: "7QU1nvuxaMA" },
   { title: "Use Somebody", artist: "Kings of Leon", videoId: "gnhXHvRoUd0" },
-  { title: "Heaven", artist: "Bryan Adams", videoId: "s6TtwR2Dbjg" },
-  { title: "Every Breath You Take", artist: "The Police", videoId: "OMOGaugKpzs" },
   { title: "In the End", artist: "Linkin Park", videoId: "eVTXPUF4Oz4" },
   { title: "Don't Stop Believin'", artist: "Journey", videoId: "1k8craCGpgs" },
-  { title: "I'll Be Over You", artist: "Toto", videoId: "qFwJOyZbMZk" },
   { title: "Californication", artist: "Red Hot Chili Peppers", videoId: "YlUKcNNmywk" },
   { title: "I Don't Want to Miss a Thing", artist: "Aerosmith", videoId: "JkK8g6FMEXE" },
-  { title: "Take on Me", artist: "A-ha", videoId: "djV11Xbc914" },
-  { title: "As It Was", artist: "Harry Styles", videoId: "H5v3kku4y6Q" },
-  { title: "Reptilia", artist: "The Strokes", videoId: "b8-tXG8KyWs" },
-  { title: "Mr. Brightside", artist: "The Killers", videoId: "gGdGFtwCNBE" },
-  { title: "Do I Wanna Know?", artist: "Arctic Monkeys", videoId: "bpOSxM0rNPM" },
+  { title: "Reptilia", artist: "The Strokes", videoId: "b8-tXG8KrWs" },
+  { title: "Mr. Brightside", artist: "The Killers", videoId: "j8tZs6G_h7U" },
+  { title: "Do I Wanna Know?", artist: "Arctic Monkeys", videoId: "pqrUQrAcfo4" },
   { title: "Sweet Child O' Mine", artist: "Guns N' Roses", videoId: "1w7OgIMMRc4" },
+  // Clássicos & Retrô
+  { title: "Valerie", artist: "Amy Winehouse", videoId: "bixuI_GV5I0" },
+  { title: "Stand By Me", artist: "Ben E. King", videoId: "hwZNL7QVJjE" },
+  { title: "Have You Ever Seen the Rain?", artist: "Creedence", videoId: "u1V8YRJnr4Q" },
+  { title: "Everybody Wants to Rule the World", artist: "Tears for Fears", videoId: "aGCdLKXNF3w" },
+  { title: "Stayin' Alive", artist: "Bee Gees", videoId: "fNFzfwLM72c" },
+  { title: "Wonderwall", artist: "Oasis", videoId: "6hzrDeceEKc" },
+  { title: "Heaven", artist: "Bryan Adams", videoId: "3eT464L1YRA" },
+  { title: "Every Breath You Take", artist: "The Police", videoId: "OMOGaugKpzs" },
+  { title: "I'll Be Over You", artist: "Toto", videoId: "r7XhWUDj-Ts" },
+  { title: "Take on Me", artist: "A-ha", videoId: "djV11Xbc914" },
+  // Extras kept from original
   { title: "Uptown Funk", artist: "Bruno Mars", videoId: "OPf0YbXqDm0" },
   { title: "Don't Stop Me Now", artist: "Queen", videoId: "HgzGwKwLmgM" },
   { title: "Livin' on a Prayer", artist: "Bon Jovi", videoId: "lDK9QqIzhwk" },
@@ -95,7 +100,7 @@ const SongsSection = () => {
             A Trilha da Noite Mais Épica
           </motion.p>
 
-          <StrokeText text="O Som da Festa" fontSize="10rem" />
+          <StrokeText text="O Som da Festa" fontSize="12rem" />
 
           <motion.p
             initial={{ opacity: 0 }}
