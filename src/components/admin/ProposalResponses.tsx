@@ -23,7 +23,7 @@ const ProposalResponses = ({ proposalId, onBack }: Props) => {
   useEffect(() => { if (selectedClient) loadClientData(selectedClient); }, [selectedClient]);
 
   const loadProposal = async () => {
-    const { data: prop } = await supabase.from("proposals").select("*").eq("id", proposalId).single();
+    const { data: prop } = await supabase.from("proposals").select("*").eq("id", proposalId).maybeSingle();
     setProposal(prop);
     const { data: tokens } = await (supabase.from("client_tokens") as any).select("*").eq("proposal_id", proposalId);
     setClients(tokens || []);
@@ -36,8 +36,8 @@ const ProposalResponses = ({ proposalId, onBack }: Props) => {
       supabase.from("song_suggestions").select("*").eq("client_token_id", clientId).order("created_at", { ascending: false }),
       supabase.from("dj_playlist_links").select("*").eq("client_token_id", clientId).order("created_at", { ascending: false }),
       supabase.from("block_order_preferences").select("*").eq("client_token_id", clientId).order("display_order"),
-      supabase.from("playlist_songs").select("*"),
-      supabase.from("playlist_blocks").select("*"),
+      supabase.from("playlist_songs").select("*").eq("proposal_id", proposalId),
+      supabase.from("playlist_blocks").select("*").eq("proposal_id", proposalId),
     ]);
 
     const songsMap = new Map((songsRes.data || []).map((s: any) => [s.id, s]));

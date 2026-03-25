@@ -34,7 +34,7 @@ const ProposalPage = () => {
       .select("*")
       .eq("slug", slug)
       .eq("status", "active")
-      .single()
+      .maybeSingle()
       .then(({ data, error }) => {
         if (error || !data) { navigate("/"); return; }
         setProposal(data as unknown as ProposalData);

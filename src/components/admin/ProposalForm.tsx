@@ -123,7 +123,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
         audio_url,
       };
 
-      const { data: proposal, error } = await supabase.from("proposals").insert(insertData).select().single();
+      const { data: proposal, error } = await supabase.from("proposals").insert(insertData).select().maybeSingle();
       if (error) throw error;
       const proposalRow = proposal as any;
 
