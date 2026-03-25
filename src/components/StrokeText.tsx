@@ -21,7 +21,6 @@ const StrokeText = ({ text, className = "", fontSize = "8rem", delay = 0, trigge
     const textEl = svgRef.current.querySelector("text");
     if (!textEl) return;
 
-    // Get text length for stroke animation
     const length = textEl.getComputedTextLength?.() || 2000;
 
     gsap.set(textEl, {
@@ -32,6 +31,7 @@ const StrokeText = ({ text, className = "", fontSize = "8rem", delay = 0, trigge
       strokeWidth: 1,
     });
 
+    // Initial scroll-triggered animation
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
@@ -40,7 +40,6 @@ const StrokeText = ({ text, className = "", fontSize = "8rem", delay = 0, trigge
       },
     });
 
-    // Phase 1: Draw stroke
     tl.to(textEl, {
       strokeDashoffset: 0,
       duration: 2,
@@ -48,7 +47,6 @@ const StrokeText = ({ text, className = "", fontSize = "8rem", delay = 0, trigge
       delay,
     });
 
-    // Phase 2: Fill with gradient color
     tl.to(textEl, {
       fill: "hsl(43, 59%, 52%)",
       strokeWidth: 0,
@@ -56,8 +54,37 @@ const StrokeText = ({ text, className = "", fontSize = "8rem", delay = 0, trigge
       ease: "power2.out",
     }, "-=0.5");
 
+    // Replay stroke-draw animation every 10 seconds
+    const replay = () => {
+      const reTl = gsap.timeline();
+      // Reset to stroke
+      reTl.to(textEl, {
+        fill: "transparent",
+        strokeWidth: 1,
+        strokeDashoffset: length,
+        duration: 0.4,
+        ease: "power2.in",
+      });
+      // Redraw
+      reTl.to(textEl, {
+        strokeDashoffset: 0,
+        duration: 1.8,
+        ease: "power2.inOut",
+      });
+      // Refill
+      reTl.to(textEl, {
+        fill: "hsl(43, 59%, 52%)",
+        strokeWidth: 0,
+        duration: 1,
+        ease: "power2.out",
+      }, "-=0.4");
+    };
+
+    const intervalId = setInterval(replay, 10000);
+
     return () => {
       tl.kill();
+      clearInterval(intervalId);
     };
   }, [text, delay, triggerStart]);
 

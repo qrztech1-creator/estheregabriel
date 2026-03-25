@@ -14,7 +14,6 @@ const HeroSection = () => {
   const weddingDate = new Date("2027-03-13T18:00:00").getTime();
 
   useEffect(() => {
-    // Update countdown every second
     const updateCountdown = () => {
       const now = Date.now();
       const diff = weddingDate - now;
@@ -34,7 +33,6 @@ const HeroSection = () => {
 
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
-
     return () => clearInterval(interval);
   }, [weddingDate]);
 
@@ -60,7 +58,6 @@ const HeroSection = () => {
 
       const logoTl = gsap.timeline({ delay: 0.3 });
 
-      // Draw stroke
       logoTl.to(paths, {
         strokeDashoffset: 0,
         duration: 2.5,
@@ -68,7 +65,6 @@ const HeroSection = () => {
         ease: "power2.inOut",
       });
 
-      // Fill letters
       logoTl.to(paths, {
         fill: "hsl(43, 59%, 52%)",
         strokeWidth: 0,
@@ -77,7 +73,6 @@ const HeroSection = () => {
         ease: "power2.out",
       }, "-=0.8");
 
-      // Show decorative elements
       logoTl.to(decorPaths, {
         opacity: 0.4,
         scale: 1,
@@ -104,7 +99,6 @@ const HeroSection = () => {
         ease: "back.out(1.7)",
       });
 
-      // Glow pulse
       tl.to(chars, {
         textShadow: "0 0 40px hsla(43, 59%, 52%, 0.6), 0 0 80px hsla(43, 59%, 52%, 0.3)",
         stagger: 0.02,
@@ -119,7 +113,7 @@ const HeroSection = () => {
         ease: "power2.out",
       }, "-=0.1");
 
-      // Repeating glow every 15 seconds
+      // Repeating glow every 10 seconds
       gsap.to(chars, {
         textShadow: "0 0 30px hsla(43, 59%, 52%, 0.5), 0 0 60px hsla(43, 59%, 52%, 0.2)",
         stagger: 0.03,
@@ -127,7 +121,7 @@ const HeroSection = () => {
         ease: "power2.inOut",
         yoyo: true,
         repeat: -1,
-        repeatDelay: 13,
+        repeatDelay: 8,
         delay: 6,
       });
     }
@@ -145,18 +139,41 @@ const HeroSection = () => {
       });
     });
 
-    // Repeating logo pulse every 15s
+    // Repeating logo pulse every 10s
     if (logoRef.current) {
       const paths = logoRef.current.querySelectorAll(".logo-letter");
-      gsap.to(paths, {
-        filter: "drop-shadow(0 0 20px hsla(43, 59%, 52%, 0.6))",
-        duration: 1.5,
-        ease: "power2.inOut",
-        yoyo: true,
-        repeat: -1,
-        repeatDelay: 13,
-        delay: 8,
-      });
+
+      // Replay the stroke-draw + fill animation every 10s
+      const replayLogo = () => {
+        const reTl = gsap.timeline();
+        // Reset to stroke state
+        reTl.to(paths, {
+          fill: "transparent",
+          strokeWidth: 1.5,
+          strokeDashoffset: (i: number, el: SVGPathElement) => el.getTotalLength?.() || 500,
+          duration: 0.5,
+          ease: "power2.in",
+        });
+        // Redraw stroke
+        reTl.to(paths, {
+          strokeDashoffset: 0,
+          duration: 2,
+          stagger: 0.2,
+          ease: "power2.inOut",
+        });
+        // Refill
+        reTl.to(paths, {
+          fill: "hsl(43, 59%, 52%)",
+          strokeWidth: 0,
+          duration: 1,
+          stagger: 0.1,
+          ease: "power2.out",
+        }, "-=0.5");
+      };
+
+      const logoInterval = setInterval(replayLogo, 10000);
+      // Store for cleanup
+      return () => clearInterval(logoInterval);
     }
   }, []);
 
@@ -173,7 +190,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative h-screen max-h-[900px] flex items-center justify-center overflow-hidden">
+    <section className="relative h-screen max-h-[750px] flex items-center justify-center overflow-hidden">
       {/* Background image */}
       <div className="absolute inset-0">
         <img
@@ -216,7 +233,6 @@ const HeroSection = () => {
             className="w-40 md:w-56 lg:w-64"
             style={{ overflow: "visible" }}
           >
-            {/* E letter */}
             <text
               className="logo-letter"
               x="75"
@@ -231,7 +247,6 @@ const HeroSection = () => {
             >
               E
             </text>
-            {/* Decorative ampersand */}
             <text
               className="logo-decor"
               x="150"
@@ -246,7 +261,6 @@ const HeroSection = () => {
             >
               &amp;
             </text>
-            {/* G letter */}
             <text
               className="logo-letter"
               x="225"
@@ -261,7 +275,6 @@ const HeroSection = () => {
             >
               G
             </text>
-            {/* Decorative lines */}
             <line className="logo-decor" x1="30" y1="105" x2="120" y2="105" stroke="hsl(43, 59%, 52%)" strokeWidth="0.5" opacity="0" />
             <line className="logo-decor" x1="180" y1="105" x2="270" y2="105" stroke="hsl(43, 59%, 52%)" strokeWidth="0.5" opacity="0" />
           </svg>
@@ -269,7 +282,7 @@ const HeroSection = () => {
 
         <h1
           ref={titleRef}
-          className="font-display text-5xl md:text-7xl lg:text-8xl font-light leading-[0.9] tracking-tight mb-3"
+          className="font-display text-5xl md:text-7xl lg:text-8xl font-light leading-[0.9] tracking-tight mb-3 whitespace-nowrap"
           style={{ perspective: "1000px" }}
         >
           <span className="text-primary">{splitText("Esther")}</span>
@@ -277,7 +290,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 3.2, type: "spring" }}
-            className="block text-2xl md:text-3xl text-primary/40 font-light italic my-2"
+            className="inline-block text-2xl md:text-3xl text-primary/40 font-light italic mx-3 md:mx-5 align-middle"
           >
             &
           </motion.span>
@@ -288,14 +301,14 @@ const HeroSection = () => {
           initial={{ scaleY: 0 }}
           animate={{ scaleY: 1 }}
           transition={{ duration: 1, delay: 3.6, ease: [0.23, 1, 0.32, 1] }}
-          className="w-px h-12 bg-primary mx-auto my-6 origin-top"
+          className="w-px h-8 bg-primary mx-auto my-4 origin-top"
         />
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 4 }}
-          className="space-y-2"
+          className="space-y-1"
         >
           <p className="font-ui text-sm tracking-[0.25em] uppercase text-primary tabular-nums">
             13 · 03 · 2027
@@ -311,7 +324,7 @@ const HeroSection = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 4.4 }}
-          className="mt-6 flex items-center justify-center gap-3 md:gap-5"
+          className="mt-4 flex items-center justify-center gap-3 md:gap-5"
         >
           {[
             { label: "Dias", key: "d" },
@@ -336,7 +349,7 @@ const HeroSection = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 5 }}
-          className="mt-8"
+          className="mt-5"
         >
           <motion.div
             animate={{ y: [0, 8, 0] }}
