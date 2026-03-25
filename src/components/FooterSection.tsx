@@ -47,18 +47,37 @@ const FooterSection = () => {
       ease: "power2.out",
     }, "-=0.5");
 
-    // Repeating pulse
-    gsap.to(paths, {
-      filter: "drop-shadow(0 0 15px hsla(43, 59%, 52%, 0.5))",
-      duration: 1.5,
-      ease: "power2.inOut",
-      yoyo: true,
-      repeat: -1,
-      repeatDelay: 13,
-      delay: 4,
-    });
+    // Replay every 10s
+    const replay = () => {
+      const reTl = gsap.timeline();
+      reTl.to(paths, {
+        fill: "transparent",
+        strokeWidth: 1,
+        strokeDashoffset: (i: number, el: SVGTextElement) => el.getComputedTextLength?.() || 300,
+        duration: 0.4,
+        ease: "power2.in",
+      });
+      reTl.to(paths, {
+        strokeDashoffset: 0,
+        duration: 1.8,
+        stagger: 0.15,
+        ease: "power2.inOut",
+      });
+      reTl.to(paths, {
+        fill: "hsl(43, 59%, 52%)",
+        strokeWidth: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: "power2.out",
+      }, "-=0.3");
+    };
 
-    return () => { ScrollTrigger.getAll().forEach(t => t.kill()); };
+    const intervalId = setInterval(replay, 10000);
+
+    return () => {
+      clearInterval(intervalId);
+      ScrollTrigger.getAll().forEach(t => t.kill());
+    };
   }, []);
 
   const scrollToTop = () => {
@@ -67,7 +86,6 @@ const FooterSection = () => {
 
   return (
     <footer className="relative overflow-hidden" style={{ background: "linear-gradient(180deg, hsl(0 0% 3.1%), hsl(0 0% 2%))" }}>
-      {/* Subtle diagonal lines background */}
       <div className="absolute inset-0 opacity-[0.03]" style={{
         backgroundImage: "repeating-linear-gradient(45deg, hsl(43 59% 52%) 0, transparent 1px, transparent 60px)"
       }} />
@@ -148,13 +166,12 @@ const FooterSection = () => {
             href="https://wa.me/5527999936682?text=Ol%C3%A1!%20Vi%20a%20proposta%20no%20site%20e%20gostaria%20de%20conversar."
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 font-ui text-xs tracking-[0.2em] uppercase text-primary hover:text-foreground transition-colors duration-150 mb-10"
+            className="inline-flex items-center gap-2 font-ui text-xs tracking-[0.2em] uppercase text-primary hover:text-foreground transition-colors duration-150 mb-10 hover:scale-105 transition-transform"
           >
             <Phone className="w-4 h-4" />
             (27) 99993-6682
           </a>
 
-          {/* Divider */}
           <div className="w-16 h-px bg-border mx-auto mb-8" />
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-10">
@@ -182,12 +199,11 @@ const FooterSection = () => {
             </a>
           </div>
 
-          {/* Back to top */}
           <button
             onClick={scrollToTop}
             className="group inline-flex items-center gap-2 font-ui text-[10px] tracking-[0.15em] uppercase text-muted-foreground/50 hover:text-primary transition-colors duration-150 mb-8"
           >
-            <ArrowUp className="w-3 h-3 group-hover:-translate-y-0.5 transition-transform duration-150" />
+            <ArrowUp className="w-3 h-3 group-hover:-translate-y-1 transition-transform duration-150" />
             Voltar ao topo
           </button>
 

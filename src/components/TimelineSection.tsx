@@ -58,7 +58,7 @@ const TimelineSection = () => {
       );
     });
 
-    // Repeating title glow every 15s
+    // Repeating title glow every 10s
     titleRefs.current.forEach((el) => {
       if (!el) return;
       gsap.to(el, {
@@ -67,7 +67,7 @@ const TimelineSection = () => {
         ease: "power2.inOut",
         yoyo: true,
         repeat: -1,
-        repeatDelay: 14,
+        repeatDelay: 9,
         delay: 5,
       });
     });
@@ -126,7 +126,7 @@ const TimelineSection = () => {
               <div className="absolute left-8 md:left-1/2 -translate-x-1/2 z-10">
                 <div
                   ref={(el) => { iconRefs.current[index] = el; }}
-                  className="w-16 h-16 rounded-full bg-background border border-primary flex items-center justify-center gold-glow"
+                  className="w-16 h-16 rounded-full bg-background border border-primary flex items-center justify-center gold-glow hover:scale-110 transition-transform duration-150"
                   style={{ perspective: "600px", transformStyle: "preserve-3d" }}
                 >
                   <item.icon className="w-6 h-6 text-primary" />
@@ -135,7 +135,7 @@ const TimelineSection = () => {
 
               <div className={`ml-24 md:ml-0 md:w-[calc(50%-4rem)] ${index % 2 === 0 ? "md:pr-16" : "md:pl-16"}`}>
                 <AnimatedBorderCard delay={index * 0.2}>
-                  <div className="p-8">
+                  <div className="p-8 hover:bg-secondary/10 transition-colors duration-150 rounded-sm">
                     <div className="flex items-baseline gap-3 mb-3">
                       <span className="font-ui text-2xl font-bold text-primary tabular-nums">{item.time}</span>
                       <span className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground">{item.duration}</span>
@@ -149,7 +149,7 @@ const TimelineSection = () => {
                     <p className="font-body text-sm text-muted-foreground leading-relaxed mb-4">{item.description}</p>
                     <ul className="space-y-2">
                       {item.details.map((detail) => (
-                        <li key={detail} className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <li key={detail} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors duration-150">
                           <div className="w-1 h-1 rounded-full bg-primary" />
                           {detail}
                         </li>
