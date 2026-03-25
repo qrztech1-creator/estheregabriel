@@ -24,7 +24,7 @@ const App = () => {
         {!entered && <EntranceGate onEnter={() => setEntered(true)} />}
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={entered ? <Index /> : <div className="h-screen bg-background" />} />
             <Route path="/playlist/:token" element={<PlaylistPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
