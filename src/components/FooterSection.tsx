@@ -134,7 +134,10 @@ const FooterSection = () => {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="text-center"
         >
-          <p className="font-display text-2xl md:text-3xl text-foreground font-light mb-1">
+          <p className="font-display text-3xl md:text-4xl text-primary font-light mb-1">
+            Esther & Gabriel
+          </p>
+          <p className="font-display text-lg text-foreground/60 font-light mb-1">
             Home Music
           </p>
           <p className="font-body text-sm text-muted-foreground mb-8">
