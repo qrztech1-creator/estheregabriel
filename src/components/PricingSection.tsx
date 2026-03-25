@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Music, Disc3, Lightbulb, Volume2, Send, MessageCircle, Clock, AlertTriangle, Lock, Eye } from "lucide-react";
+import { Music, Disc3, Lightbulb, Volume2, Send, MessageCircle, AlertTriangle, Lock, Eye, Banknote } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import StrokeText from "./StrokeText";
@@ -26,6 +26,78 @@ const techDetails = [
   "Suporte técnico durante o evento",
 ];
 
+interface PricingPlan {
+  id: string;
+  label: string;
+  description: string;
+  total: number;
+  entry30: number;
+  savings30: number;
+  entry50: number;
+  savings50: number;
+  aVista: number;
+  savingsAVista: number;
+  recommended?: boolean;
+}
+
+const plans: PricingPlan[] = [
+  {
+    id: "banda-2h",
+    label: "Banda 2h",
+    description: "Show ao vivo 2h + música ambiente no restante",
+    total: 8532,
+    entry30: 8190.72,
+    savings30: 341.28,
+    entry50: 7678.80,
+    savings50: 853.20,
+    aVista: 7465.50,
+    savingsAVista: 1066.50,
+  },
+  {
+    id: "banda-2h-dj-2h",
+    label: "Banda 2h + DJ 2h",
+    description: "Show ao vivo 2h + DJ com playlist personalizada 2h",
+    total: 9480,
+    entry30: 8974.50,
+    savings30: 505.50,
+    entry50: 8498.53,
+    savings50: 981.47,
+    aVista: 8295.00,
+    savingsAVista: 1185.00,
+    recommended: true,
+  },
+  {
+    id: "banda-2h-dj-3h",
+    label: "Banda 2h + DJ 3h",
+    description: "Show ao vivo 2h + DJ com playlist personalizada 3h",
+    total: 10353,
+    entry30: 9938.88,
+    savings30: 414.12,
+    entry50: 9317.70,
+    savings50: 1035.30,
+    aVista: 9058.88,
+    savingsAVista: 1294.12,
+  },
+  {
+    id: "banda-3h-dj-2h",
+    label: "Banda 3h + DJ 2h",
+    description: "Show ao vivo 3h + DJ com playlist personalizada 2h",
+    total: 11984,
+    entry30: 11504.64,
+    savings30: 479.36,
+    entry50: 10785.60,
+    savings50: 1198.40,
+    aVista: 10486.00,
+    savingsAVista: 1498.00,
+  },
+];
+
+const formatBRL = (val: number) => {
+  const [int, dec] = val.toFixed(2).split(".");
+  const formattedInt = parseInt(int).toLocaleString("pt-BR");
+  return { int: formattedInt, dec };
+};
+
 const PricingSection = () => {
   const priceRef = useRef<HTMLParagraphElement>(null);
   const countdownSectionRef = useRef<HTMLDivElement>(null);
@@ -33,8 +105,11 @@ const PricingSection = () => {
   const [proposalTime, setProposalTime] = useState({ h: "48", m: "00", s: "00" });
   const [countdownStarted, setCountdownStarted] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(1); // default to recommended
 
-  // Price counter animation - only after reveal with delay for DOM mount
+  const plan = plans[selectedPlan];
+
+  // Price counter animation
   useEffect(() => {
     if (!revealed) return;
 
@@ -42,8 +117,8 @@ const PricingSection = () => {
       if (!priceRef.current) return;
       const target = { val: 0 };
       gsap.to(target, {
-        val: 9480,
-        duration: 2.5,
+        val: plan.total,
+        duration: 2,
         ease: "power2.out",
         onUpdate: () => {
           if (priceRef.current) {
@@ -51,15 +126,14 @@ const PricingSection = () => {
           }
         },
       });
-    }, 600);
+    }, 400);
 
     return () => clearTimeout(timer);
-  }, [revealed]);
+  }, [revealed, selectedPlan, plan.total]);
 
-  // 48h countdown - activate when revealed
+  // 48h countdown
   useEffect(() => {
     if (!revealed || countdownStarted) return;
-
     const storageKey = "proposal_expiry_eg2027_v2";
     const stored = localStorage.getItem(storageKey);
     let expiry: number;
@@ -75,7 +149,6 @@ const PricingSection = () => {
 
   useEffect(() => {
     if (!proposalExpiry) return;
-
     const tick = () => {
       const diff = proposalExpiry - Date.now();
       if (diff <= 0) {
@@ -91,11 +164,14 @@ const PricingSection = () => {
         s: String(s).padStart(2, "0"),
       });
     };
-
     tick();
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, [proposalExpiry]);
+
+  const e30 = formatBRL(plan.entry30);
+  const e50 = formatBRL(plan.entry50);
+  const eAV = formatBRL(plan.aVista);
 
   return (
     <section className="py-12 px-6 relative">
@@ -109,11 +185,9 @@ const PricingSection = () => {
           >
             O Investimento na Noite Perfeita
           </motion.p>
-
           <StrokeText text="Nosso Combinado" fontSize="12rem" />
         </div>
 
-        {/* Services included - always visible */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -121,6 +195,7 @@ const PricingSection = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="glass-surface p-8 md:p-12 rounded-sm"
         >
+          {/* Services included */}
           <div className="grid sm:grid-cols-2 gap-4 mb-8">
             {included.map((item) => (
               <div key={item.text} className="flex items-start gap-3 p-4 rounded-sm bg-secondary/30 hover:bg-secondary/50 transition-colors duration-150">
@@ -201,7 +276,7 @@ const PricingSection = () => {
                 </div>
 
                 {/* Carol Suhet photo */}
-                <div className="flex justify-center mb-6">
+                <div className="flex justify-center mb-8">
                   <a
                     href="https://www.instagram.com/carolsuhetcerimonialista/"
                     target="_blank"
@@ -214,36 +289,96 @@ const PricingSection = () => {
                   </a>
                 </div>
 
-                {/* Pricing */}
+                {/* Plan selector tabs */}
+                <div className="mb-8">
+                  <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-4 text-center">
+                    Escolha o formato ideal
+                  </p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {plans.map((p, i) => (
+                      <button
+                        key={p.id}
+                        onClick={() => setSelectedPlan(i)}
+                        className={`relative p-3 rounded-sm border text-center transition-all duration-200 ${
+                          selectedPlan === i
+                            ? "border-primary bg-primary/10 shadow-[0_0_20px_hsla(43,59%,52%,0.15)]"
+                            : "border-border hover:border-primary/40 bg-secondary/20 hover:bg-secondary/30"
+                        }`}
+                      >
+                        {p.recommended && (
+                          <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 font-ui text-[8px] tracking-[0.15em] uppercase px-2 py-0.5 bg-primary text-primary-foreground rounded-sm whitespace-nowrap">
+                            Recomendado
+                          </span>
+                        )}
+                        <p className={`font-ui text-[10px] tracking-[0.1em] uppercase ${selectedPlan === i ? "text-primary" : "text-muted-foreground"}`}>
+                          {p.label}
+                        </p>
+                        <p className="font-display text-lg text-foreground font-light mt-1">
+                          R$ {p.total.toLocaleString("pt-BR")}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Selected plan description */}
                 <div className="text-center mb-6">
+                  <p className="font-body text-sm text-muted-foreground mb-2">{plan.description}</p>
                   <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-2">
                     Valor total do investimento
                   </p>
                   <p ref={priceRef} className="font-display text-5xl md:text-7xl font-light text-gold-gradient tabular-nums">
-                    R$ 0
+                    R$ {plan.total.toLocaleString("pt-BR")}
                   </p>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                {/* Payment options: 3 cards */}
+                <div className="grid sm:grid-cols-3 gap-4 mb-6">
                   <AnimatedBorderCard delay={0.1}>
-                    <div className="p-6 text-center hover:bg-secondary/20 transition-colors duration-150 rounded-sm">
+                    <div className="p-5 text-center hover:bg-secondary/20 transition-colors duration-150 rounded-sm">
                       <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">
                         Entrada de 30%
                       </p>
-                      <p className="font-display text-3xl text-foreground font-light">R$ 8.974<span className="text-lg">,50</span></p>
-                      <p className="font-body text-xs text-primary mt-2">Economia de R$ 505,50</p>
+                      <p className="font-display text-2xl md:text-3xl text-foreground font-light">
+                        R$ {e30.int}<span className="text-base">,{e30.dec}</span>
+                      </p>
+                      <p className="font-body text-xs text-primary mt-2">
+                        Economia de R$ {formatBRL(plan.savings30).int},{formatBRL(plan.savings30).dec}
+                      </p>
                     </div>
                   </AnimatedBorderCard>
-                  <AnimatedBorderCard delay={0.3}>
-                    <div className="p-6 text-center relative overflow-hidden hover:bg-secondary/20 transition-colors duration-150 rounded-sm">
-                      <div className="absolute top-0 right-0 bg-primary px-3 py-1">
-                        <p className="font-ui text-[10px] tracking-wider uppercase text-primary-foreground">Desconto maior</p>
+                  <AnimatedBorderCard delay={0.2}>
+                    <div className="p-5 text-center relative overflow-hidden hover:bg-secondary/20 transition-colors duration-150 rounded-sm">
+                      <div className="absolute top-0 right-0 bg-primary px-2 py-0.5">
+                        <p className="font-ui text-[9px] tracking-wider uppercase text-primary-foreground">Mais popular</p>
                       </div>
                       <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">
                         Entrada de 50%
                       </p>
-                      <p className="font-display text-3xl text-foreground font-light">R$ 8.498<span className="text-lg">,53</span></p>
-                      <p className="font-body text-xs text-primary mt-2">Economia de R$ 981,47</p>
+                      <p className="font-display text-2xl md:text-3xl text-foreground font-light">
+                        R$ {e50.int}<span className="text-base">,{e50.dec}</span>
+                      </p>
+                      <p className="font-body text-xs text-primary mt-2">
+                        Economia de R$ {formatBRL(plan.savings50).int},{formatBRL(plan.savings50).dec}
+                      </p>
+                    </div>
+                  </AnimatedBorderCard>
+                  <AnimatedBorderCard delay={0.3}>
+                    <div className="p-5 text-center relative overflow-hidden hover:bg-secondary/20 transition-colors duration-150 rounded-sm">
+                      <div className="absolute top-0 right-0 bg-primary px-2 py-0.5">
+                        <p className="font-ui text-[9px] tracking-wider uppercase text-primary-foreground flex items-center gap-1">
+                          <Banknote className="w-3 h-3" /> Melhor preço
+                        </p>
+                      </div>
+                      <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">
+                        À Vista
+                      </p>
+                      <p className="font-display text-2xl md:text-3xl text-foreground font-light">
+                        R$ {eAV.int}<span className="text-base">,{eAV.dec}</span>
+                      </p>
+                      <p className="font-body text-xs text-primary mt-2">
+                        Economia de R$ {formatBRL(plan.savingsAVista).int},{formatBRL(plan.savingsAVista).dec}
+                      </p>
                     </div>
                   </AnimatedBorderCard>
                 </div>
@@ -286,7 +421,7 @@ const PricingSection = () => {
 
                 <div className="text-center space-y-3">
                   <a
-                    href="https://wa.me/5527999936682?text=Ol%C3%A1!%20Gostaria%20de%20aceitar%20a%20proposta%20musical%20para%20nosso%20casamento%20no%20valor%20de%20R%24%209.480.%20Podemos%20alinhar%20os%20pr%C3%B3ximos%20passos%3F"
+                    href={`https://wa.me/5527999936682?text=${encodeURIComponent(`Olá! Gostaria de aceitar a proposta musical "${plan.label}" para nosso casamento no valor de R$ ${plan.total.toLocaleString("pt-BR")}. Podemos alinhar os próximos passos?`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-3 px-10 py-4 rounded-sm border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-150 breathing-glow font-ui text-sm tracking-[0.15em] uppercase hover:shadow-[0_0_30px_hsla(43,59%,52%,0.3)]"
@@ -310,7 +445,6 @@ const PricingSection = () => {
             )}
           </AnimatePresence>
         </motion.div>
-
       </div>
     </section>
   );
