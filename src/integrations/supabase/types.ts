@@ -55,21 +55,32 @@ export type Database = {
           client_name: string
           created_at: string | null
           id: string
+          proposal_id: string | null
           token: string
         }
         Insert: {
           client_name: string
           created_at?: string | null
           id?: string
+          proposal_id?: string | null
           token: string
         }
         Update: {
           client_name?: string
           created_at?: string | null
           id?: string
+          proposal_id?: string | null
           token?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "client_tokens_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dj_playlist_links: {
         Row: {
@@ -109,20 +120,31 @@ export type Database = {
           display_order: number
           id: string
           name: string
+          proposal_id: string | null
         }
         Insert: {
           created_at?: string | null
           display_order: number
           id?: string
           name: string
+          proposal_id?: string | null
         }
         Update: {
           created_at?: string | null
           display_order?: number
           id?: string
           name?: string
+          proposal_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "playlist_blocks_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       playlist_songs: {
         Row: {
@@ -131,6 +153,7 @@ export type Database = {
           created_at: string | null
           display_order: number
           id: string
+          proposal_id: string | null
           title: string
         }
         Insert: {
@@ -139,6 +162,7 @@ export type Database = {
           created_at?: string | null
           display_order: number
           id?: string
+          proposal_id?: string | null
           title: string
         }
         Update: {
@@ -147,6 +171,7 @@ export type Database = {
           created_at?: string | null
           display_order?: number
           id?: string
+          proposal_id?: string | null
           title?: string
         }
         Relationships: [
@@ -157,7 +182,104 @@ export type Database = {
             referencedRelation: "playlist_blocks"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "playlist_songs_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      proposals: {
+        Row: {
+          bride_name: string
+          created_at: string | null
+          duration_label: string | null
+          event_date: string
+          event_end_time: string
+          event_start_time: string
+          event_timeline: Json
+          extras_bundle_price: number | null
+          extras_bundle_title: string | null
+          groom_name: string
+          guest_count: number
+          id: string
+          included_services: Json
+          optional_extras: Json
+          partnership_instagram: string | null
+          partnership_name: string | null
+          partnership_photo_url: string | null
+          pricing_plans: Json
+          process_steps: Json
+          proposal_deadline: string | null
+          showcase_songs: Json
+          slug: string
+          status: string
+          tech_details: Json
+          updated_at: string | null
+          venue_name: string
+          whatsapp_number: string
+        }
+        Insert: {
+          bride_name: string
+          created_at?: string | null
+          duration_label?: string | null
+          event_date: string
+          event_end_time?: string
+          event_start_time?: string
+          event_timeline?: Json
+          extras_bundle_price?: number | null
+          extras_bundle_title?: string | null
+          groom_name: string
+          guest_count?: number
+          id?: string
+          included_services?: Json
+          optional_extras?: Json
+          partnership_instagram?: string | null
+          partnership_name?: string | null
+          partnership_photo_url?: string | null
+          pricing_plans?: Json
+          process_steps?: Json
+          proposal_deadline?: string | null
+          showcase_songs?: Json
+          slug: string
+          status?: string
+          tech_details?: Json
+          updated_at?: string | null
+          venue_name: string
+          whatsapp_number?: string
+        }
+        Update: {
+          bride_name?: string
+          created_at?: string | null
+          duration_label?: string | null
+          event_date?: string
+          event_end_time?: string
+          event_start_time?: string
+          event_timeline?: Json
+          extras_bundle_price?: number | null
+          extras_bundle_title?: string | null
+          groom_name?: string
+          guest_count?: number
+          id?: string
+          included_services?: Json
+          optional_extras?: Json
+          partnership_instagram?: string | null
+          partnership_name?: string | null
+          partnership_photo_url?: string | null
+          pricing_plans?: Json
+          process_steps?: Json
+          proposal_deadline?: string | null
+          showcase_songs?: Json
+          slug?: string
+          status?: string
+          tech_details?: Json
+          updated_at?: string | null
+          venue_name?: string
+          whatsapp_number?: string
+        }
+        Relationships: []
       }
       song_preferences: {
         Row: {
