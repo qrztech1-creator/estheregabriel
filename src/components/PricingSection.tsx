@@ -64,7 +64,7 @@ const plans: PricingPlan[] = [
     savings50: 981.47,
     aVista: 8295.00,
     savingsAVista: 1185.00,
-    recommended: true,
+    
   },
   {
     id: "banda-2h-dj-3h",
@@ -89,6 +89,7 @@ const plans: PricingPlan[] = [
     savings50: 1198.40,
     aVista: 10486.00,
     savingsAVista: 1498.00,
+    recommended: true,
   },
 ];
 
