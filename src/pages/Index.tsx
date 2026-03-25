@@ -98,10 +98,11 @@ const Index = () => {
 
       <TimelineSection />
       <SongsSection />
-      <GallerySection />
       <ProcessTimeline />
       <PricingSection />
+      <LedPanelSection />
       <CeremonySection />
+      <GallerySection />
       <FooterSection />
     </div>
   );
