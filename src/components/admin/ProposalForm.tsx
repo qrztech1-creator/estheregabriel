@@ -137,7 +137,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
         const { data: srcProposals } = await (supabase.from("proposals") as any).select("id").neq("id", proposalRow.id).order("created_at").limit(1);
         const srcProposal = srcProposals?.[0];
         if (srcProposal) {
-          const { data: srcBlocks } = await supabase.from("playlist_blocks").select("*").eq("proposal_id" as any, (srcProposal as any).id).order("display_order");
+          const { data: srcBlocks } = await (supabase.from("playlist_blocks") as any).select("*").eq("proposal_id", (srcProposal as any).id).order("display_order");
           if (srcBlocks) {
             for (const block of srcBlocks) {
               const { data: newBlock } = await supabase.from("playlist_blocks").insert({
