@@ -134,7 +134,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
       } as any);
 
       if (copyRepertoire) {
-        const { data: srcProposals } = await supabase.from("proposals").select("id").neq("id", proposalRow.id).order("created_at").limit(1);
+        const { data: srcProposals } = await (supabase.from("proposals") as any).select("id").neq("id", proposalRow.id).order("created_at").limit(1);
         const srcProposal = srcProposals?.[0];
         if (srcProposal) {
           const { data: srcBlocks } = await supabase.from("playlist_blocks").select("*").eq("proposal_id" as any, (srcProposal as any).id).order("display_order");
