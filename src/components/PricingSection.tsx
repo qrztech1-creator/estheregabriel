@@ -320,10 +320,8 @@ const PricingSection = () => {
             </div>
           </a>
         </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+      </div>
+    </section>
       </div>
     </section>
   );
