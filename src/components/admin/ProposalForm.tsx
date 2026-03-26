@@ -31,6 +31,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
     proposal_deadline: "",
     whatsapp_number: "5527999936682",
     slug: "",
+    created_by: "",
     partnership_name: "",
     partnership_instagram: "",
     partnership_photo_url: "",
@@ -108,6 +109,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
         duration_label: form.duration_label,
         proposal_deadline: form.proposal_deadline || null,
         whatsapp_number: form.whatsapp_number,
+        created_by: form.created_by || null,
         partnership_name: form.partnership_name || null,
         partnership_instagram: form.partnership_instagram || null,
         partnership_photo_url: form.partnership_photo_url || null,
@@ -211,7 +213,8 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><Label>Prazo da proposta</Label><Input type="datetime-local" value={form.proposal_deadline} onChange={e => set("proposal_deadline", e.target.value)} /></div>
             <div><Label>WhatsApp</Label><Input value={form.whatsapp_number} onChange={e => set("whatsapp_number", e.target.value)} /></div>
-            <div className="sm:col-span-2"><Label>Slug (URL)</Label><Input value={form.slug} onChange={e => set("slug", e.target.value)} placeholder="auto-gerado se vazio" /></div>
+            <div><Label>Responsável pelo atendimento</Label><Input value={form.created_by} onChange={e => set("created_by", e.target.value)} placeholder="Nome de quem está atendendo" /></div>
+            <div><Label>Slug (URL)</Label><Input value={form.slug} onChange={e => set("slug", e.target.value)} placeholder="auto-gerado se vazio" /></div>
           </div>
         )}
 
