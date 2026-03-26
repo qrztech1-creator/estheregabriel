@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, Plus, List, BarChart3, Menu, X } from "lucide-react";
+import { LogOut, Plus, List, BarChart3, Pencil } from "lucide-react";
 import logo from "@/assets/logo-homemusic.png";
 import { Button } from "@/components/ui/button";
 import ProposalList from "@/components/admin/ProposalList";
 import ProposalForm from "@/components/admin/ProposalForm";
 import ProposalResponses from "@/components/admin/ProposalResponses";
 import ProposalDetail from "@/components/admin/ProposalDetail";
+import ProposalEditForm from "@/components/admin/ProposalEditForm";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 
-type View = "list" | "create" | "detail" | "responses" | "analytics";
+type View = "list" | "create" | "detail" | "responses" | "analytics" | "edit";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -50,61 +51,52 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
             <img src={logo} alt="Home Music" className="h-6 sm:h-7 w-auto" />
             <span className="text-sm sm:text-lg font-bold hidden sm:inline">Admin</span>
           </div>
-
-          {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-1">
             {navItems.map(item => (
-              <Button
-                key={item.key}
-                variant={view === item.key ? "default" : "ghost"}
-                size="sm"
-                onClick={() => switchView(item.key)}
-                className="gap-2"
-              >
-                <item.icon className="w-4 h-4" />
-                {item.label}
+              <Button key={item.key} variant={view === item.key ? "default" : "ghost"} size="sm" onClick={() => switchView(item.key)} className="gap-2">
+                <item.icon className="w-4 h-4" />{item.label}
               </Button>
             ))}
             <div className="w-px h-6 bg-border mx-2" />
-            <Button variant="ghost" size="icon" onClick={handleLogout} title="Sair">
-              <LogOut className="w-4 h-4" />
-            </Button>
+            <Button variant="ghost" size="icon" onClick={handleLogout} title="Sair"><LogOut className="w-4 h-4" /></Button>
           </div>
-
-          {/* Mobile menu button */}
           <div className="flex md:hidden items-center gap-1">
             {navItems.map(item => (
-              <Button
-                key={item.key}
-                variant={view === item.key ? "default" : "ghost"}
-                size="icon"
-                className="h-9 w-9"
-                onClick={() => switchView(item.key)}
-              >
+              <Button key={item.key} variant={view === item.key ? "default" : "ghost"} size="icon" className="h-9 w-9" onClick={() => switchView(item.key)}>
                 <item.icon className="w-4 h-4" />
               </Button>
             ))}
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleLogout}>
-              <LogOut className="w-4 h-4" />
-            </Button>
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleLogout}><LogOut className="w-4 h-4" /></Button>
           </div>
         </div>
       </header>
 
-      {/* Content */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
         {view === "analytics" && <AdminAnalytics onViewProposal={(id) => { setSelectedProposalId(id); setView("detail"); }} />}
-        {view === "list" && <ProposalList onView={(id) => { setSelectedProposalId(id); setView("responses"); }} onEdit={(id) => { setSelectedProposalId(id); setView("detail"); }} />}
+        {view === "list" && (
+          <ProposalList
+            onView={(id) => { setSelectedProposalId(id); setView("responses"); }}
+            onEdit={(id) => { setSelectedProposalId(id); setView("edit"); }}
+            onDetail={(id) => { setSelectedProposalId(id); setView("detail"); }}
+          />
+        )}
         {view === "create" && <ProposalForm onCreated={() => switchView("list")} onCancel={() => switchView("list")} />}
         {view === "responses" && selectedProposalId && <ProposalResponses proposalId={selectedProposalId} onBack={() => switchView("list")} />}
         {view === "detail" && selectedProposalId && <ProposalDetail proposalId={selectedProposalId} onBack={() => switchView("list")} />}
+        {view === "edit" && selectedProposalId && (
+          <ProposalEditForm
+            proposalId={selectedProposalId}
+            onSaved={() => switchView("list")}
+            onBack={() => switchView("list")}
+            onDelete={() => switchView("list")}
+          />
+        )}
       </div>
     </div>
   );

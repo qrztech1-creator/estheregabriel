@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import PlaylistPage from "./pages/PlaylistPage";
 import ProposalPage from "./pages/ProposalPage";
+import ProposalSummaryPage from "./pages/ProposalSummaryPage";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/proposta/:slug" element={<ProposalPage />} />
+          <Route path="/proposta/:slug/resumo" element={<ProposalSummaryPage />} />
           <Route path="/playlist/:token" element={<PlaylistPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
