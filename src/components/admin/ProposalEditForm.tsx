@@ -83,7 +83,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
         audio_url = urlData.publicUrl;
       }
 
-      const { error } = await (supabase.from("proposals") as any).update({
+      const { error } = await supabase.from("proposals").update({
         bride_name: form.bride_name, groom_name: form.groom_name, event_date: form.event_date,
         event_start_time: form.event_start_time, event_end_time: form.event_end_time,
         venue_name: form.venue_name, guest_count: form.guest_count,
@@ -91,10 +91,10 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
         whatsapp_number: form.whatsapp_number, partnership_name: form.partnership_name || null,
         partnership_instagram: form.partnership_instagram || null,
         partnership_photo_url: form.partnership_photo_url || null, created_by: form.created_by || null,
-        pricing_plans: form.pricing_plans, included_services: form.included_services,
-        tech_details: form.tech_details, event_timeline: form.event_timeline,
-        process_steps: form.process_steps, showcase_songs: form.showcase_songs,
-        optional_extras: form.optional_extras, extras_bundle_title: form.extras_bundle_title || null,
+        pricing_plans: form.pricing_plans as any, included_services: form.included_services as any,
+        tech_details: form.tech_details as any, event_timeline: form.event_timeline as any,
+        process_steps: form.process_steps as any, showcase_songs: form.showcase_songs as any,
+        optional_extras: form.optional_extras as any, extras_bundle_title: form.extras_bundle_title || null,
         extras_bundle_price: form.extras_bundle_price || null, audio_url,
         updated_at: new Date().toISOString(),
       }).eq("id", proposalId);
@@ -116,15 +116,15 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
       const { data: tokens } = await supabase.from("client_tokens").select("id").eq("proposal_id", proposalId);
       if (tokens?.length) {
         const tokenIds = tokens.map((t: any) => t.id);
-        await (supabase.from("song_preferences") as any).delete().in("client_token_id", tokenIds);
-        await (supabase.from("song_suggestions") as any).delete().in("client_token_id", tokenIds);
-        await (supabase.from("block_order_preferences") as any).delete().in("client_token_id", tokenIds);
-        await (supabase.from("dj_playlist_links") as any).delete().in("client_token_id", tokenIds);
-        await (supabase.from("client_tokens") as any).delete().eq("proposal_id", proposalId);
+        await supabase.from("song_preferences").delete().in("client_token_id", tokenIds);
+        await supabase.from("song_suggestions").delete().in("client_token_id", tokenIds);
+        await supabase.from("block_order_preferences").delete().in("client_token_id", tokenIds);
+        await supabase.from("dj_playlist_links").delete().in("client_token_id", tokenIds);
+        await supabase.from("client_tokens").delete().eq("proposal_id", proposalId);
       }
-      await (supabase.from("playlist_songs") as any).delete().eq("proposal_id", proposalId);
-      await (supabase.from("playlist_blocks") as any).delete().eq("proposal_id", proposalId);
-      await (supabase.from("proposals") as any).delete().eq("id", proposalId);
+      await supabase.from("playlist_songs").delete().eq("proposal_id", proposalId);
+      await supabase.from("playlist_blocks").delete().eq("proposal_id", proposalId);
+      await supabase.from("proposals").delete().eq("id", proposalId);
       toast.success("Proposta excluída!");
       onDelete?.();
     } catch (err: any) {
