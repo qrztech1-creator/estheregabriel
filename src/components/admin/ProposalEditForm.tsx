@@ -83,7 +83,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
         audio_url = urlData.publicUrl;
       }
 
-      const { error } = await supabase.from("proposals").update({
+      const updateData = {
         bride_name: form.bride_name, groom_name: form.groom_name, event_date: form.event_date,
         event_start_time: form.event_start_time, event_end_time: form.event_end_time,
         venue_name: form.venue_name, guest_count: form.guest_count,
@@ -97,9 +97,21 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
         optional_extras: form.optional_extras as any, extras_bundle_title: form.extras_bundle_title || null,
         extras_bundle_price: form.extras_bundle_price || null, audio_url,
         updated_at: new Date().toISOString(),
-      }).eq("id", proposalId);
+      };
 
+      const { error } = await supabase.from("proposals").update(updateData).eq("id", proposalId);
       if (error) throw error;
+
+      // Log edit to audit
+      await supabase.from("proposal_audit_log" as any).insert({
+        proposal_id: proposalId, actor_type: "admin", action: "edited_proposal",
+        changes: {
+          fields_updated: Object.keys(updateData).filter(k => k !== "updated_at"),
+          bride_name: form.bride_name,
+          groom_name: form.groom_name,
+        },
+      });
+
       toast.success("Proposta atualizada!");
       onSaved();
     } catch (err: any) {
