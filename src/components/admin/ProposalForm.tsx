@@ -189,14 +189,14 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
       </div>
 
       <div className="space-y-4">
-        <Section id="casal" title="👫 Dados do Casal *">
+        {renderSection("casal" title="👫 Dados do Casal *">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><Label>Nome da noiva *</Label><Input value={form.bride_name} onChange={e => set("bride_name", e.target.value)} placeholder="Ex: Ana" /></div>
             <div><Label>Nome do noivo *</Label><Input value={form.groom_name} onChange={e => set("groom_name", e.target.value)} placeholder="Ex: Lucas" /></div>
           </div>
-        </Section>
+        )}
 
-        <Section id="evento" title="📅 Detalhes do Evento *">
+        {renderSection("evento" title="📅 Detalhes do Evento *">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><Label>Data do evento *</Label><Input type="date" value={form.event_date} onChange={e => set("event_date", e.target.value)} /></div>
             <div><Label>Local *</Label><Input value={form.venue_name} onChange={e => set("venue_name", e.target.value)} placeholder="Ex: Espaço XYZ" /></div>
@@ -205,17 +205,17 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
             <div><Label>Convidados</Label><Input type="number" value={form.guest_count} onChange={e => set("guest_count", Number(e.target.value))} /></div>
             <div><Label>Duração (descrição)</Label><Input value={form.duration_label} onChange={e => set("duration_label", e.target.value)} /></div>
           </div>
-        </Section>
+        )}
 
-        <Section id="proposta" title="⏰ Configuração da Proposta">
+        {renderSection("proposta" title="⏰ Configuração da Proposta">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><Label>Prazo da proposta</Label><Input type="datetime-local" value={form.proposal_deadline} onChange={e => set("proposal_deadline", e.target.value)} /></div>
             <div><Label>WhatsApp</Label><Input value={form.whatsapp_number} onChange={e => set("whatsapp_number", e.target.value)} /></div>
             <div className="sm:col-span-2"><Label>Slug (URL)</Label><Input value={form.slug} onChange={e => set("slug", e.target.value)} placeholder="auto-gerado se vazio" /></div>
           </div>
-        </Section>
+        )}
 
-        <Section id="audio" title="🎵 Música de Fundo (MP3)">
+        {renderSection("audio" title="🎵 Música de Fundo (MP3)">
           <div>
             <Label>Arquivo MP3 para a página do casal</Label>
             <div className="mt-2 flex items-center gap-4">
@@ -228,9 +228,9 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
             </div>
             <p className="text-xs text-muted-foreground mt-2">Este áudio tocará automaticamente quando o casal iniciar a experiência da página.</p>
           </div>
-        </Section>
+        )}
 
-        <Section id="pricing" title={`💰 Planos de Preço (${form.pricing_plans.length})`}>
+        {renderSection("pricing" title={`💰 Planos de Preço (${form.pricing_plans.length})`}>
           {form.pricing_plans.map((plan: any, i: number) => (
             <div key={i} className="border border-border rounded-lg p-4 space-y-3 relative">
               <button onClick={() => set("pricing_plans", form.pricing_plans.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
@@ -248,9 +248,9 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
             </div>
           ))}
           <Button variant="outline" size="sm" onClick={() => set("pricing_plans", [...form.pricing_plans, { id: `plano-${form.pricing_plans.length + 1}`, label: "", description: "", total: 0, entry30: 0, savings30: 0, entry50: 0, savings50: 0, aVista: 0, savingsAVista: 0, recommended: false }])}>+ Adicionar plano</Button>
-        </Section>
+        )}
 
-        <Section id="services" title={`🎵 Serviços Inclusos (${form.included_services.length})`}>
+        {renderSection("services" title={`🎵 Serviços Inclusos (${form.included_services.length})`}>
           {form.included_services.map((s: any, i: number) => (
             <div key={i} className="flex gap-2 items-center">
               <select value={s.icon} onChange={e => { const arr = [...form.included_services]; arr[i] = { ...arr[i], icon: e.target.value }; set("included_services", arr); }} className="bg-card border border-border rounded px-2 py-2 text-sm">
@@ -262,9 +262,9 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
             </div>
           ))}
           <Button variant="outline" size="sm" onClick={() => set("included_services", [...form.included_services, { icon: "Music", text: "" }])}>+ Adicionar</Button>
-        </Section>
+        )}
 
-        <Section id="tech" title={`🔧 Detalhes Técnicos (${form.tech_details.length})`}>
+        {renderSection("tech" title={`🔧 Detalhes Técnicos (${form.tech_details.length})`}>
           {form.tech_details.map((t: string, i: number) => (
             <div key={i} className="flex gap-2">
               <Input value={t} onChange={e => { const arr = [...form.tech_details]; arr[i] = e.target.value; set("tech_details", arr); }} className="flex-1" />
@@ -272,9 +272,9 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
             </div>
           ))}
           <Button variant="outline" size="sm" onClick={() => set("tech_details", [...form.tech_details, ""])}>+ Adicionar</Button>
-        </Section>
+        )}
 
-        <Section id="timeline" title={`🕐 Timeline do Evento (${form.event_timeline.length})`}>
+        {renderSection("timeline" title={`🕐 Timeline do Evento (${form.event_timeline.length})`}>
           {form.event_timeline.map((item: any, i: number) => (
             <div key={i} className="border border-border rounded p-3 space-y-2 relative">
               <button onClick={() => set("event_timeline", form.event_timeline.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
@@ -287,9 +287,9 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
             </div>
           ))}
           <Button variant="outline" size="sm" onClick={() => set("event_timeline", [...form.event_timeline, { time: "", duration: "", title: "", description: "", icon: "Music", details: [] }])}>+ Adicionar bloco</Button>
-        </Section>
+        )}
 
-        <Section id="process" title={`📋 Etapas do Processo (${form.process_steps.length})`}>
+        {renderSection("process" title={`📋 Etapas do Processo (${form.process_steps.length})`}>
           {form.process_steps.map((step: any, i: number) => (
             <div key={i} className="border border-border rounded p-3 space-y-2 relative">
               <button onClick={() => set("process_steps", form.process_steps.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
@@ -302,9 +302,9 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
             </div>
           ))}
           <Button variant="outline" size="sm" onClick={() => set("process_steps", [...form.process_steps, { icon: "CheckCircle2", title: "", date: "", description: "", active: false }])}>+ Adicionar etapa</Button>
-        </Section>
+        )}
 
-        <Section id="songs" title={`🎶 Músicas Destaque (${form.showcase_songs.length})`}>
+        {renderSection("songs" title={`🎶 Músicas Destaque (${form.showcase_songs.length})`}>
           <div className="max-h-64 overflow-y-auto space-y-2">
             {form.showcase_songs.map((song: any, i: number) => (
               <div key={i} className="flex gap-2 items-center">
@@ -316,9 +316,9 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
             ))}
           </div>
           <Button variant="outline" size="sm" onClick={() => set("showcase_songs", [...form.showcase_songs, { title: "", artist: "", videoId: "" }])}>+ Adicionar música</Button>
-        </Section>
+        )}
 
-        <Section id="extras" title="✨ Opcionais">
+        {renderSection("extras" title="✨ Opcionais">
           {form.optional_extras.map((extra: any, i: number) => (
             <div key={i} className="border border-border rounded p-3 space-y-2 relative">
               <button onClick={() => set("optional_extras", form.optional_extras.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
@@ -331,15 +331,15 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
             <div><Label>Título do pacote</Label><Input value={form.extras_bundle_title} onChange={e => set("extras_bundle_title", e.target.value)} /></div>
             <div><Label>Preço do pacote (R$)</Label><Input type="number" value={form.extras_bundle_price} onChange={e => set("extras_bundle_price", Number(e.target.value))} /></div>
           </div>
-        </Section>
+        )}
 
-        <Section id="partnership" title="🤝 Parceria">
+        {renderSection("partnership" title="🤝 Parceria">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><Label>Nome</Label><Input value={form.partnership_name} onChange={e => set("partnership_name", e.target.value)} /></div>
             <div><Label>Instagram (URL)</Label><Input value={form.partnership_instagram} onChange={e => set("partnership_instagram", e.target.value)} /></div>
             <div className="col-span-2"><Label>URL da foto</Label><Input value={form.partnership_photo_url} onChange={e => set("partnership_photo_url", e.target.value)} /></div>
           </div>
-        </Section>
+        )}
 
         <div className="border border-border rounded-lg p-4">
           <label className="flex items-center gap-3">
