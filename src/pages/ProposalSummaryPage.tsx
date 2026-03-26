@@ -47,9 +47,9 @@ const ProposalSummaryPage = () => {
       aVista: "À Vista",
     };
 
-    const { error } = await (supabase.from("proposals") as any).update({
+    const { error } = await supabase.from("proposals").update({
       accepted_at: new Date().toISOString(),
-      accepted_plan: { ...plan, payment_method: paymentLabels[paymentMethod] || paymentMethod },
+      accepted_plan: { ...plan, payment_method: paymentLabels[paymentMethod] || paymentMethod } as any,
       accepted_payment_method: paymentLabels[paymentMethod] || paymentMethod,
       accepted_notes: notes || null,
       contract_status: "accepted",
