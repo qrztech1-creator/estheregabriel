@@ -217,7 +217,7 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
         </div>
       )}
 
-      {/* CRM Section */}
+      {/* Organize Section */}
       <div className="bg-card border border-border rounded-xl p-4 sm:p-6 space-y-4">
         <h3 className="font-semibold text-sm flex items-center gap-2"><MessageCircle className="w-4 h-4 text-primary" /> Dados do Cliente & Contrato</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

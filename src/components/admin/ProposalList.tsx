@@ -67,7 +67,7 @@ const ProposalList = ({ onView, onEdit, onDetail }: Props) => {
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyLink(p.slug)} title="Copiar link"><Copy className="w-3.5 h-3.5" /></Button>
                   <Button variant="ghost" size="icon" className="h-8 w-8" asChild><a href={`/proposta/${p.slug}`} target="_blank"><ExternalLink className="w-3.5 h-3.5" /></a></Button>
                   {onEdit && <Button variant="ghost" size="sm" className="h-8 text-xs gap-1" onClick={() => onEdit(p.id)}><Pencil className="w-3 h-3" /> Editar</Button>}
-                  {onDetail && <Button variant="ghost" size="sm" className="h-8 text-xs gap-1" onClick={() => onDetail(p.id)}><Info className="w-3 h-3" /> CRM</Button>}
+                  {onDetail && <Button variant="ghost" size="sm" className="h-8 text-xs gap-1" onClick={() => onDetail(p.id)}><Info className="w-3 h-3" /> Organize</Button>}
                   <Button variant="outline" size="sm" className="h-8 text-xs gap-1" onClick={() => onView(p.id)}><Eye className="w-3.5 h-3.5" /> Respostas</Button>
                 </div>
               </div>
