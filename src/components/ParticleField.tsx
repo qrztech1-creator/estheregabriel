@@ -38,26 +38,14 @@ function MouseReactiveParticles() {
     const arr = posAttr.array as Float32Array;
     const mx = mouse.current.x * viewport.width * 0.5;
     const my = mouse.current.y * viewport.height * 0.5;
-
     for (let i = 0; i < count; i++) {
-      const ix = i * 3;
-      const iy = i * 3 + 1;
-      const iz = i * 3 + 2;
-      arr[ix] += velocities[ix];
-      arr[iy] += velocities[iy];
-      arr[iz] += velocities[iz];
-      const dx = arr[ix] - mx;
-      const dy = arr[iy] - my;
+      const ix = i * 3, iy = i * 3 + 1, iz = i * 3 + 2;
+      arr[ix] += velocities[ix]; arr[iy] += velocities[iy]; arr[iz] += velocities[iz];
+      const dx = arr[ix] - mx, dy = arr[iy] - my;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 3) {
-        const force = (3 - dist) * 0.008;
-        arr[ix] += dx * force;
-        arr[iy] += dy * force;
-      }
-      if (arr[ix] > 15) arr[ix] = -15;
-      if (arr[ix] < -15) arr[ix] = 15;
-      if (arr[iy] > 15) arr[iy] = -15;
-      if (arr[iy] < -15) arr[iy] = 15;
+      if (dist < 3) { const force = (3 - dist) * 0.008; arr[ix] += dx * force; arr[iy] += dy * force; }
+      if (arr[ix] > 15) arr[ix] = -15; if (arr[ix] < -15) arr[ix] = 15;
+      if (arr[iy] > 15) arr[iy] = -15; if (arr[iy] < -15) arr[iy] = 15;
     }
     posAttr.needsUpdate = true;
     ref.current.rotation.y = state.clock.elapsedTime * 0.01;
@@ -102,102 +90,218 @@ function GoldDust() {
   );
 }
 
-/* ─── Musical notation symbols rendered as 3D geometry ─── */
+/* ─── Musical notation symbols ─── */
 
-function MusicSymbol({ position, symbolType, scale, speed, offset }: {
-  position: [number, number, number];
-  symbolType: string;
-  scale: number;
-  speed: number;
-  offset: number;
+function FloatingSymbol({ position, speed, offset, children }: {
+  position: [number, number, number]; speed: number; offset: number; children: React.ReactNode;
 }) {
   const ref = useRef<THREE.Group>(null);
-
   useFrame((state) => {
     if (!ref.current) return;
     const t = state.clock.elapsedTime;
     ref.current.position.y = position[1] + Math.sin(t * speed + offset) * 2;
     ref.current.position.x = position[0] + Math.cos(t * speed * 0.6 + offset) * 0.8;
-    ref.current.rotation.z = Math.sin(t * speed * 0.3 + offset) * 0.4;
+    ref.current.rotation.z = Math.sin(t * speed * 0.3 + offset) * 0.3;
     ref.current.rotation.y = t * 0.15 + offset;
   });
+  return <group ref={ref} position={position}>{children}</group>;
+}
 
-  if (symbolType === "trebleClef") {
-    return (
-      <group ref={ref} position={position} scale={scale}>
-        <mesh><torusGeometry args={[0.3, 0.03, 8, 16]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.12} /></mesh>
-        <mesh position={[0, 0.6, 0]}><cylinderGeometry args={[0.02, 0.02, 1.2, 4]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.1} /></mesh>
-        <mesh position={[0, -0.4, 0]}><sphereGeometry args={[0.12, 6, 6]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.1} /></mesh>
-      </group>
-    );
-  }
-
-  if (symbolType === "quarterNote" || symbolType === "eighthNote") {
-    return (
-      <group ref={ref} position={position} scale={scale}>
-        <mesh rotation={[0, 0, 0.4]}><sphereGeometry args={[0.2, 6, 6]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.13} /></mesh>
-        <mesh position={[0.15, 0.7, 0]}><cylinderGeometry args={[0.015, 0.015, 1.3, 4]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.1} /></mesh>
-        {symbolType === "eighthNote" && (
-          <mesh position={[0.3, 1.1, 0]} rotation={[0, 0, -0.6]}><cylinderGeometry args={[0.01, 0.03, 0.5, 4]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.08} /></mesh>
-        )}
-      </group>
-    );
-  }
-
-  if (symbolType === "sharp") {
-    return (
-      <group ref={ref} position={position} scale={scale}>
-        <mesh position={[-0.15, 0, 0]}><cylinderGeometry args={[0.015, 0.015, 1, 4]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.1} /></mesh>
-        <mesh position={[0.15, 0, 0]}><cylinderGeometry args={[0.015, 0.015, 1, 4]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.1} /></mesh>
-        <mesh position={[0, -0.2, 0]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.012, 0.012, 0.6, 4]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.08} /></mesh>
-        <mesh position={[0, 0.2, 0]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.012, 0.012, 0.6, 4]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.08} /></mesh>
-      </group>
-    );
-  }
-
-  if (symbolType === "rest") {
-    return (
-      <group ref={ref} position={position} scale={scale}>
-        <mesh><cylinderGeometry args={[0.02, 0.02, 0.8, 4]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.1} /></mesh>
-        <mesh position={[0.15, 0.2, 0]} rotation={[0, 0, 0.8]}><cylinderGeometry args={[0.015, 0.015, 0.4, 4]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.08} /></mesh>
-        <mesh position={[-0.1, -0.2, 0]} rotation={[0, 0, -0.6]}><cylinderGeometry args={[0.015, 0.015, 0.35, 4]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.08} /></mesh>
-      </group>
-    );
-  }
-
-  if (symbolType === "doubleNote") {
-    return (
-      <group ref={ref} position={position} scale={scale}>
-        <mesh position={[-0.2, 0, 0]} rotation={[0, 0, 0.3]}><sphereGeometry args={[0.18, 6, 6]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.12} /></mesh>
-        <mesh position={[0.2, 0.1, 0]} rotation={[0, 0, 0.3]}><sphereGeometry args={[0.18, 6, 6]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.12} /></mesh>
-        <mesh position={[-0.05, 0.7, 0]}><cylinderGeometry args={[0.012, 0.012, 1.2, 4]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.09} /></mesh>
-        <mesh position={[0.35, 0.8, 0]}><cylinderGeometry args={[0.012, 0.012, 1.2, 4]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.09} /></mesh>
-        <mesh position={[0.15, 1.3, 0]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.012, 0.012, 0.5, 4]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.08} /></mesh>
-      </group>
-    );
-  }
-
-  // flat
+/* Quarter note: filled oval head + vertical stem */
+function QuarterNote({ scale = 1 }: { scale?: number }) {
   return (
-    <group ref={ref} position={position} scale={scale}>
-      <mesh position={[0, 0.3, 0]}><cylinderGeometry args={[0.015, 0.015, 1, 4]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.1} /></mesh>
-      <mesh position={[0.12, -0.15, 0]}><sphereGeometry args={[0.15, 6, 6]} /><meshBasicMaterial color="#c9a84c" transparent opacity={0.08} wireframe /></mesh>
+    <group scale={scale}>
+      {/* Note head - oval tilted */}
+      <mesh rotation={[0, 0, -0.3]} scale={[1, 0.75, 0.4]}>
+        <sphereGeometry args={[0.22, 12, 8]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.15} />
+      </mesh>
+      {/* Stem */}
+      <mesh position={[0.18, 0.75, 0]}>
+        <cylinderGeometry args={[0.02, 0.02, 1.4, 6]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.12} />
+      </mesh>
+    </group>
+  );
+}
+
+/* Eighth note: quarter note + flag */
+function EighthNote({ scale = 1 }: { scale?: number }) {
+  return (
+    <group scale={scale}>
+      <mesh rotation={[0, 0, -0.3]} scale={[1, 0.75, 0.4]}>
+        <sphereGeometry args={[0.22, 12, 8]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.15} />
+      </mesh>
+      <mesh position={[0.18, 0.75, 0]}>
+        <cylinderGeometry args={[0.02, 0.02, 1.4, 6]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.12} />
+      </mesh>
+      {/* Flag - curved line */}
+      <mesh position={[0.32, 1.2, 0]} rotation={[0.2, 0, -0.8]} scale={[0.6, 1, 0.3]}>
+        <torusGeometry args={[0.25, 0.015, 6, 12, Math.PI * 0.7]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.1} />
+      </mesh>
+    </group>
+  );
+}
+
+/* Double beamed notes */
+function BeamedNotes({ scale = 1 }: { scale?: number }) {
+  return (
+    <group scale={scale}>
+      {/* Two note heads */}
+      <mesh position={[-0.2, 0, 0]} rotation={[0, 0, -0.3]} scale={[1, 0.75, 0.4]}>
+        <sphereGeometry args={[0.18, 12, 8]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.14} />
+      </mesh>
+      <mesh position={[0.25, 0.05, 0]} rotation={[0, 0, -0.3]} scale={[1, 0.75, 0.4]}>
+        <sphereGeometry args={[0.18, 12, 8]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.14} />
+      </mesh>
+      {/* Two stems */}
+      <mesh position={[-0.05, 0.7, 0]}>
+        <cylinderGeometry args={[0.015, 0.015, 1.2, 6]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.1} />
+      </mesh>
+      <mesh position={[0.4, 0.75, 0]}>
+        <cylinderGeometry args={[0.015, 0.015, 1.3, 6]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.1} />
+      </mesh>
+      {/* Beam connecting tops */}
+      <mesh position={[0.175, 1.3, 0]} rotation={[0, 0, 0.06]}>
+        <boxGeometry args={[0.5, 0.06, 0.03]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.1} />
+      </mesh>
+    </group>
+  );
+}
+
+/* Treble Clef - simplified recognizable shape */
+function TrebleClef({ scale = 1 }: { scale?: number }) {
+  return (
+    <group scale={scale}>
+      {/* Main curl */}
+      <mesh position={[0, 0, 0]}>
+        <torusGeometry args={[0.28, 0.025, 8, 20, Math.PI * 1.5]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.13} />
+      </mesh>
+      {/* Upper vertical line */}
+      <mesh position={[0, 0.6, 0]}>
+        <cylinderGeometry args={[0.02, 0.02, 1.2, 6]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.11} />
+      </mesh>
+      {/* Bottom small circle */}
+      <mesh position={[0.05, -0.4, 0]}>
+        <torusGeometry args={[0.1, 0.02, 6, 12]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.09} />
+      </mesh>
+      {/* Dot at bottom */}
+      <mesh position={[0.05, -0.55, 0]}>
+        <sphereGeometry args={[0.06, 8, 6]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.1} />
+      </mesh>
+    </group>
+  );
+}
+
+/* Sharp symbol: # */
+function SharpSymbol({ scale = 1 }: { scale?: number }) {
+  return (
+    <group scale={scale}>
+      {/* Two vertical lines */}
+      <mesh position={[-0.12, 0, 0]}>
+        <cylinderGeometry args={[0.018, 0.018, 0.9, 6]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.12} />
+      </mesh>
+      <mesh position={[0.12, 0, 0]}>
+        <cylinderGeometry args={[0.018, 0.018, 0.9, 6]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.12} />
+      </mesh>
+      {/* Two horizontal lines (slightly angled) */}
+      <mesh position={[0, 0.15, 0]} rotation={[0, 0, Math.PI / 2 + 0.15]}>
+        <cylinderGeometry args={[0.014, 0.014, 0.55, 6]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.1} />
+      </mesh>
+      <mesh position={[0, -0.15, 0]} rotation={[0, 0, Math.PI / 2 + 0.15]}>
+        <cylinderGeometry args={[0.014, 0.014, 0.55, 6]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.1} />
+      </mesh>
+    </group>
+  );
+}
+
+/* Flat symbol: b shape */
+function FlatSymbol({ scale = 1 }: { scale?: number }) {
+  return (
+    <group scale={scale}>
+      {/* Vertical line */}
+      <mesh position={[-0.1, 0.25, 0]}>
+        <cylinderGeometry args={[0.018, 0.018, 1, 6]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.12} />
+      </mesh>
+      {/* Rounded bump */}
+      <mesh position={[0.05, -0.15, 0]} rotation={[0, 0, -0.2]}>
+        <torusGeometry args={[0.18, 0.02, 6, 12, Math.PI]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.1} />
+      </mesh>
+    </group>
+  );
+}
+
+/* Quarter rest: zigzag */
+function QuarterRest({ scale = 1 }: { scale?: number }) {
+  return (
+    <group scale={scale}>
+      <mesh position={[0, 0.3, 0]} rotation={[0, 0, 0.6]}>
+        <cylinderGeometry args={[0.018, 0.018, 0.35, 6]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.12} />
+      </mesh>
+      <mesh position={[0.08, 0.05, 0]} rotation={[0, 0, -0.6]}>
+        <cylinderGeometry args={[0.018, 0.018, 0.35, 6]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.11} />
+      </mesh>
+      <mesh position={[0, -0.2, 0]} rotation={[0, 0, 0.6]}>
+        <cylinderGeometry args={[0.018, 0.018, 0.35, 6]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.1} />
+      </mesh>
+      {/* Small curved ending */}
+      <mesh position={[-0.08, -0.42, 0]}>
+        <torusGeometry args={[0.08, 0.015, 6, 8, Math.PI]} />
+        <meshBasicMaterial color="#c9a84c" transparent opacity={0.09} />
+      </mesh>
     </group>
   );
 }
 
 function FloatingMusicSymbols() {
   const symbols = useMemo(() => {
-    const types = ["trebleClef", "quarterNote", "eighthNote", "sharp", "flat", "rest", "doubleNote", "quarterNote", "eighthNote", "trebleClef", "sharp", "rest", "flat", "eighthNote", "doubleNote", "quarterNote", "trebleClef", "rest"];
-    return types.map((type) => ({
-      type,
+    const defs: { component: React.FC<{ scale?: number }>; scale: number }[] = [
+      { component: QuarterNote, scale: 0.7 },
+      { component: EighthNote, scale: 0.8 },
+      { component: BeamedNotes, scale: 0.6 },
+      { component: TrebleClef, scale: 0.9 },
+      { component: SharpSymbol, scale: 0.7 },
+      { component: FlatSymbol, scale: 0.75 },
+      { component: QuarterRest, scale: 0.65 },
+      { component: QuarterNote, scale: 0.5 },
+      { component: EighthNote, scale: 0.6 },
+      { component: TrebleClef, scale: 0.7 },
+      { component: SharpSymbol, scale: 0.55 },
+      { component: BeamedNotes, scale: 0.5 },
+      { component: FlatSymbol, scale: 0.6 },
+      { component: QuarterRest, scale: 0.5 },
+      { component: QuarterNote, scale: 0.65 },
+      { component: EighthNote, scale: 0.7 },
+    ];
+    return defs.map((d) => ({
+      ...d,
       position: [
         (Math.random() - 0.5) * 24,
         (Math.random() - 0.5) * 18,
         (Math.random() - 0.5) * 14,
       ] as [number, number, number],
-      scale: 0.4 + Math.random() * 1,
-      speed: 0.12 + Math.random() * 0.3,
+      speed: 0.12 + Math.random() * 0.25,
       offset: Math.random() * Math.PI * 2,
     }));
   }, []);
@@ -205,17 +309,16 @@ function FloatingMusicSymbols() {
   return (
     <>
       {symbols.map((s, i) => (
-        <MusicSymbol key={i} position={s.position} symbolType={s.type} scale={s.scale} speed={s.speed} offset={s.offset} />
+        <FloatingSymbol key={i} position={s.position} speed={s.speed} offset={s.offset}>
+          <s.component scale={s.scale} />
+        </FloatingSymbol>
       ))}
     </>
   );
 }
 
-/* ─── Background staff lines (pentagrama) ─── */
-
 function StaffLines() {
   const ref = useRef<THREE.Group>(null);
-
   useFrame((state) => {
     if (!ref.current) return;
     const t = state.clock.elapsedTime;
@@ -295,12 +398,7 @@ function WireframeRings() {
 const ParticleField = () => {
   return (
     <div className="absolute inset-0 z-0">
-      <Canvas
-        camera={{ position: [0, 0, 10], fov: 55 }}
-        dpr={[1, 1.5]}
-        gl={{ antialias: false, alpha: true }}
-        style={{ background: "transparent" }}
-      >
+      <Canvas camera={{ position: [0, 0, 10], fov: 55 }} dpr={[1, 1.5]} gl={{ antialias: false, alpha: true }} style={{ background: "transparent" }}>
         <Suspense fallback={null}>
           <MouseReactiveParticles />
           <GoldDust />
