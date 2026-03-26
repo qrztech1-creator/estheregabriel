@@ -169,7 +169,7 @@ const PricingSection = () => {
 
                 <div className="mb-8">
                   <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-4 text-center">Escolha o formato ideal</p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <div className={`grid gap-2 ${plans.length <= 3 ? 'grid-cols-1 sm:grid-cols-3 max-w-2xl mx-auto' : 'grid-cols-2 md:grid-cols-4'}`}>
                     {plans.map((p: any, i: number) => (
                       <button key={p.id || i} onClick={() => setSelectedPlan(i)}
                         className={`relative p-3 rounded-sm border text-center transition-all duration-200 ${selectedPlan === i ? "border-primary bg-primary/10 shadow-[0_0_20px_hsla(43,59%,52%,0.15)]" : "border-border hover:border-primary/40 bg-secondary/20 hover:bg-secondary/30"}`}>
@@ -187,7 +187,7 @@ const PricingSection = () => {
                   <p ref={priceRef} className="font-display text-5xl md:text-7xl font-light text-gold-gradient tabular-nums">R$ {(plan.total || 0).toLocaleString("pt-BR")}</p>
                 </div>
 
-                <div className="grid sm:grid-cols-3 gap-4 mb-6">
+                <div className="grid sm:grid-cols-3 gap-4 mb-6 max-w-3xl mx-auto">
                   <AnimatedBorderCard delay={0.1}>
                     <div className="p-5 text-center hover:bg-secondary/20 transition-colors duration-150 rounded-sm">
                       <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">Entrada de 30%</p>
