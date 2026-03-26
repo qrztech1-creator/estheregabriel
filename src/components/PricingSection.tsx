@@ -234,9 +234,9 @@ const PricingSection = () => {
                 )}
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Olá! Gostaria de aceitar a proposta musical para nosso casamento. Podemos conversar?")}`} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-3 px-8 py-4 rounded-sm bg-primary text-primary-foreground hover:shadow-[0_0_30px_hsla(43,59%,52%,0.4)] transition-all duration-150 font-ui text-xs tracking-[0.15em] uppercase group">
-                    <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-150" />Aceitar Proposta
+                  <a href={`/proposta/${proposal?.slug}/resumo`}
+                    className="inline-flex items-center gap-3 px-8 py-4 rounded-sm bg-primary text-primary-foreground hover:shadow-[0_0_30px_hsla(43,59%,52%,0.4)] transition-all duration-150 font-ui text-xs tracking-[0.15em] uppercase group font-bold">
+                    <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-150" />RESUMIR MINHA PROPOSTA
                   </a>
                   <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Olá! Vi a proposta no site e tenho algumas dúvidas. Podemos conversar?")}`} target="_blank" rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-6 py-3 rounded-sm border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all duration-150 font-ui text-xs tracking-[0.15em] uppercase">
