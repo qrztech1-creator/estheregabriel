@@ -213,7 +213,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><Label>Prazo da proposta</Label><Input type="datetime-local" value={form.proposal_deadline} onChange={e => set("proposal_deadline", e.target.value)} /></div>
             <div><Label>WhatsApp</Label><Input value={form.whatsapp_number} onChange={e => set("whatsapp_number", e.target.value)} /></div>
-            <div><Label>Responsável pelo atendimento</Label><Input value={form.created_by} onChange={e => set("created_by", e.target.value)} placeholder="Nome de quem está atendendo" /></div>
+            <div><Label>Consultor</Label><Input value={form.created_by} onChange={e => set("created_by", e.target.value)} placeholder="Nome do consultor" /></div>
             <div><Label>Slug (URL)</Label><Input value={form.slug} onChange={e => set("slug", e.target.value)} placeholder="auto-gerado se vazio" /></div>
           </div>
         )}

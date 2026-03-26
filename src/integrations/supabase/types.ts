@@ -202,6 +202,7 @@ export type Database = {
           client_email: string | null
           client_instagram: string | null
           client_phone: string | null
+          contract_file_url: string | null
           contract_status: string | null
           contract_value: number | null
           created_at: string | null
@@ -223,6 +224,7 @@ export type Database = {
           partnership_instagram: string | null
           partnership_name: string | null
           partnership_photo_url: string | null
+          payment_receipts: Json | null
           pricing_plans: Json
           process_steps: Json
           proposal_deadline: string | null
@@ -245,6 +247,7 @@ export type Database = {
           client_email?: string | null
           client_instagram?: string | null
           client_phone?: string | null
+          contract_file_url?: string | null
           contract_status?: string | null
           contract_value?: number | null
           created_at?: string | null
@@ -266,6 +269,7 @@ export type Database = {
           partnership_instagram?: string | null
           partnership_name?: string | null
           partnership_photo_url?: string | null
+          payment_receipts?: Json | null
           pricing_plans?: Json
           process_steps?: Json
           proposal_deadline?: string | null
@@ -288,6 +292,7 @@ export type Database = {
           client_email?: string | null
           client_instagram?: string | null
           client_phone?: string | null
+          contract_file_url?: string | null
           contract_status?: string | null
           contract_value?: number | null
           created_at?: string | null
@@ -309,6 +314,7 @@ export type Database = {
           partnership_instagram?: string | null
           partnership_name?: string | null
           partnership_photo_url?: string | null
+          payment_receipts?: Json | null
           pricing_plans?: Json
           process_steps?: Json
           proposal_deadline?: string | null

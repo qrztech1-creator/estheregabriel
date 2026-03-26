@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Save, ExternalLink, Copy, MessageCircle, Check } from "lucide-react";
+import { ArrowLeft, Save, ExternalLink, Copy, MessageCircle, Check, Upload, FileText, Trash2, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +24,10 @@ const contractStatuses = [
 const ProposalDetail = ({ proposalId, onBack }: Props) => {
   const [proposal, setProposal] = useState<any>(null);
   const [saving, setSaving] = useState(false);
+  const [uploadingContract, setUploadingContract] = useState(false);
+  const [uploadingReceipt, setUploadingReceipt] = useState(false);
+  const contractInputRef = useRef<HTMLInputElement>(null);
+  const receiptInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     client_email: "", client_phone: "", client_instagram: "",
     contract_value: 0, contract_status: "proposal_sent", notes: "",
@@ -63,10 +67,51 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
     }
   };
 
+  const handleContractUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !proposal) return;
+    setUploadingContract(true);
+    const path = `${proposal.slug}/contrato-${Date.now()}.${file.name.split('.').pop()}`;
+    const { error: uploadError } = await supabase.storage.from("proposal-contracts").upload(path, file, { upsert: true });
+    if (uploadError) { toast.error("Erro ao enviar contrato"); setUploadingContract(false); return; }
+    const { data: urlData } = supabase.storage.from("proposal-contracts").getPublicUrl(path);
+    await supabase.from("proposals").update({ contract_file_url: urlData.publicUrl } as any).eq("id", proposalId);
+    await loadProposal();
+    toast.success("Contrato anexado!");
+    setUploadingContract(false);
+  };
+
+  const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !proposal) return;
+    setUploadingReceipt(true);
+    const path = `${proposal.slug}/comprovante-${Date.now()}.${file.name.split('.').pop()}`;
+    const { error: uploadError } = await supabase.storage.from("proposal-contracts").upload(path, file, { upsert: true });
+    if (uploadError) { toast.error("Erro ao enviar comprovante"); setUploadingReceipt(false); return; }
+    const { data: urlData } = supabase.storage.from("proposal-contracts").getPublicUrl(path);
+    const currentReceipts = (proposal as any).payment_receipts || [];
+    const newReceipt = { url: urlData.publicUrl, name: file.name, date: new Date().toISOString() };
+    await supabase.from("proposals").update({ payment_receipts: [...currentReceipts, newReceipt] } as any).eq("id", proposalId);
+    await loadProposal();
+    toast.success("Comprovante anexado!");
+    setUploadingReceipt(false);
+  };
+
+  const removeReceipt = async (index: number) => {
+    if (!proposal) return;
+    const currentReceipts = [...((proposal as any).payment_receipts || [])];
+    currentReceipts.splice(index, 1);
+    await supabase.from("proposals").update({ payment_receipts: currentReceipts } as any).eq("id", proposalId);
+    await loadProposal();
+    toast.success("Comprovante removido!");
+  };
+
   if (!proposal) return <div className="flex justify-center py-12"><div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" /></div>;
 
   const accepted = proposal.accepted_at;
   const acceptedPlan = proposal.accepted_plan;
+  const contractFileUrl = (proposal as any).contract_file_url;
+  const paymentReceipts = (proposal as any).payment_receipts || [];
 
   return (
     <div className="space-y-6">
@@ -99,15 +144,15 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
           <p className="text-lg font-bold">{proposal.event_start_time} - {proposal.event_end_time}</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-3 sm:p-4">
-          <p className="text-xs text-muted-foreground mb-1">Atendente</p>
+          <p className="text-xs text-muted-foreground mb-1">Consultor</p>
           <p className="text-lg font-bold">{proposal.created_by || "—"}</p>
         </div>
       </div>
 
       {/* Accepted info */}
       {accepted && (
-        <div className="bg-green-500/5 border border-green-500/30 rounded-xl p-4 sm:p-6 space-y-3">
-          <div className="flex items-center gap-2 text-green-400">
+        <div className="bg-primary/5 border border-primary/30 rounded-xl p-4 sm:p-6 space-y-3">
+          <div className="flex items-center gap-2 text-primary">
             <Check className="w-5 h-5" />
             <h3 className="font-semibold text-sm">Proposta Aceita pelo Cliente</h3>
           </div>
@@ -123,6 +168,51 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
             {proposal.accepted_notes && (
               <div className="col-span-2"><span className="text-muted-foreground">Obs do cliente:</span> <strong>{proposal.accepted_notes}</strong></div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Contract & Receipts */}
+      {accepted && (
+        <div className="bg-card border border-border rounded-xl p-4 sm:p-6 space-y-4">
+          <h3 className="font-semibold text-sm flex items-center gap-2"><FileText className="w-4 h-4 text-primary" /> Contrato & Comprovantes</h3>
+
+          {/* Contract file */}
+          <div className="space-y-2">
+            <Label className="text-xs">Contrato</Label>
+            {contractFileUrl ? (
+              <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
+                <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                <a href={contractFileUrl} target="_blank" rel="noopener" className="text-sm text-primary hover:underline truncate flex-1">Contrato anexado</a>
+                <Button variant="ghost" size="sm" onClick={() => contractInputRef.current?.click()} className="text-xs">Substituir</Button>
+              </div>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => contractInputRef.current?.click()} disabled={uploadingContract} className="gap-2">
+                <Upload className="w-3.5 h-3.5" /> {uploadingContract ? "Enviando..." : "Anexar Contrato (PDF)"}
+              </Button>
+            )}
+            <input ref={contractInputRef} type="file" accept=".pdf,.doc,.docx,.jpg,.png" className="hidden" onChange={handleContractUpload} />
+          </div>
+
+          {/* Payment receipts */}
+          <div className="space-y-2">
+            <Label className="text-xs">Comprovantes de Pagamento</Label>
+            {paymentReceipts.length > 0 && (
+              <div className="space-y-2">
+                {paymentReceipts.map((r: any, i: number) => (
+                  <div key={i} className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
+                    <Receipt className="w-4 h-4 text-primary flex-shrink-0" />
+                    <a href={r.url} target="_blank" rel="noopener" className="text-xs text-primary hover:underline truncate flex-1">{r.name}</a>
+                    <span className="text-[10px] text-muted-foreground flex-shrink-0">{new Date(r.date).toLocaleDateString("pt-BR")}</span>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeReceipt(i)}><Trash2 className="w-3 h-3 text-destructive" /></Button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <Button variant="outline" size="sm" onClick={() => receiptInputRef.current?.click()} disabled={uploadingReceipt} className="gap-2">
+              <Upload className="w-3.5 h-3.5" /> {uploadingReceipt ? "Enviando..." : "Adicionar Comprovante"}
+            </Button>
+            <input ref={receiptInputRef} type="file" accept=".pdf,.jpg,.png,.jpeg" className="hidden" onChange={handleReceiptUpload} />
           </div>
         </div>
       )}
