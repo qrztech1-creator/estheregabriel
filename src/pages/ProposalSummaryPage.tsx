@@ -45,6 +45,16 @@ const ProposalSummaryPage = () => {
     setSelectedExtras(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const getSummaryExtrasForAccept = (dbExtras: any[], prop: any) => {
+    const items = dbExtras.map((e: any) => ({ ...e, price: 0 }));
+    items.push({ icon: "Square", title: "Palco 4×3", description: "Estrutura de palco profissional 4×3 metros para a banda.", price: 1200, details: ["Montagem e desmontagem inclusa", "Estrutura segura e resistente"] });
+    if (prop.extras_bundle_price && dbExtras.length > 0) {
+      const perItem = Number(prop.extras_bundle_price) / dbExtras.length;
+      items.forEach((it: any, i: number) => { if (i < dbExtras.length) it.price = perItem; });
+    }
+    return items;
+  };
+
   const handleAccept = async () => {
     if (!proposal) return;
     if (paymentTypes.length === 0) { toast.error("Selecione pelo menos uma forma de pagamento"); return; }
