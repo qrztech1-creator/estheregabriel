@@ -168,7 +168,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
     }
   };
 
-  const Section = ({ id, title, children }: { id: string; title: string; children: React.ReactNode }) => (
+  const renderSection = (id: string, title: string, children: React.ReactNode) => (
     <div className="border border-border rounded-lg overflow-hidden">
       <button onClick={() => toggle(id)} className="w-full p-4 flex justify-between items-center bg-card hover:bg-secondary/20 transition-colors">
         <h3 className="font-medium text-sm">{title}</h3>
