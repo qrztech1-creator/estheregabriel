@@ -83,7 +83,7 @@ const SongsSection = () => {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-6 gap-2">
           {songs.map((song: any, index: number) => (
             <a key={`${song.artist}-${song.title}`} ref={(el) => { cardsRef.current[index] = el; }}
               href={`https://www.youtube.com/watch?v=${song.videoId}`} target="_blank" rel="noopener noreferrer"
