@@ -189,7 +189,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><Label>Prazo da proposta</Label><Input type="datetime-local" value={form.proposal_deadline} onChange={e => set("proposal_deadline", e.target.value)} /></div>
             <div><Label>WhatsApp</Label><Input value={form.whatsapp_number} onChange={e => set("whatsapp_number", e.target.value)} /></div>
-            <div><Label>Responsável pelo atendimento</Label><Input value={form.created_by} onChange={e => set("created_by", e.target.value)} placeholder="Nome do atendente" /></div>
+            <div><Label>Consultor</Label><Input value={form.created_by} onChange={e => set("created_by", e.target.value)} placeholder="Nome do consultor" /></div>
             <div><Label>Slug (URL) — somente leitura</Label><Input value={form.slug} disabled className="opacity-60" /></div>
           </div>
         )}

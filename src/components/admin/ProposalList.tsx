@@ -59,7 +59,7 @@ const ProposalList = ({ onView, onEdit, onDetail }: Props) => {
                     <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(p.event_date).toLocaleDateString("pt-BR")}</span>
                     <span className="truncate">{p.venue_name}</span>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${status.className}`}>{status.label}</span>
-                    {p.created_by && <span className="text-[10px] text-muted-foreground">por {p.created_by}</span>}
+                    {p.created_by && <span className="text-[10px] text-muted-foreground">Consultor: {p.created_by}</span>}
                     {p.accepted_at && <span className="text-[10px] text-green-400">✓ Aceita</span>}
                   </div>
                 </div>

@@ -99,7 +99,7 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
           <p className="text-lg font-bold">{proposal.event_start_time} - {proposal.event_end_time}</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-3 sm:p-4">
-          <p className="text-xs text-muted-foreground mb-1">Atendente</p>
+          <p className="text-xs text-muted-foreground mb-1">Consultor</p>
           <p className="text-lg font-bold">{proposal.created_by || "—"}</p>
         </div>
       </div>
