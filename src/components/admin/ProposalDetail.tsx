@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Save, ExternalLink, Copy, MessageCircle, Check, Upload, FileText, Trash2, Receipt } from "lucide-react";
+import { ArrowLeft, Save, ExternalLink, Copy, Check, Upload, FileText, Trash2, Receipt, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 interface Props {
   proposalId: string;
   onBack: () => void;
+  onHistory?: (id: string) => void;
 }
 
 const contractStatuses = [
@@ -21,7 +22,9 @@ const contractStatuses = [
   { value: "rejected", label: "Recusada" },
 ];
 
-const ProposalDetail = ({ proposalId, onBack }: Props) => {
+const formatBRL = (val: number) => `R$ ${val.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+
+const ProposalDetail = ({ proposalId, onBack, onHistory }: Props) => {
   const [proposal, setProposal] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [uploadingContract, setUploadingContract] = useState(false);
@@ -30,7 +33,7 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
   const receiptInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     client_email: "", client_phone: "", client_instagram: "",
-    contract_value: 0, contract_status: "proposal_sent", notes: "",
+    contract_status: "proposal_sent", notes: "",
   });
 
   useEffect(() => { loadProposal(); }, [proposalId]);
@@ -42,7 +45,7 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
       const d = data as any;
       setForm({
         client_email: d.client_email || "", client_phone: d.client_phone || "",
-        client_instagram: d.client_instagram || "", contract_value: Number(d.contract_value) || 0,
+        client_instagram: d.client_instagram || "",
         contract_status: d.contract_status || "proposal_sent", notes: d.notes || "",
       });
     }
@@ -50,13 +53,33 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
 
   const save = async () => {
     setSaving(true);
+    const oldData = {
+      client_email: proposal.client_email, client_phone: proposal.client_phone,
+      client_instagram: proposal.client_instagram, contract_status: proposal.contract_status, notes: proposal.notes,
+    };
+    const changes: Record<string, { from: any; to: any }> = {};
+    if (form.client_email !== (oldData.client_email || "")) changes.client_email = { from: oldData.client_email, to: form.client_email };
+    if (form.client_phone !== (oldData.client_phone || "")) changes.client_phone = { from: oldData.client_phone, to: form.client_phone };
+    if (form.client_instagram !== (oldData.client_instagram || "")) changes.client_instagram = { from: oldData.client_instagram, to: form.client_instagram };
+    if (form.contract_status !== (oldData.contract_status || "proposal_sent")) changes.contract_status = { from: oldData.contract_status, to: form.contract_status };
+    if (form.notes !== (oldData.notes || "")) changes.notes = { from: oldData.notes, to: form.notes };
+
     const { error } = await supabase.from("proposals").update({
       client_email: form.client_email || null, client_phone: form.client_phone || null,
-      client_instagram: form.client_instagram || null, contract_value: form.contract_value || 0,
+      client_instagram: form.client_instagram || null,
       contract_status: form.contract_status, notes: form.notes || null,
     }).eq("id", proposalId);
-    if (error) toast.error("Erro ao salvar");
-    else toast.success("Salvo com sucesso!");
+
+    if (error) { toast.error("Erro ao salvar"); }
+    else {
+      if (Object.keys(changes).length > 0) {
+        await supabase.from("proposal_audit_log" as any).insert({
+          proposal_id: proposalId, actor_type: "admin", action: "updated_details", changes,
+        });
+      }
+      toast.success("Salvo com sucesso!");
+      await loadProposal();
+    }
     setSaving(false);
   };
 
@@ -76,6 +99,10 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
     if (uploadError) { toast.error("Erro ao enviar contrato"); setUploadingContract(false); return; }
     const { data: urlData } = supabase.storage.from("proposal-contracts").getPublicUrl(path);
     await supabase.from("proposals").update({ contract_file_url: urlData.publicUrl } as any).eq("id", proposalId);
+    await supabase.from("proposal_audit_log" as any).insert({
+      proposal_id: proposalId, actor_type: "admin", action: "uploaded_contract",
+      changes: { file: file.name },
+    });
     await loadProposal();
     toast.success("Contrato anexado!");
     setUploadingContract(false);
@@ -92,6 +119,10 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
     const currentReceipts = (proposal as any).payment_receipts || [];
     const newReceipt = { url: urlData.publicUrl, name: file.name, date: new Date().toISOString() };
     await supabase.from("proposals").update({ payment_receipts: [...currentReceipts, newReceipt] } as any).eq("id", proposalId);
+    await supabase.from("proposal_audit_log" as any).insert({
+      proposal_id: proposalId, actor_type: "admin", action: "uploaded_receipt",
+      changes: { file: file.name },
+    });
     await loadProposal();
     toast.success("Comprovante anexado!");
     setUploadingReceipt(false);
@@ -100,8 +131,13 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
   const removeReceipt = async (index: number) => {
     if (!proposal) return;
     const currentReceipts = [...((proposal as any).payment_receipts || [])];
+    const removed = currentReceipts[index];
     currentReceipts.splice(index, 1);
     await supabase.from("proposals").update({ payment_receipts: currentReceipts } as any).eq("id", proposalId);
+    await supabase.from("proposal_audit_log" as any).insert({
+      proposal_id: proposalId, actor_type: "admin", action: "removed_receipt",
+      changes: { file: removed?.name },
+    });
     await loadProposal();
     toast.success("Comprovante removido!");
   };
@@ -112,6 +148,7 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
   const acceptedPlan = proposal.accepted_plan;
   const contractFileUrl = (proposal as any).contract_file_url;
   const paymentReceipts = (proposal as any).payment_receipts || [];
+  const contractValue = Number(proposal.contract_value) || 0;
 
   return (
     <div className="space-y-6">
@@ -123,7 +160,12 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
             <p className="text-xs text-muted-foreground">{new Date(proposal.event_date).toLocaleDateString("pt-BR")} — {proposal.venue_name}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {onHistory && (
+            <Button variant="outline" size="sm" onClick={() => onHistory(proposalId)} className="gap-1.5">
+              <History className="w-3.5 h-3.5" /> Histórico
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={copyLink} className="gap-1.5"><Copy className="w-3.5 h-3.5" /> Link</Button>
           <Button variant="outline" size="sm" asChild><a href={`/proposta/${proposal.slug}`} target="_blank"><ExternalLink className="w-3.5 h-3.5 mr-1.5" /> Abrir</a></Button>
         </div>
@@ -140,8 +182,8 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
           <p className="text-lg font-bold">{proposal.view_count || 0}</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-3 sm:p-4">
-          <p className="text-xs text-muted-foreground mb-1">Horário</p>
-          <p className="text-lg font-bold">{proposal.event_start_time} - {proposal.event_end_time}</p>
+          <p className="text-xs text-muted-foreground mb-1">Valor do Contrato</p>
+          <p className="text-lg font-bold text-primary">{contractValue > 0 ? formatBRL(contractValue) : "—"}</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-3 sm:p-4">
           <p className="text-xs text-muted-foreground mb-1">Consultor</p>
@@ -151,7 +193,7 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
 
       {/* Accepted info */}
       {accepted && (
-        <div className="bg-primary/5 border border-primary/30 rounded-xl p-4 sm:p-6 space-y-3">
+        <div className="bg-primary/5 border border-primary/30 rounded-xl p-4 sm:p-6 space-y-4">
           <div className="flex items-center gap-2 text-primary">
             <Check className="w-5 h-5" />
             <h3 className="font-semibold text-sm">Proposta Aceita pelo Cliente</h3>
@@ -161,8 +203,21 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
             {acceptedPlan && (
               <>
                 <div><span className="text-muted-foreground">Pacote:</span> <strong>{acceptedPlan.label}</strong></div>
-                <div><span className="text-muted-foreground">Valor:</span> <strong>R$ {(acceptedPlan.total || 0).toLocaleString("pt-BR")}</strong></div>
-                <div><span className="text-muted-foreground">Pagamento:</span> <strong>{acceptedPlan.payment_method || proposal.accepted_payment_method}</strong></div>
+                <div><span className="text-muted-foreground">Valor do Pacote:</span> <strong>{formatBRL(acceptedPlan.total || 0)}</strong></div>
+                <div><span className="text-muted-foreground">Condição:</span> <strong>{acceptedPlan.payment_method}</strong></div>
+                {acceptedPlan.payment_types && acceptedPlan.payment_types.length > 0 && (
+                  <div><span className="text-muted-foreground">Forma(s):</span> <strong>{acceptedPlan.payment_types.join(", ")}</strong></div>
+                )}
+                {acceptedPlan.extras_total > 0 && (
+                  <div><span className="text-muted-foreground">Opcionais:</span> <strong>{formatBRL(acceptedPlan.extras_total)}</strong></div>
+                )}
+                {acceptedPlan.extras_chosen && acceptedPlan.extras_chosen.length > 0 && (
+                  <div className="col-span-2">
+                    <span className="text-muted-foreground">Itens opcionais:</span>{" "}
+                    <strong>{acceptedPlan.extras_chosen.map((e: any) => e.title).join(", ")}</strong>
+                  </div>
+                )}
+                <div><span className="text-muted-foreground">Valor Final:</span> <strong className="text-primary text-base">{formatBRL(acceptedPlan.final_value || acceptedPlan.total || 0)}</strong></div>
               </>
             )}
             {proposal.accepted_notes && (
@@ -176,8 +231,6 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
       {accepted && (
         <div className="bg-card border border-border rounded-xl p-4 sm:p-6 space-y-4">
           <h3 className="font-semibold text-sm flex items-center gap-2"><FileText className="w-4 h-4 text-primary" /> Contrato & Comprovantes</h3>
-
-          {/* Contract file */}
           <div className="space-y-2">
             <Label className="text-xs">Contrato</Label>
             {contractFileUrl ? (
@@ -193,8 +246,6 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
             )}
             <input ref={contractInputRef} type="file" accept=".pdf,.doc,.docx,.jpg,.png" className="hidden" onChange={handleContractUpload} />
           </div>
-
-          {/* Payment receipts */}
           <div className="space-y-2">
             <Label className="text-xs">Comprovantes de Pagamento</Label>
             {paymentReceipts.length > 0 && (
@@ -219,12 +270,11 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
 
       {/* Organize Section */}
       <div className="bg-card border border-border rounded-xl p-4 sm:p-6 space-y-4">
-        <h3 className="font-semibold text-sm flex items-center gap-2"><MessageCircle className="w-4 h-4 text-primary" /> Dados do Cliente & Contrato</h3>
+        <h3 className="font-semibold text-sm">Dados do Cliente & Contrato</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><Label className="text-xs">Email</Label><Input value={form.client_email} onChange={e => setForm(f => ({ ...f, client_email: e.target.value }))} placeholder="email@exemplo.com" /></div>
           <div><Label className="text-xs">Telefone</Label><Input value={form.client_phone} onChange={e => setForm(f => ({ ...f, client_phone: e.target.value }))} placeholder="(27) 99999-9999" /></div>
           <div><Label className="text-xs">Instagram</Label><Input value={form.client_instagram} onChange={e => setForm(f => ({ ...f, client_instagram: e.target.value }))} placeholder="@instagram" /></div>
-          <div><Label className="text-xs">Valor do Contrato (R$)</Label><Input type="number" value={form.contract_value} onChange={e => setForm(f => ({ ...f, contract_value: Number(e.target.value) }))} /></div>
           <div>
             <Label className="text-xs">Status do Contrato</Label>
             <select value={form.contract_status} onChange={e => setForm(f => ({ ...f, contract_status: e.target.value }))} className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">

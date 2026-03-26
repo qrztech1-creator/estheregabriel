@@ -2,14 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Check, ArrowLeft, Send, MessageCircle } from "lucide-react";
+import { Check, ArrowLeft, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import logo from "@/assets/logo-homemusic.png";
 
 const formatBRL = (val: number) => `R$ ${val.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
-
-const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
 const ProposalSummaryPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -18,9 +17,11 @@ const ProposalSummaryPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedPlanIdx, setSelectedPlanIdx] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("entry50");
+  const [paymentTypes, setPaymentTypes] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [accepted, setAccepted] = useState(false);
+  const [selectedExtras, setSelectedExtras] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!slug) { navigate("/"); return; }
@@ -36,8 +37,17 @@ const ProposalSummaryPage = () => {
       });
   }, [slug]);
 
+  const togglePaymentType = (type: string) => {
+    setPaymentTypes(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]);
+  };
+
+  const toggleExtra = (key: string) => {
+    setSelectedExtras(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const handleAccept = async () => {
     if (!proposal) return;
+    if (paymentTypes.length === 0) { toast.error("Selecione pelo menos uma forma de pagamento"); return; }
     setSubmitting(true);
     const plans = proposal.pricing_plans || [];
     const plan = plans[selectedPlanIdx];
@@ -47,17 +57,54 @@ const ProposalSummaryPage = () => {
       aVista: "À Vista",
     };
 
+    const extras = proposal.optional_extras || [];
+    const chosenExtras = extras.filter((_: any, i: number) => selectedExtras[`extra-${i}`]);
+    const extrasTotal = chosenExtras.length > 0 && proposal.extras_bundle_price
+      ? Number(proposal.extras_bundle_price)
+      : 0;
+
+    const paymentValues = getPaymentValues(plan);
+    const planValue = paymentValues[paymentMethod]?.value || plan.total || 0;
+    const finalValue = planValue + extrasTotal;
+
+    const acceptedPlanData = {
+      ...plan,
+      payment_method: paymentLabels[paymentMethod] || paymentMethod,
+      payment_types: paymentTypes,
+      extras_chosen: chosenExtras,
+      extras_total: extrasTotal,
+      final_value: finalValue,
+    };
+
     const { error } = await supabase.from("proposals").update({
       accepted_at: new Date().toISOString(),
-      accepted_plan: { ...plan, payment_method: paymentLabels[paymentMethod] || paymentMethod } as any,
+      accepted_plan: acceptedPlanData as any,
       accepted_payment_method: paymentLabels[paymentMethod] || paymentMethod,
       accepted_notes: notes || null,
+      accepted_extras: chosenExtras as any,
+      accepted_payment_types: paymentTypes,
       contract_status: "accepted",
+      contract_value: finalValue,
     }).eq("id", proposal.id);
 
     if (error) {
       toast.error("Erro ao confirmar proposta");
     } else {
+      // Log the acceptance
+      await supabase.from("proposal_audit_log" as any).insert({
+        proposal_id: proposal.id,
+        actor_type: "client",
+        actor_name: `${proposal.bride_name} & ${proposal.groom_name}`,
+        action: "accepted",
+        changes: {
+          plan: plan.label,
+          payment_discount: paymentLabels[paymentMethod],
+          payment_types: paymentTypes,
+          extras: chosenExtras.map((e: any) => e.title),
+          final_value: finalValue,
+          notes: notes || null,
+        },
+      });
       setAccepted(true);
       toast.success("Proposta confirmada com sucesso!");
     }
@@ -75,14 +122,27 @@ const ProposalSummaryPage = () => {
   const plans = proposal.pricing_plans || [];
   const plan = plans[selectedPlanIdx] || {};
   const eventDate = new Date(proposal.event_date + "T12:00:00");
+  const extras = proposal.optional_extras || [];
 
-  const paymentValues: Record<string, { value: number; savings: number }> = {
-    entry30: { value: plan.entry30 || 0, savings: plan.savings30 || 0 },
-    entry50: { value: plan.entry50 || 0, savings: plan.savings50 || 0 },
-    aVista: { value: plan.aVista || 0, savings: plan.savingsAVista || 0 },
-  };
+  const getPaymentValues = (p: any): Record<string, { value: number; savings: number }> => ({
+    entry30: { value: p.entry30 || 0, savings: p.savings30 || 0 },
+    entry50: { value: p.entry50 || 0, savings: p.savings50 || 0 },
+    aVista: { value: p.aVista || 0, savings: p.savingsAVista || 0 },
+  });
 
+  const paymentValues = getPaymentValues(plan);
   const selected = paymentValues[paymentMethod] || paymentValues.entry50;
+
+  const extrasTotal = extras.some((_: any, i: number) => selectedExtras[`extra-${i}`]) && proposal.extras_bundle_price
+    ? Number(proposal.extras_bundle_price) : 0;
+  const grandTotal = selected.value + extrasTotal;
+
+  const paymentTypeOptions = [
+    { key: "pix", label: "Pix" },
+    { key: "dinheiro", label: "Dinheiro" },
+    { key: "ted", label: "TED / Transferência" },
+    { key: "credito", label: "Cartão de Crédito", warning: "Taxas aplicáveis — consulte o consultor" },
+  ];
 
   if (accepted) {
     return (
@@ -124,12 +184,12 @@ const ProposalSummaryPage = () => {
         {/* Event details */}
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
           <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Detalhes do Evento</h2>
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div><span className="text-muted-foreground">Data:</span> <strong>{eventDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}</strong></div>
             <div><span className="text-muted-foreground">Local:</span> <strong>{proposal.venue_name}</strong></div>
             <div><span className="text-muted-foreground">Horário:</span> <strong>{proposal.event_start_time} — {proposal.event_end_time}</strong></div>
             <div><span className="text-muted-foreground">Convidados:</span> <strong>{proposal.guest_count}</strong></div>
-            <div className="col-span-2"><span className="text-muted-foreground">Duração:</span> <strong>{proposal.duration_label}</strong></div>
+            <div className="col-span-1 sm:col-span-2"><span className="text-muted-foreground">Duração:</span> <strong>{proposal.duration_label}</strong></div>
           </div>
         </div>
 
@@ -152,9 +212,39 @@ const ProposalSummaryPage = () => {
           </div>
         </div>
 
-        {/* Payment method */}
+        {/* Optional Extras (LED / Pista) */}
+        {extras.length > 0 && (
+          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+            <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">
+              {proposal.extras_bundle_title || "Opcionais"}
+            </h2>
+            <div className="grid gap-3">
+              {extras.map((extra: any, i: number) => (
+                <button key={i} onClick={() => toggleExtra(`extra-${i}`)}
+                  className={`p-4 rounded-lg border text-left transition-all ${selectedExtras[`extra-${i}`] ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+                  <div className="flex items-start gap-3">
+                    <div className={`w-5 h-5 rounded border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${selectedExtras[`extra-${i}`] ? "bg-primary border-primary" : "border-muted-foreground/40"}`}>
+                      {selectedExtras[`extra-${i}`] && <Check className="w-3 h-3 text-primary-foreground" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{extra.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{extra.description}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+            {proposal.extras_bundle_price && (
+              <p className="text-sm text-center text-muted-foreground">
+                Valor do pacote: <strong className="text-foreground">{formatBRL(Number(proposal.extras_bundle_price))}</strong>
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Payment discount */}
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-          <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Forma de Pagamento</h2>
+          <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Condição de Pagamento</h2>
           <div className="grid gap-2">
             {[
               { key: "entry30", label: "Entrada de 30%", desc: "4% de desconto" },
@@ -178,19 +268,43 @@ const ProposalSummaryPage = () => {
           </div>
         </div>
 
+        {/* Payment type (checkbox) */}
+        <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+          <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Forma de Pagamento</h2>
+          <p className="text-xs text-muted-foreground">Selecione como pretende realizar o pagamento:</p>
+          <div className="grid gap-3">
+            {paymentTypeOptions.map(opt => (
+              <label key={opt.key}
+                className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${paymentTypes.includes(opt.key) ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+                <Checkbox checked={paymentTypes.includes(opt.key)} onCheckedChange={() => togglePaymentType(opt.key)} className="mt-0.5" />
+                <div>
+                  <p className="font-medium text-sm">{opt.label}</p>
+                  {opt.warning && (
+                    <p className="text-[11px] text-yellow-500 mt-0.5">⚠️ {opt.warning}</p>
+                  )}
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
         {/* Total */}
-        <div className="bg-card border border-primary/30 rounded-xl p-6 text-center space-y-2">
+        <div className="bg-card border border-primary/30 rounded-xl p-6 text-center space-y-3">
           <p className="text-sm text-muted-foreground">Valor final com desconto</p>
-          <p className="font-display text-4xl text-foreground">{formatBRL(selected.value)}</p>
+          <div className="space-y-1">
+            <p className="text-sm text-muted-foreground">Pacote: {formatBRL(selected.value)}</p>
+            {extrasTotal > 0 && (
+              <p className="text-sm text-muted-foreground">Opcionais: {formatBRL(extrasTotal)}</p>
+            )}
+          </div>
+          <p className="font-display text-4xl text-foreground">{formatBRL(grandTotal)}</p>
           <p className="text-xs text-primary">Economia de {formatBRL(selected.savings)}</p>
         </div>
 
         {/* Notes */}
         <div className="bg-card border border-border rounded-xl p-6 space-y-3">
           <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Observações (opcional)</h2>
-          <p className="text-xs text-muted-foreground">Informe como pretende realizar o pagamento (Pix, dinheiro, etc.) ou qualquer outra observação.</p>
-          <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Ex: Pagamento será via Pix..." rows={3} />
-          <p className="text-[10px] text-muted-foreground">* Para pagamento via cartão de crédito, consulte a taxa com o atendente.</p>
+          <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Qualquer observação adicional..." rows={3} />
         </div>
 
         {/* Accept */}
