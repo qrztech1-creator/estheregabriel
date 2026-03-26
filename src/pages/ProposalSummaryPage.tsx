@@ -58,14 +58,14 @@ const ProposalSummaryPage = () => {
     };
 
     const extras = proposal.optional_extras || [];
-    const chosenExtras = extras.filter((_: any, i: number) => selectedExtras[`extra-${i}`]);
-    const extrasTotal = chosenExtras.length > 0 && proposal.extras_bundle_price
-      ? Number(proposal.extras_bundle_price)
-      : 0;
+    const summaryExtras = getSummaryExtras(extras, proposal);
+    const chosenExtras = summaryExtras.filter((_: any, i: number) => selectedExtras[`extra-${i}`]);
+    const chosenExtrasTotal = chosenExtras.reduce((sum: number, e: any) => sum + (e.price || 0), 0);
 
-    const paymentValues = getPaymentValues(plan);
-    const planValue = paymentValues[paymentMethod]?.value || plan.total || 0;
-    const finalValue = planValue + extrasTotal;
+    const baseTotal = (plan.total || 0) + chosenExtrasTotal;
+    const discountRates: Record<string, number> = { entry30: 0.04, entry50: 0.10, aVista: 0.125 };
+    const rate = discountRates[paymentMethod] || 0;
+    const finalValue = +(baseTotal * (1 - rate)).toFixed(2);
 
     const acceptedPlanData = {
       ...plan,
@@ -124,18 +124,27 @@ const ProposalSummaryPage = () => {
   const eventDate = new Date(proposal.event_date + "T12:00:00");
   const extras = proposal.optional_extras || [];
 
-  const getPaymentValues = (p: any): Record<string, { value: number; savings: number }> => ({
-    entry30: { value: p.entry30 || 0, savings: p.savings30 || 0 },
-    entry50: { value: p.entry50 || 0, savings: p.savings50 || 0 },
-    aVista: { value: p.aVista || 0, savings: p.savingsAVista || 0 },
-  });
+  const getSummaryExtras = (dbExtras: any[], prop: any) => {
+    const items = dbExtras.map((e: any) => ({ ...e, price: 0 }));
+    // Add palco option
+    items.push({ icon: "Square", title: "Palco 4×3", description: "Estrutura de palco profissional 4×3 metros para a banda.", price: 1200, details: ["Montagem e desmontagem inclusa", "Estrutura segura e resistente"] });
+    // Distribute bundle price across original extras
+    if (prop.extras_bundle_price && dbExtras.length > 0) {
+      const perItem = Number(prop.extras_bundle_price) / dbExtras.length;
+      items.forEach((it: any, i: number) => { if (i < dbExtras.length) it.price = perItem; });
+    }
+    return items;
+  };
 
-  const paymentValues = getPaymentValues(plan);
-  const selected = paymentValues[paymentMethod] || paymentValues.entry50;
+  const summaryExtras = getSummaryExtras(extras, proposal);
 
-  const extrasTotal = extras.some((_: any, i: number) => selectedExtras[`extra-${i}`]) && proposal.extras_bundle_price
-    ? Number(proposal.extras_bundle_price) : 0;
-  const grandTotal = selected.value + extrasTotal;
+  const discountRates: Record<string, number> = { entry30: 0.04, entry50: 0.10, aVista: 0.125 };
+  const rate = discountRates[paymentMethod] || 0;
+
+  const chosenExtrasTotal = summaryExtras.reduce((sum: number, e: any, i: number) => sum + (selectedExtras[`extra-${i}`] ? (e.price || 0) : 0), 0);
+  const baseTotal = (plan.total || 0) + chosenExtrasTotal;
+  const grandTotal = +(baseTotal * (1 - rate)).toFixed(2);
+  const totalSavings = +(baseTotal * rate).toFixed(2);
 
   const paymentTypeOptions = [
     { key: "pix", label: "Pix" },
