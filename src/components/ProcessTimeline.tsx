@@ -10,18 +10,71 @@ gsap.registerPlugin(ScrollTrigger);
 
 const iconMap: Record<string, any> = { CalendarDays, ListMusic, Users, Mic2, PartyPopper, CheckCircle2 };
 
-const defaultSteps = [
-  { icon: "CheckCircle2", title: "Fechamento do Contrato", date: "Março 2026", description: "Assinatura e entrada. Definição das preferências iniciais de repertório.", active: true },
-  { icon: "ListMusic", title: "Definição de Repertório", date: "Abril — Junho 2026", description: "Vocês montam a playlist do DJ e sugerem músicas para a banda." },
-  { icon: "Users", title: "Reunião de Alinhamento", date: "Setembro 2026", description: "Encontro para alinhar detalhes finais: setlist, ordem das músicas, momentos especiais." },
-  { icon: "Mic2", title: "Ensaio & Preparação", date: "Fevereiro 2027", description: "Banda ensaia o repertório final." },
-  { icon: "CalendarDays", title: "Passagem de Som", date: "13/03/2027 — Manhã", description: "Montagem da estrutura, passagem de som e teste de iluminação." },
-  { icon: "PartyPopper", title: "O Grande Dia", date: "13/03/2027 — 18:00", description: "Tudo pronto. A noite perfeita começa. Hora de celebrar!" },
-];
+const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+function computeDynamicDates(eventDate: string, proposalDeadline: string | null) {
+  const event = new Date(eventDate + "T12:00:00");
+  const eventMonth = event.getMonth();
+  const eventYear = event.getFullYear();
+  const eventDay = event.getDate();
+
+  // Deadline month (or 6 months before event as fallback)
+  let deadlineDate: Date;
+  if (proposalDeadline) {
+    deadlineDate = new Date(proposalDeadline);
+  } else {
+    deadlineDate = new Date(eventYear, eventMonth - 6, 1);
+  }
+  const dlMonth = deadlineDate.getMonth();
+  const dlYear = deadlineDate.getFullYear();
+
+  // Month 2-4 after deadline
+  const m2 = new Date(dlYear, dlMonth + 1, 1);
+  const m4 = new Date(dlYear, dlMonth + 3, 1);
+
+  // Month 6 after deadline
+  const m6 = new Date(dlYear, dlMonth + 5, 1);
+
+  // Month before event
+  const prevMonth = new Date(eventYear, eventMonth - 1, 1);
+
+  const fmt = (d: Date) => `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+  const fmtRange = (a: Date, b: Date) => {
+    if (a.getFullYear() === b.getFullYear()) return `${monthNames[a.getMonth()]} — ${monthNames[b.getMonth()]} ${a.getFullYear()}`;
+    return `${fmt(a)} — ${fmt(b)}`;
+  };
+  const fmtDay = (d: Date) => `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+
+  return [
+    { icon: "CheckCircle2", title: "Fechamento do Contrato", date: fmt(deadlineDate), description: "Assinatura e entrada. Definição das preferências iniciais de repertório.", active: true },
+    { icon: "ListMusic", title: "Definição de Repertório", date: fmtRange(m2, m4), description: "Vocês montam a playlist do DJ e sugerem músicas para a banda. Troca de ideias e refinamentos." },
+    { icon: "Users", title: "Reunião de Alinhamento", date: fmt(m6), description: "Encontro para alinhar detalhes finais: setlist, ordem das músicas, definição de momentos especiais." },
+    { icon: "Mic2", title: "Ensaio & Preparação", date: fmt(prevMonth), description: "Banda ensaia o repertório final. Ajustes de última hora no setlist." },
+    { icon: "CalendarDays", title: "Passagem de Som", date: `${fmtDay(event)} — Manhã`, description: "Montagem da estrutura, passagem de som e teste de iluminação no local." },
+    { icon: "PartyPopper", title: "O Grande Dia", date: fmtDay(event), description: "Tudo pronto conforme o sonho de vocês. A noite perfeita começa. Hora de celebrar!" },
+  ];
+}
 
 const ProcessTimeline = () => {
   const proposal = useProposal();
-  const steps = (proposal?.process_steps?.length ? proposal.process_steps : defaultSteps) as any[];
+
+  // Use saved steps if they have real dates, otherwise compute dynamically
+  let steps: any[];
+  if (proposal?.process_steps?.length) {
+    const saved = proposal.process_steps as any[];
+    // Check if steps have generic "Mês 1" style dates — if so, compute dynamic
+    const hasGenericDates = saved.some((s: any) => /^Mês\s/i.test(s.date || ""));
+    if (hasGenericDates && proposal.event_date) {
+      steps = computeDynamicDates(proposal.event_date, proposal.proposal_deadline);
+    } else {
+      steps = saved;
+    }
+  } else if (proposal?.event_date) {
+    steps = computeDynamicDates(proposal.event_date, proposal.proposal_deadline);
+  } else {
+    steps = computeDynamicDates("2027-03-13", null);
+  }
+
   const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -54,7 +107,7 @@ const ProcessTimeline = () => {
           {steps.map((step: any, index: number) => {
             const Icon = iconMap[step.icon] || CheckCircle2;
             return (
-              <div key={step.title} className="relative flex items-start gap-6 mb-8 last:mb-0">
+              <div key={index} className="relative flex items-start gap-6 mb-8 last:mb-0">
                 <div className="relative z-10 flex-shrink-0" style={{ perspective: "600px" }}>
                   <div ref={(el) => { nodeRefs.current[index] = el; }}
                     className={`w-16 h-16 rounded-full flex items-center justify-center border ${step.active ? "bg-primary/20 border-primary gold-glow" : "bg-secondary border-border"}`}

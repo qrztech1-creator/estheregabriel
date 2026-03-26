@@ -27,6 +27,11 @@ export interface ProposalData {
   extras_bundle_title: string | null;
   extras_bundle_price: number | null;
   audio_url: string | null;
+  created_by: string | null;
+  accepted_at: string | null;
+  accepted_plan: any | null;
+  accepted_payment_method: string | null;
+  accepted_notes: string | null;
 }
 
 const ProposalContext = createContext<ProposalData | null>(null);

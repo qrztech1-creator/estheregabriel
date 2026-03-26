@@ -193,6 +193,10 @@ export type Database = {
       }
       proposals: {
         Row: {
+          accepted_at: string | null
+          accepted_notes: string | null
+          accepted_payment_method: string | null
+          accepted_plan: Json | null
           audio_url: string | null
           bride_name: string
           client_email: string | null
@@ -201,6 +205,7 @@ export type Database = {
           contract_status: string | null
           contract_value: number | null
           created_at: string | null
+          created_by: string | null
           duration_label: string | null
           event_date: string
           event_end_time: string
@@ -231,6 +236,10 @@ export type Database = {
           whatsapp_number: string
         }
         Insert: {
+          accepted_at?: string | null
+          accepted_notes?: string | null
+          accepted_payment_method?: string | null
+          accepted_plan?: Json | null
           audio_url?: string | null
           bride_name: string
           client_email?: string | null
@@ -239,6 +248,7 @@ export type Database = {
           contract_status?: string | null
           contract_value?: number | null
           created_at?: string | null
+          created_by?: string | null
           duration_label?: string | null
           event_date: string
           event_end_time?: string
@@ -269,6 +279,10 @@ export type Database = {
           whatsapp_number?: string
         }
         Update: {
+          accepted_at?: string | null
+          accepted_notes?: string | null
+          accepted_payment_method?: string | null
+          accepted_plan?: Json | null
           audio_url?: string | null
           bride_name?: string
           client_email?: string | null
@@ -277,6 +291,7 @@ export type Database = {
           contract_status?: string | null
           contract_value?: number | null
           created_at?: string | null
+          created_by?: string | null
           duration_label?: string | null
           event_date?: string
           event_end_time?: string

@@ -85,7 +85,7 @@ const ProposalPage = () => {
             <img src={logo} alt="Home Music" className="h-8 md:h-10 w-auto" />
             <div className="flex items-center gap-3">
               <a href={`/playlist/${proposal.slug}`} className="font-ui text-[10px] tracking-[0.2em] uppercase px-4 py-2 text-muted-foreground hover:text-primary transition-colors duration-150 hidden sm:block">Repertório</a>
-              <a href={`https://wa.me/${proposal.whatsapp_number}?text=${whatsappMsg}`} target="_blank" rel="noopener noreferrer" className="font-ui text-[10px] tracking-[0.2em] uppercase px-5 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-150 rounded-sm">Aceitar Proposta</a>
+              <a href={`/proposta/${proposal.slug}/resumo`} className="font-ui text-[10px] tracking-[0.2em] uppercase px-5 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-150 rounded-sm font-bold">RESUMIR MINHA PROPOSTA</a>
             </div>
           </div>
         </nav>
