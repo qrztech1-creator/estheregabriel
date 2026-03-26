@@ -45,6 +45,11 @@ const defaultProposal: ProposalData = {
   extras_bundle_title: proposalTemplate.extras_bundle_title,
   extras_bundle_price: proposalTemplate.extras_bundle_price,
   audio_url: "/audio/background-music.mp3",
+  created_by: null,
+  accepted_at: null,
+  accepted_plan: null,
+  accepted_payment_method: null,
+  accepted_notes: null,
 };
 
 const Index = () => {
