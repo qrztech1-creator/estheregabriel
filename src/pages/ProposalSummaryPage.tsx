@@ -68,7 +68,7 @@ const ProposalSummaryPage = () => {
     };
 
     const extras = proposal.optional_extras || [];
-    const summaryExtras = getSummaryExtras(extras, proposal);
+    const sExtras = getSummaryExtrasForAccept(extras, proposal);
     const chosenExtras = summaryExtras.filter((_: any, i: number) => selectedExtras[`extra-${i}`]);
     const chosenExtrasTotal = chosenExtras.reduce((sum: number, e: any) => sum + (e.price || 0), 0);
 
