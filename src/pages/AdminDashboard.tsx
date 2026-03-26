@@ -25,7 +25,11 @@ const AdminDashboard = () => {
       if (!session) navigate("/");
       else setLoading(false);
     });
-  }, []);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || !session) navigate("/");
+    });
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

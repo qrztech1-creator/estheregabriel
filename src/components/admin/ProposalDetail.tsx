@@ -46,7 +46,7 @@ const ProposalDetail = ({ proposalId, onBack }: Props) => {
 
   const save = async () => {
     setSaving(true);
-    const { error } = await (supabase.from("proposals") as any).update({
+    const { error } = await supabase.from("proposals").update({
       client_email: form.client_email || null, client_phone: form.client_phone || null,
       client_instagram: form.client_instagram || null, contract_value: form.contract_value || 0,
       contract_status: form.contract_status, notes: form.notes || null,

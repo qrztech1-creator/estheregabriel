@@ -35,10 +35,12 @@ const ProposalPage = () => {
       .eq("slug", slug)
       .eq("status", "active")
       .maybeSingle()
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (error || !data) { navigate("/"); return; }
         setProposal(data as unknown as ProposalData);
         setLoading(false);
+        // Increment view count via secure function
+        await supabase.rpc("increment_view_count", { proposal_slug: slug });
       });
   }, [slug]);
 
