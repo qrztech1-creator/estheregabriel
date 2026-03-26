@@ -191,11 +191,43 @@ export type Database = {
           },
         ]
       }
+      proposal_audit_log: {
+        Row: {
+          action: string
+          actor_name: string | null
+          actor_type: string
+          changes: Json | null
+          created_at: string
+          id: string
+          proposal_id: string
+        }
+        Insert: {
+          action: string
+          actor_name?: string | null
+          actor_type?: string
+          changes?: Json | null
+          created_at?: string
+          id?: string
+          proposal_id: string
+        }
+        Update: {
+          action?: string
+          actor_name?: string | null
+          actor_type?: string
+          changes?: Json | null
+          created_at?: string
+          id?: string
+          proposal_id?: string
+        }
+        Relationships: []
+      }
       proposals: {
         Row: {
           accepted_at: string | null
+          accepted_extras: Json | null
           accepted_notes: string | null
           accepted_payment_method: string | null
+          accepted_payment_types: string[] | null
           accepted_plan: Json | null
           audio_url: string | null
           bride_name: string
@@ -239,8 +271,10 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
+          accepted_extras?: Json | null
           accepted_notes?: string | null
           accepted_payment_method?: string | null
+          accepted_payment_types?: string[] | null
           accepted_plan?: Json | null
           audio_url?: string | null
           bride_name: string
@@ -284,8 +318,10 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
+          accepted_extras?: Json | null
           accepted_notes?: string | null
           accepted_payment_method?: string | null
+          accepted_payment_types?: string[] | null
           accepted_plan?: Json | null
           audio_url?: string | null
           bride_name?: string

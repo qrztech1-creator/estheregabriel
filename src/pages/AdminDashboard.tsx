@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, Plus, List, BarChart3, Pencil } from "lucide-react";
+import { LogOut, Plus, List, BarChart3 } from "lucide-react";
 import logo from "@/assets/logo-homemusic.png";
 import { Button } from "@/components/ui/button";
 import ProposalList from "@/components/admin/ProposalList";
@@ -9,9 +9,10 @@ import ProposalForm from "@/components/admin/ProposalForm";
 import ProposalResponses from "@/components/admin/ProposalResponses";
 import ProposalDetail from "@/components/admin/ProposalDetail";
 import ProposalEditForm from "@/components/admin/ProposalEditForm";
+import ProposalHistory from "@/components/admin/ProposalHistory";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 
-type View = "list" | "create" | "detail" | "responses" | "analytics" | "edit";
+type View = "list" | "create" | "detail" | "responses" | "analytics" | "edit" | "history";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -92,7 +93,8 @@ const AdminDashboard = () => {
         )}
         {view === "create" && <ProposalForm onCreated={() => switchView("list")} onCancel={() => switchView("list")} />}
         {view === "responses" && selectedProposalId && <ProposalResponses proposalId={selectedProposalId} onBack={() => switchView("list")} />}
-        {view === "detail" && selectedProposalId && <ProposalDetail proposalId={selectedProposalId} onBack={() => switchView("list")} />}
+        {view === "detail" && selectedProposalId && <ProposalDetail proposalId={selectedProposalId} onBack={() => switchView("list")} onHistory={(id) => { setSelectedProposalId(id); setView("history"); }} />}
+        {view === "history" && selectedProposalId && <ProposalHistory proposalId={selectedProposalId} onBack={() => { setView("detail"); }} />}
         {view === "edit" && selectedProposalId && (
           <ProposalEditForm
             proposalId={selectedProposalId}
