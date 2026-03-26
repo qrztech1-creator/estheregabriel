@@ -151,4 +151,9 @@
 .animate-shimmer {
   background-size: 200% auto;
   animation: shimmer 3s linear infinite;
+
+#lovable-badge { 
+  display: none !important;
+  }
+  
 }
