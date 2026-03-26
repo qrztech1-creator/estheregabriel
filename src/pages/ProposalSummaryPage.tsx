@@ -72,7 +72,7 @@ const ProposalSummaryPage = () => {
       payment_method: paymentLabels[paymentMethod] || paymentMethod,
       payment_types: paymentTypes,
       extras_chosen: chosenExtras,
-      extras_total: extrasTotal,
+      extras_total: chosenExtrasTotal,
       final_value: finalValue,
     };
 
@@ -221,59 +221,53 @@ const ProposalSummaryPage = () => {
           </div>
         </div>
 
-        {/* Optional Extras (LED / Pista) */}
-        {extras.length > 0 && (
-          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-            <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">
-              {proposal.extras_bundle_title || "Opcionais"}
-            </h2>
-            <div className="grid gap-3">
-              {extras.map((extra: any, i: number) => (
-                <button key={i} onClick={() => toggleExtra(`extra-${i}`)}
-                  className={`p-4 rounded-lg border text-left transition-all ${selectedExtras[`extra-${i}`] ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
-                  <div className="flex items-start gap-3">
-                    <div className={`w-5 h-5 rounded border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${selectedExtras[`extra-${i}`] ? "bg-primary border-primary" : "border-muted-foreground/40"}`}>
-                      {selectedExtras[`extra-${i}`] && <Check className="w-3 h-3 text-primary-foreground" />}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{extra.title}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{extra.description}</p>
-                    </div>
+        {/* Optional Extras */}
+        <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+          <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Opcionais</h2>
+          <div className="grid gap-3">
+            {summaryExtras.map((extra: any, i: number) => (
+              <button key={i} onClick={() => toggleExtra(`extra-${i}`)}
+                className={`p-4 rounded-lg border text-left transition-all ${selectedExtras[`extra-${i}`] ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+                <div className="flex items-start gap-3">
+                  <div className={`w-5 h-5 rounded border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${selectedExtras[`extra-${i}`] ? "bg-primary border-primary" : "border-muted-foreground/40"}`}>
+                    {selectedExtras[`extra-${i}`] && <Check className="w-3 h-3 text-primary-foreground" />}
                   </div>
-                </button>
-              ))}
-            </div>
-            {proposal.extras_bundle_price && (
-              <p className="text-sm text-center text-muted-foreground">
-                Valor do pacote: <strong className="text-foreground">{formatBRL(Number(proposal.extras_bundle_price))}</strong>
-              </p>
-            )}
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{extra.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{extra.description}</p>
+                  </div>
+                  <p className="font-display text-sm text-foreground whitespace-nowrap">{formatBRL(extra.price)}</p>
+                </div>
+              </button>
+            ))}
           </div>
-        )}
+        </div>
 
         {/* Payment discount */}
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
           <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Condição de Pagamento</h2>
           <div className="grid gap-2">
             {[
-              { key: "entry30", label: "Entrada de 30%", desc: "4% de desconto" },
-              { key: "entry50", label: "Entrada de 50%", desc: "10% de desconto" },
-              { key: "aVista", label: "À Vista", desc: "12.5% de desconto" },
-            ].map(opt => (
-              <button key={opt.key} onClick={() => setPaymentMethod(opt.key)}
-                className={`p-4 rounded-lg border text-left transition-all ${paymentMethod === opt.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
-                <div className="flex justify-between items-center">
-                  <div>
+              { key: "entry30", label: "Entrada de 30%" },
+              { key: "entry50", label: "Entrada de 50%" },
+              { key: "aVista", label: "À Vista" },
+            ].map(opt => {
+              const r = discountRates[opt.key] || 0;
+              const val = +(baseTotal * (1 - r)).toFixed(2);
+              const sav = +(baseTotal * r).toFixed(2);
+              return (
+                <button key={opt.key} onClick={() => setPaymentMethod(opt.key)}
+                  className={`p-4 rounded-lg border text-left transition-all ${paymentMethod === opt.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+                  <div className="flex justify-between items-center">
                     <p className="font-medium text-sm">{opt.label}</p>
-                    <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                    <div className="text-right">
+                      <p className="font-display text-lg">{formatBRL(val)}</p>
+                      {sav > 0 && <p className="text-xs text-primary">Economia: {formatBRL(sav)}</p>}
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-display text-lg">{formatBRL(paymentValues[opt.key].value)}</p>
-                    <p className="text-xs text-primary">Economia: {formatBRL(paymentValues[opt.key].savings)}</p>
-                  </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -301,13 +295,13 @@ const ProposalSummaryPage = () => {
         <div className="bg-card border border-primary/30 rounded-xl p-6 text-center space-y-3">
           <p className="text-sm text-muted-foreground">Valor final com desconto</p>
           <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">Pacote: {formatBRL(selected.value)}</p>
-            {extrasTotal > 0 && (
-              <p className="text-sm text-muted-foreground">Opcionais: {formatBRL(extrasTotal)}</p>
+            <p className="text-sm text-muted-foreground">Pacote: {formatBRL(plan.total || 0)}</p>
+            {chosenExtrasTotal > 0 && (
+              <p className="text-sm text-muted-foreground">Opcionais: {formatBRL(chosenExtrasTotal)}</p>
             )}
           </div>
           <p className="font-display text-4xl text-foreground">{formatBRL(grandTotal)}</p>
-          <p className="text-xs text-primary">Economia de {formatBRL(selected.savings)}</p>
+          {totalSavings > 0 && <p className="text-xs text-primary">Economia de {formatBRL(totalSavings)}</p>}
         </div>
 
         {/* Notes */}
