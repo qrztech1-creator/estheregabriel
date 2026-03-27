@@ -82,12 +82,12 @@ const ProposalPage = () => {
     <ProposalProvider value={proposal}>
       <BackgroundMusic startPlaying audioUrl={proposal.audio_url || "/audio/background-music.mp3"} />
       <div ref={containerRef} className="grain-overlay">
-        <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between glass-surface px-6 py-3 rounded-sm">
-            <img src={logo} alt="Home Music" className="h-8 md:h-10 w-auto" />
-            <div className="flex items-center gap-3">
-              <a href={`/playlist/${proposal.slug}`} className="font-ui text-[10px] tracking-[0.2em] uppercase px-4 py-2 text-muted-foreground hover:text-primary transition-colors duration-150 hidden sm:block">Repertório</a>
-              <a href={`/proposta/${proposal.slug}/resumo`} className="font-ui text-[10px] tracking-[0.2em] uppercase px-5 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-150 rounded-sm font-bold">RESUMIR MINHA PROPOSTA</a>
+        <nav className="fixed top-0 left-0 right-0 z-50 px-3 sm:px-6 py-3 sm:py-4">
+          <div className="max-w-7xl mx-auto flex items-center justify-between glass-surface px-3 sm:px-6 py-2.5 sm:py-3 rounded-sm gap-2">
+            <img src={logo} alt="Home Music" className="h-7 sm:h-8 md:h-10 w-auto flex-shrink-0" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <a href={`/playlist/${proposal.slug}`} className="font-ui text-[10px] tracking-[0.15em] sm:tracking-[0.2em] uppercase px-3 py-2 text-muted-foreground hover:text-primary transition-colors duration-150 hidden sm:block">Repertório</a>
+              <a href={`/proposta/${proposal.slug}/resumo`} className="font-ui text-[9px] sm:text-[10px] tracking-[0.1em] sm:tracking-[0.2em] uppercase px-3 sm:px-5 py-2 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-150 rounded-sm font-bold whitespace-nowrap">Resumir Proposta</a>
             </div>
           </div>
         </nav>
