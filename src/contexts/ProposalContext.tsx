@@ -26,6 +26,8 @@ export interface ProposalData {
   optional_extras: any[];
   extras_bundle_title: string | null;
   extras_bundle_price: number | null;
+  show_partnership?: boolean | null;
+  show_optionals?: boolean | null;
   audio_url: string | null;
   created_by: string | null;
   accepted_at: string | null;

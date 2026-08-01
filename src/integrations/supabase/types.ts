@@ -260,6 +260,8 @@ export type Database = {
           pricing_plans: Json
           process_steps: Json
           proposal_deadline: string | null
+          show_optionals: boolean
+          show_partnership: boolean
           showcase_songs: Json
           slug: string
           status: string
@@ -307,6 +309,8 @@ export type Database = {
           pricing_plans?: Json
           process_steps?: Json
           proposal_deadline?: string | null
+          show_optionals?: boolean
+          show_partnership?: boolean
           showcase_songs?: Json
           slug: string
           status?: string
@@ -354,6 +358,8 @@ export type Database = {
           pricing_plans?: Json
           process_steps?: Json
           proposal_deadline?: string | null
+          show_optionals?: boolean
+          show_partnership?: boolean
           showcase_songs?: Json
           slug?: string
           status?: string

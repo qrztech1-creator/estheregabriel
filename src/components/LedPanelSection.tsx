@@ -17,6 +17,9 @@ const LedPanelSection = () => {
   const bundlePrice = proposal?.extras_bundle_price ?? 2800;
   const whatsappNumber = proposal?.whatsapp_number ?? "5527999936682";
 
+  if (proposal && proposal.show_optionals === false) return null;
+
+
   return (
     <section className="py-12 px-6 relative">
       <div className="max-w-4xl mx-auto">

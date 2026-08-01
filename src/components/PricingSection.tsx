@@ -43,9 +43,10 @@ const PricingSection = () => {
   const included = (proposal?.included_services?.length ? proposal.included_services : defaultIncluded) as any[];
   const techDetails = (proposal?.tech_details?.length ? proposal.tech_details : defaultTechDetails) as string[];
   const whatsappNumber = proposal?.whatsapp_number ?? "5527999936682";
-  const partnershipName = proposal?.partnership_name ?? "Carol Suhet";
-  const partnershipInstagram = proposal?.partnership_instagram ?? "https://www.instagram.com/carolsuhetcerimonialista/";
-  const partnershipPhotoUrl = proposal?.partnership_photo_url;
+  const showPartnership = proposal ? proposal.show_partnership !== false : true;
+  const partnershipName = showPartnership ? (proposal?.partnership_name ?? "Carol Suhet") : null;
+  const partnershipInstagram = showPartnership ? (proposal?.partnership_instagram ?? "https://www.instagram.com/carolsuhetcerimonialista/") : null;
+  const partnershipPhotoUrl = showPartnership ? proposal?.partnership_photo_url : null;
 
   const priceRef = useRef<HTMLParagraphElement>(null);
   const [proposalTime, setProposalTime] = useState({ d: "0", h: "00", m: "00", s: "00" });
