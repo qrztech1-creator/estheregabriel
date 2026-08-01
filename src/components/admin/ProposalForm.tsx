@@ -339,6 +339,14 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
 
         {renderSection("extras", "✨ Opcionais",
           <>
+            <label className="flex items-center gap-3 mb-4">
+              <input type="checkbox" checked={form.show_optionals} onChange={e => set("show_optionals", e.target.checked)} className="w-4 h-4" />
+              <div>
+                <p className="text-sm font-medium">Exibir seção de opcionais (LED / Pista)</p>
+                <p className="text-xs text-muted-foreground">Desmarque quando o local já tem cênica e você não vai oferecer</p>
+              </div>
+            </label>
+            {form.show_optionals && <>
             {form.optional_extras.map((extra: any, i: number) => (
               <div key={i} className="border border-border rounded p-3 space-y-2 relative">
                 <button onClick={() => set("optional_extras", form.optional_extras.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
@@ -351,15 +359,27 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
               <div><Label>Título do pacote</Label><Input value={form.extras_bundle_title} onChange={e => set("extras_bundle_title", e.target.value)} /></div>
               <div><Label>Preço do pacote (R$)</Label><Input type="number" value={form.extras_bundle_price} onChange={e => set("extras_bundle_price", Number(e.target.value))} /></div>
             </div>
+            </>}
           </>
         )}
 
-        {renderSection("partnership", "🤝 Parceria",
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div><Label>Nome</Label><Input value={form.partnership_name} onChange={e => set("partnership_name", e.target.value)} /></div>
-            <div><Label>Instagram (URL)</Label><Input value={form.partnership_instagram} onChange={e => set("partnership_instagram", e.target.value)} /></div>
-            <div className="col-span-2"><Label>URL da foto</Label><Input value={form.partnership_photo_url} onChange={e => set("partnership_photo_url", e.target.value)} /></div>
-          </div>
+        {renderSection("partnership", "🤝 Parceria / Indicação",
+          <>
+            <label className="flex items-center gap-3 mb-4">
+              <input type="checkbox" checked={form.show_partnership} onChange={e => set("show_partnership", e.target.checked)} className="w-4 h-4" />
+              <div>
+                <p className="text-sm font-medium">Exibir indicação / parceria</p>
+                <p className="text-xs text-muted-foreground">Desmarque quando o lead for direto nosso</p>
+              </div>
+            </label>
+            {form.show_partnership && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div><Label>Nome</Label><Input value={form.partnership_name} onChange={e => set("partnership_name", e.target.value)} /></div>
+                <div><Label>Instagram (URL)</Label><Input value={form.partnership_instagram} onChange={e => set("partnership_instagram", e.target.value)} /></div>
+                <div className="col-span-2"><Label>URL da foto</Label><Input value={form.partnership_photo_url} onChange={e => set("partnership_photo_url", e.target.value)} /></div>
+              </div>
+            )}
+          </>
         )}
 
         <div className="border border-border rounded-lg p-4">
