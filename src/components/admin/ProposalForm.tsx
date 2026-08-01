@@ -35,6 +35,8 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
     partnership_name: "",
     partnership_instagram: "",
     partnership_photo_url: "",
+    show_partnership: true,
+    show_optionals: true,
     pricing_plans: [] as any[],
     included_services: [] as any[],
     tech_details: [] as string[],
