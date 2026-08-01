@@ -30,6 +30,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
     pricing_plans: [] as any[], included_services: [] as any[], tech_details: [] as string[],
     event_timeline: [] as any[], process_steps: [] as any[], showcase_songs: [] as any[],
     optional_extras: [] as any[], extras_bundle_title: "", extras_bundle_price: 0, audio_url: "",
+    show_partnership: true, show_optionals: true,
   });
 
   useEffect(() => { loadProposal(); }, [proposalId]);
