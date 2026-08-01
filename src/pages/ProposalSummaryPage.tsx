@@ -132,7 +132,7 @@ const ProposalSummaryPage = () => {
   const plans = proposal.pricing_plans || [];
   const plan = plans[selectedPlanIdx] || {};
   const eventDate = new Date(proposal.event_date + "T12:00:00");
-  const extras = proposal.optional_extras || [];
+  const extras = (proposal as any).show_optionals === false ? [] : (proposal.optional_extras || []);
 
   const getSummaryExtras = (dbExtras: any[], prop: any) => {
     const items = dbExtras.map((e: any) => ({ ...e, price: 0 }));
