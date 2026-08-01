@@ -52,6 +52,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
       process_steps: d.process_steps || [], showcase_songs: d.showcase_songs || [],
       optional_extras: d.optional_extras || [], extras_bundle_title: d.extras_bundle_title || "",
       extras_bundle_price: Number(d.extras_bundle_price) || 0, audio_url: d.audio_url || "",
+      show_partnership: d.show_partnership !== false, show_optionals: d.show_optionals !== false,
     });
     setLoading(false);
   };
