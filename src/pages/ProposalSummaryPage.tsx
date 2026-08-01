@@ -67,7 +67,7 @@ const ProposalSummaryPage = () => {
       aVista: "À Vista",
     };
 
-    const extras = proposal.optional_extras || [];
+    const extras = (proposal as any).show_optionals === false ? [] : (proposal.optional_extras || []);
     const sExtras = getSummaryExtrasForAccept(extras, proposal);
     const chosenExtras = sExtras.filter((_: any, i: number) => selectedExtras[`extra-${i}`]);
     const chosenExtrasTotal = chosenExtras.reduce((sum: number, e: any) => sum + (e.price || 0), 0);
