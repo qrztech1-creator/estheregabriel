@@ -7,6 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { proposalTemplate, generateSlug, recalcPlanDiscounts } from "@/data/proposalTemplate";
+import SortableList from "./SortableList";
+import AiTextButton from "./AiTextButton";
+import CostCalculator, { type DraftItem, type DraftPackage } from "./CostCalculator";
+import { TEMPLATES } from "@/data/templates";
+import type { RegionKey } from "@/data/regionPricing";
 
 interface Props {
   onCreated: () => void;
@@ -18,6 +23,9 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(["casal", "evento"]));
   const [copyRepertoire, setCopyRepertoire] = useState(true);
   const [mp3File, setMp3File] = useState<File | null>(null);
+  const [draftPackages, setDraftPackages] = useState<DraftPackage[]>([]);
+  const [looseItems, setLooseItems] = useState<DraftItem[]>([]);
+
 
   const [form, setForm] = useState({
     bride_name: "",
