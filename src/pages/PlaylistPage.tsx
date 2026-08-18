@@ -62,39 +62,24 @@ const PlaylistPage = () => {
 
   const loadData = async () => {
     try {
-      const { data: tokenData } = await supabase
-        .from("client_tokens")
-        .select("*")
-        .eq("token", token!)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("get_playlist_session", { p_token: token! });
+      if (error || !data) { navigate("/"); return; }
+      const session = data as any;
 
-      if (!tokenData) { navigate("/"); return; }
-      setClientTokenId(tokenData.id);
-      setClientName(tokenData.client_name);
+      setClientTokenId(token!);
+      setClientName(session.client_name || "");
+      setBlocks(session.blocks || []);
+      setSongs(session.songs || []);
 
-      const proposalId = tokenData.proposal_id;
-
-      const [blocksRes, songsRes, prefsRes, suggestionsRes, djLinksRes, blockOrdersRes] = await Promise.all([
-        supabase.from("playlist_blocks").select("*").eq("proposal_id", proposalId).order("display_order"),
-        supabase.from("playlist_songs").select("*").eq("proposal_id", proposalId).order("display_order"),
-        supabase.from("song_preferences").select("*").eq("client_token_id", tokenData.id),
-        supabase.from("song_suggestions").select("*").eq("client_token_id", tokenData.id).order("created_at", { ascending: false }),
-        supabase.from("dj_playlist_links").select("*").eq("client_token_id", tokenData.id).order("created_at", { ascending: false }),
-        supabase.from("block_order_preferences").select("*").eq("client_token_id", tokenData.id),
-      ]);
-
-      setBlocks(blocksRes.data || []);
-      setSongs(songsRes.data || []);
-      
       const prefsMap = new Map<string, string>();
-      (prefsRes.data || []).forEach((p: any) => prefsMap.set(p.song_id, p.status));
+      (session.preferences || []).forEach((p: any) => prefsMap.set(p.song_id, p.status));
       setPreferences(prefsMap);
-      
-      setSuggestions(suggestionsRes.data || []);
-      setDjLinks(djLinksRes.data || []);
-      
+
+      setSuggestions(session.suggestions || []);
+      setDjLinks(session.dj_links || []);
+
       const ordersMap = new Map<string, number>();
-      (blockOrdersRes.data || []).forEach((o: any) => ordersMap.set(o.block_id, o.display_order));
+      (session.block_orders || []).forEach((o: any) => ordersMap.set(o.block_id, o.display_order));
       setBlockOrders(ordersMap);
     } catch (err) {
       console.error(err);
@@ -103,6 +88,7 @@ const PlaylistPage = () => {
       setLoading(false);
     }
   };
+
 
   const getBlockOrder = (block: Block) => blockOrders.get(block.id) ?? block.display_order;
   const sortedBlocks = [...blocks].sort((a, b) => getBlockOrder(a) - getBlockOrder(b));
