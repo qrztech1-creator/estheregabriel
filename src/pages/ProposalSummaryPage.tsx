@@ -22,6 +22,8 @@ const ProposalSummaryPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [selectedExtras, setSelectedExtras] = useState<Record<string, boolean>>({});
+  const [selectedPkgIds, setSelectedPkgIds] = useState<Record<string, boolean>>({});
+
 
   useEffect(() => {
     if (!slug) { navigate("/"); return; }
