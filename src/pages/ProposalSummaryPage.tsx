@@ -25,7 +25,7 @@ const ProposalSummaryPage = () => {
 
   useEffect(() => {
     if (!slug) { navigate("/"); return; }
-    supabase.from("proposals").select("*").eq("slug", slug).eq("status", "active").maybeSingle()
+    supabase.rpc("get_public_proposal", { p_slug: slug })
       .then(({ data }) => {
         if (!data) { navigate("/"); return; }
         setProposal(data);
@@ -36,6 +36,7 @@ const ProposalSummaryPage = () => {
         setLoading(false);
       });
   }, [slug]);
+
 
   const togglePaymentType = (type: string) => {
     setPaymentTypes(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]);
