@@ -34,7 +34,11 @@ const ProposalSummaryPage = () => {
         const plans = (data as any).pricing_plans || [];
         const recIdx = plans.findIndex((p: any) => p.recommended);
         setSelectedPlanIdx(recIdx >= 0 ? recIdx : plans.length - 1);
+        const pkgDefaults: Record<string, boolean> = {};
+        ((data as any).packages || []).forEach((p: any) => { pkgDefaults[p.id] = !p.is_optional; });
+        setSelectedPkgIds(pkgDefaults);
         if ((data as any).accepted_at) setAccepted(true);
+
         setLoading(false);
       });
   }, [slug]);
