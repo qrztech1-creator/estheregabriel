@@ -31,6 +31,8 @@ const formatBRL = (val: number) => `R$ ${val.toLocaleString("pt-BR", { minimumFr
 
 const ProposalDetail = ({ proposalId, onBack, onHistory }: Props) => {
   const [proposal, setProposal] = useState<any>(null);
+  const [tab, setTab] = useState<"geral" | "pacotes" | "checklist" | "interno">("geral");
+
   const [saving, setSaving] = useState(false);
   const [uploadingContract, setUploadingContract] = useState(false);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
