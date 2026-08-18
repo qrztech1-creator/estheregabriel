@@ -9,6 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import ProposalPackages from "./ProposalPackages";
 import ProposalChecklist from "./ProposalChecklist";
 import ProposalInternalContract from "./ProposalInternalContract";
+import ProposalPlaylist from "./ProposalPlaylist";
+import ProposalAppearance from "./ProposalAppearance";
+import ProposalExport from "./ProposalExport";
 import type { RegionKey } from "@/data/regionPricing";
 
 interface Props {
