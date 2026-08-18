@@ -290,7 +290,26 @@ const ProposalDetail = ({ proposalId, onBack, onHistory }: Props) => {
         <div><Label className="text-xs">Anotações</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Observações..." rows={4} /></div>
         <Button onClick={save} disabled={saving} className="w-full sm:w-auto gap-2"><Save className="w-4 h-4" />{saving ? "Salvando..." : "Salvar Alterações"}</Button>
       </div>
+      </>
+      )}
+
+      {tab === "pacotes" && (
+        <ProposalPackages
+          proposalId={proposalId}
+          proposalLabel={`${proposal.bride_name} & ${proposal.groom_name} — ${proposal.venue_name}`}
+          region={(proposal.region as RegionKey) || "gv"}
+          onRegionChange={async (r) => {
+            setProposal({ ...proposal, region: r });
+            await supabase.from("proposals").update({ region: r }).eq("id", proposalId);
+          }}
+        />
+      )}
+
+      {tab === "checklist" && <ProposalChecklist proposalId={proposalId} />}
+
+      {tab === "interno" && <ProposalInternalContract proposalId={proposalId} contractValue={contractValue} />}
     </div>
+
   );
 };
 
