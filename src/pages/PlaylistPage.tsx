@@ -62,39 +62,24 @@ const PlaylistPage = () => {
 
   const loadData = async () => {
     try {
-      const { data: tokenData } = await supabase
-        .from("client_tokens")
-        .select("*")
-        .eq("token", token!)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("get_playlist_session", { p_token: token! });
+      if (error || !data) { navigate("/"); return; }
+      const session = data as any;
 
-      if (!tokenData) { navigate("/"); return; }
-      setClientTokenId(tokenData.id);
-      setClientName(tokenData.client_name);
+      setClientTokenId(token!);
+      setClientName(session.client_name || "");
+      setBlocks(session.blocks || []);
+      setSongs(session.songs || []);
 
-      const proposalId = tokenData.proposal_id;
-
-      const [blocksRes, songsRes, prefsRes, suggestionsRes, djLinksRes, blockOrdersRes] = await Promise.all([
-        supabase.from("playlist_blocks").select("*").eq("proposal_id", proposalId).order("display_order"),
-        supabase.from("playlist_songs").select("*").eq("proposal_id", proposalId).order("display_order"),
-        supabase.from("song_preferences").select("*").eq("client_token_id", tokenData.id),
-        supabase.from("song_suggestions").select("*").eq("client_token_id", tokenData.id).order("created_at", { ascending: false }),
-        supabase.from("dj_playlist_links").select("*").eq("client_token_id", tokenData.id).order("created_at", { ascending: false }),
-        supabase.from("block_order_preferences").select("*").eq("client_token_id", tokenData.id),
-      ]);
-
-      setBlocks(blocksRes.data || []);
-      setSongs(songsRes.data || []);
-      
       const prefsMap = new Map<string, string>();
-      (prefsRes.data || []).forEach((p: any) => prefsMap.set(p.song_id, p.status));
+      (session.preferences || []).forEach((p: any) => prefsMap.set(p.song_id, p.status));
       setPreferences(prefsMap);
-      
-      setSuggestions(suggestionsRes.data || []);
-      setDjLinks(djLinksRes.data || []);
-      
+
+      setSuggestions(session.suggestions || []);
+      setDjLinks(session.dj_links || []);
+
       const ordersMap = new Map<string, number>();
-      (blockOrdersRes.data || []).forEach((o: any) => ordersMap.set(o.block_id, o.display_order));
+      (session.block_orders || []).forEach((o: any) => ordersMap.set(o.block_id, o.display_order));
       setBlockOrders(ordersMap);
     } catch (err) {
       console.error(err);
@@ -103,6 +88,7 @@ const PlaylistPage = () => {
       setLoading(false);
     }
   };
+
 
   const getBlockOrder = (block: Block) => blockOrders.get(block.id) ?? block.display_order;
   const sortedBlocks = [...blocks].sort((a, b) => getBlockOrder(a) - getBlockOrder(b));
@@ -121,20 +107,7 @@ const PlaylistPage = () => {
     setPreferences(newPrefs);
 
     try {
-      if (finalStatus === "pending") {
-        await supabase.from("song_preferences")
-          .delete()
-          .eq("client_token_id", clientTokenId)
-          .eq("song_id", songId);
-      } else {
-        await supabase.from("song_preferences")
-          .upsert({
-            client_token_id: clientTokenId,
-            song_id: songId,
-            status: finalStatus,
-            updated_at: new Date().toISOString(),
-          }, { onConflict: "client_token_id,song_id" });
-      }
+      await supabase.rpc("set_song_preference", { p_token: token!, p_song_id: songId, p_status: finalStatus });
     } catch (err) {
       console.error(err);
       toast.error("Erro ao salvar preferência");
@@ -149,32 +122,34 @@ const PlaylistPage = () => {
     const newOrders = new Map(blockOrders);
     const currentOrder = getBlockOrder(sortedBlocks[idx]);
     const swapOrder = getBlockOrder(sortedBlocks[swapIdx]);
-    
+
     newOrders.set(sortedBlocks[idx].id, swapOrder);
     newOrders.set(sortedBlocks[swapIdx].id, currentOrder);
     setBlockOrders(newOrders);
 
-    if (!clientTokenId) return;
     try {
-      await supabase.from("block_order_preferences").upsert([
-        { client_token_id: clientTokenId, block_id: sortedBlocks[idx].id, display_order: swapOrder },
-        { client_token_id: clientTokenId, block_id: sortedBlocks[swapIdx].id, display_order: currentOrder },
-      ], { onConflict: "client_token_id,block_id" });
+      await supabase.rpc("set_block_orders", {
+        p_token: token!,
+        p_orders: [
+          { block_id: sortedBlocks[idx].id, display_order: swapOrder },
+          { block_id: sortedBlocks[swapIdx].id, display_order: currentOrder },
+        ] as any,
+      });
     } catch (err) {
       console.error(err);
     }
   };
 
   const addSuggestion = async () => {
-    if (!clientTokenId || !newSuggestion.title.trim()) return;
+    if (!newSuggestion.title.trim()) return;
     try {
-      const { data } = await supabase.from("song_suggestions").insert({
-        client_token_id: clientTokenId,
-        title: newSuggestion.title,
-        artist: newSuggestion.artist || null,
-        notes: newSuggestion.notes || null,
-      }).select().single();
-      if (data) setSuggestions([data, ...suggestions]);
+      const { data } = await supabase.rpc("add_song_suggestion", {
+        p_token: token!,
+        p_title: newSuggestion.title,
+        p_artist: newSuggestion.artist || null,
+        p_notes: newSuggestion.notes || null,
+      });
+      if (data) setSuggestions([data as unknown as Suggestion, ...suggestions]);
       setNewSuggestion({ title: "", artist: "", notes: "" });
       toast.success("Sugestão adicionada!");
     } catch (err) {
@@ -184,7 +159,7 @@ const PlaylistPage = () => {
 
   const deleteSuggestion = async (id: string) => {
     try {
-      await supabase.from("song_suggestions").delete().eq("id", id);
+      await supabase.rpc("delete_song_suggestion", { p_token: token!, p_id: id });
       setSuggestions(suggestions.filter(s => s.id !== id));
       toast.success("Sugestão removida");
     } catch (err) {
@@ -193,14 +168,15 @@ const PlaylistPage = () => {
   };
 
   const addDjLink = async () => {
-    if (!clientTokenId || !newDjLink.url.trim()) return;
+    if (!newDjLink.url.trim()) return;
     try {
-      const { data } = await supabase.from("dj_playlist_links").insert({
-        client_token_id: clientTokenId,
-        spotify_url: newDjLink.url,
-        name: newDjLink.name || null,
-      }).select().single();
-      if (data) setDjLinks([data, ...djLinks]);
+      const { data } = await supabase.rpc("add_dj_playlist_link", {
+        p_token: token!,
+        p_url: newDjLink.url,
+        p_name: newDjLink.name || null,
+      });
+      if (!data) { toast.error("Link inválido"); return; }
+      setDjLinks([data as unknown as DjLink, ...djLinks]);
       setNewDjLink({ url: "", name: "" });
       toast.success("Playlist do DJ salva!");
     } catch (err) {
@@ -210,8 +186,9 @@ const PlaylistPage = () => {
 
   const deleteDjLink = async (id: string) => {
     try {
-      await supabase.from("dj_playlist_links").delete().eq("id", id);
+      await supabase.rpc("delete_dj_playlist_link", { p_token: token!, p_id: id });
       setDjLinks(djLinks.filter(l => l.id !== id));
+
       toast.success("Link removido");
     } catch (err) {
       toast.error("Erro ao remover link");

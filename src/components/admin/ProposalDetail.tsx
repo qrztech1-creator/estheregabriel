@@ -6,12 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import ProposalPackages from "./ProposalPackages";
+import ProposalChecklist from "./ProposalChecklist";
+import ProposalInternalContract from "./ProposalInternalContract";
+import type { RegionKey } from "@/data/regionPricing";
 
 interface Props {
   proposalId: string;
   onBack: () => void;
   onHistory?: (id: string) => void;
 }
+
 
 const contractStatuses = [
   { value: "proposal_sent", label: "Proposta Enviada" },
@@ -26,6 +31,8 @@ const formatBRL = (val: number) => `R$ ${val.toLocaleString("pt-BR", { minimumFr
 
 const ProposalDetail = ({ proposalId, onBack, onHistory }: Props) => {
   const [proposal, setProposal] = useState<any>(null);
+  const [tab, setTab] = useState<"geral" | "pacotes" | "checklist" | "interno">("geral");
+
   const [saving, setSaving] = useState(false);
   const [uploadingContract, setUploadingContract] = useState(false);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
@@ -191,6 +198,25 @@ const ProposalDetail = ({ proposalId, onBack, onHistory }: Props) => {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-1 border-b border-border overflow-x-auto">
+        {[
+          { key: "geral", label: "Geral" },
+          { key: "pacotes", label: "Pacotes & Custos" },
+          { key: "checklist", label: "Checklist" },
+          { key: "interno", label: "Contrato Interno" },
+        ].map(t => (
+          <button key={t.key} onClick={() => setTab(t.key as any)}
+            className={`px-3 py-2 text-xs whitespace-nowrap border-b-2 transition-colors ${tab === t.key ? "border-primary text-primary font-medium" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "geral" && (
+      <>
+
+
       {/* Accepted info */}
       {accepted && (
         <div className="bg-primary/5 border border-primary/30 rounded-xl p-4 sm:p-6 space-y-4">
@@ -285,7 +311,26 @@ const ProposalDetail = ({ proposalId, onBack, onHistory }: Props) => {
         <div><Label className="text-xs">Anotações</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Observações..." rows={4} /></div>
         <Button onClick={save} disabled={saving} className="w-full sm:w-auto gap-2"><Save className="w-4 h-4" />{saving ? "Salvando..." : "Salvar Alterações"}</Button>
       </div>
+      </>
+      )}
+
+      {tab === "pacotes" && (
+        <ProposalPackages
+          proposalId={proposalId}
+          proposalLabel={`${proposal.bride_name} & ${proposal.groom_name} — ${proposal.venue_name}`}
+          region={(proposal.region as RegionKey) || "gv"}
+          onRegionChange={async (r) => {
+            setProposal({ ...proposal, region: r });
+            await supabase.from("proposals").update({ region: r }).eq("id", proposalId);
+          }}
+        />
+      )}
+
+      {tab === "checklist" && <ProposalChecklist proposalId={proposalId} />}
+
+      {tab === "interno" && <ProposalInternalContract proposalId={proposalId} contractValue={contractValue} />}
     </div>
+
   );
 };
 

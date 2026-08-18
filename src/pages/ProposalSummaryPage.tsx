@@ -22,6 +22,8 @@ const ProposalSummaryPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [selectedExtras, setSelectedExtras] = useState<Record<string, boolean>>({});
+  const [selectedPkgIds, setSelectedPkgIds] = useState<Record<string, boolean>>({});
+
 
   useEffect(() => {
     if (!slug) { navigate("/"); return; }
@@ -32,7 +34,11 @@ const ProposalSummaryPage = () => {
         const plans = (data as any).pricing_plans || [];
         const recIdx = plans.findIndex((p: any) => p.recommended);
         setSelectedPlanIdx(recIdx >= 0 ? recIdx : plans.length - 1);
+        const pkgDefaults: Record<string, boolean> = {};
+        ((data as any).packages || []).forEach((p: any) => { pkgDefaults[p.id] = !p.is_optional; });
+        setSelectedPkgIds(pkgDefaults);
         if ((data as any).accepted_at) setAccepted(true);
+
         setLoading(false);
       });
   }, [slug]);
@@ -73,52 +79,48 @@ const ProposalSummaryPage = () => {
     const chosenExtras = sExtras.filter((_: any, i: number) => selectedExtras[`extra-${i}`]);
     const chosenExtrasTotal = chosenExtras.reduce((sum: number, e: any) => sum + (e.price || 0), 0);
 
-    const baseTotal = (plan.total || 0) + chosenExtrasTotal;
+    const chosenPkgs = ((proposal.packages || []) as any[]).filter((p: any) => selectedPkgIds[p.id]);
+    const packagesTotal = chosenPkgs.reduce((s: number, p: any) => s + (p.is_courtesy ? 0 : Number(p.sale_price) || 0), 0);
+    const selectedPackages = chosenPkgs.map((p: any) => ({
+      id: p.id, name: p.name, is_courtesy: !!p.is_courtesy,
+      sale_price: p.is_courtesy ? 0 : Number(p.sale_price) || 0,
+    }));
+
+    const baseTotal = (plan?.total || 0) + chosenExtrasTotal + packagesTotal;
     const discountRates: Record<string, number> = { entry30: 0.04, entry50: 0.10, aVista: 0.125 };
     const rate = discountRates[paymentMethod] || 0;
     const finalValue = +(baseTotal * (1 - rate)).toFixed(2);
 
     const acceptedPlanData = {
-      ...plan,
+      ...(plan || {}),
       payment_method: paymentLabels[paymentMethod] || paymentMethod,
       payment_types: paymentTypes,
       extras_chosen: chosenExtras,
       extras_total: chosenExtrasTotal,
+      packages_chosen: selectedPackages,
+      packages_total: packagesTotal,
       final_value: finalValue,
     };
 
-    const { error } = await supabase.from("proposals").update({
-      accepted_at: new Date().toISOString(),
-      accepted_plan: acceptedPlanData as any,
-      accepted_payment_method: paymentLabels[paymentMethod] || paymentMethod,
-      accepted_notes: notes || null,
-      accepted_extras: chosenExtras as any,
-      accepted_payment_types: paymentTypes,
-      contract_status: "accepted",
-      contract_value: finalValue,
-    }).eq("id", proposal.id);
 
-    if (error) {
+    const { data: ok, error } = await supabase.rpc("accept_proposal", {
+      p_slug: proposal.slug,
+      p_plan: acceptedPlanData as any,
+      p_payment_method: paymentLabels[paymentMethod] || paymentMethod,
+      p_payment_types: paymentTypes,
+      p_extras: chosenExtras as any,
+      p_notes: notes || null,
+      p_final_value: finalValue,
+      p_selected_packages: selectedPackages as any,
+    });
+
+    if (error || !ok) {
       toast.error("Erro ao confirmar proposta");
     } else {
-      // Log the acceptance
-      await supabase.from("proposal_audit_log" as any).insert({
-        proposal_id: proposal.id,
-        actor_type: "client",
-        actor_name: `${proposal.bride_name} & ${proposal.groom_name}`,
-        action: "accepted",
-        changes: {
-          plan: plan.label,
-          payment_discount: paymentLabels[paymentMethod],
-          payment_types: paymentTypes,
-          extras: chosenExtras.map((e: any) => e.title),
-          final_value: finalValue,
-          notes: notes || null,
-        },
-      });
       setAccepted(true);
       toast.success("Proposta confirmada com sucesso!");
     }
+
     setSubmitting(false);
   };
 
@@ -148,14 +150,17 @@ const ProposalSummaryPage = () => {
   };
 
   const summaryExtras = getSummaryExtras(extras, proposal);
+  const packages: any[] = (proposal as any).packages || [];
 
   const discountRates: Record<string, number> = { entry30: 0.04, entry50: 0.10, aVista: 0.125 };
   const rate = discountRates[paymentMethod] || 0;
 
   const chosenExtrasTotal = summaryExtras.reduce((sum: number, e: any, i: number) => sum + (selectedExtras[`extra-${i}`] ? (e.price || 0) : 0), 0);
-  const baseTotal = (plan.total || 0) + chosenExtrasTotal;
+  const packagesTotal = packages.reduce((sum: number, p: any) => sum + (selectedPkgIds[p.id] && !p.is_courtesy ? Number(p.sale_price) || 0 : 0), 0);
+  const baseTotal = (plan.total || 0) + chosenExtrasTotal + packagesTotal;
   const grandTotal = +(baseTotal * (1 - rate)).toFixed(2);
   const totalSavings = +(baseTotal * rate).toFixed(2);
+
 
   const paymentTypeOptions = [
     { key: "pix", label: "Pix" },
@@ -232,7 +237,50 @@ const ProposalSummaryPage = () => {
           </div>
         </div>
 
+        {/* Modular packages */}
+        {packages.length > 0 && (
+          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+            <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Serviços & Pacotes</h2>
+            <div className="grid gap-3">
+              {packages.map((pk: any) => {
+                const active = !!selectedPkgIds[pk.id];
+                return (
+                  <button key={pk.id} onClick={() => setSelectedPkgIds(prev => ({ ...prev, [pk.id]: !prev[pk.id] }))}
+                    className={`p-4 rounded-lg border text-left transition-all ${active ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+                    <div className="flex items-start gap-3">
+                      <div className={`w-5 h-5 rounded border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${active ? "bg-primary border-primary" : "border-muted-foreground/40"}`}>
+                        {active && <Check className="w-3 h-3 text-primary-foreground" />}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">
+                          {pk.name}
+                          {pk.is_courtesy && <span className="ml-2 text-[10px] uppercase tracking-wider text-primary">Cortesia</span>}
+                          {pk.is_optional && <span className="ml-2 text-[10px] uppercase tracking-wider text-muted-foreground">Opcional</span>}
+                        </p>
+                        {pk.description && <p className="text-xs text-muted-foreground mt-1">{pk.description}</p>}
+                        {(pk.items || []).length > 0 && (
+                          <ul className="mt-2 space-y-0.5">
+                            {pk.items.map((it: any) => (
+                              <li key={it.id} className="text-[11px] text-muted-foreground">
+                                • {it.quantity > 1 ? `${it.quantity}× ` : ""}{it.name}{it.is_courtesy ? " (cortesia)" : ""}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                      <p className="font-display text-sm text-foreground whitespace-nowrap">
+                        {pk.is_courtesy ? "Cortesia" : formatBRL(Number(pk.sale_price) || 0)}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Optional Extras */}
+        {(proposal as any).show_optionals !== false && (
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
           <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Opcionais</h2>
           <div className="grid gap-3">
@@ -253,6 +301,9 @@ const ProposalSummaryPage = () => {
             ))}
           </div>
         </div>
+        )}
+
+
 
         {/* Payment discount */}
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
