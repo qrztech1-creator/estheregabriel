@@ -221,6 +221,210 @@ export type Database = {
         }
         Relationships: []
       }
+      proposal_checklist: {
+        Row: {
+          category: string
+          created_at: string
+          display_order: number
+          id: string
+          item: string
+          notes: string | null
+          proposal_id: string
+          quantity: number
+          status: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          item: string
+          notes?: string | null
+          proposal_id: string
+          quantity?: number
+          status?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          item?: string
+          notes?: string | null
+          proposal_id?: string
+          quantity?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_checklist_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_internal_contracts: {
+        Row: {
+          closed_by: string | null
+          created_at: string
+          executed_by: string | null
+          id: string
+          proposal_id: string
+          revenue_split: Json
+          technical_lead: string | null
+          terms: string | null
+          updated_at: string
+        }
+        Insert: {
+          closed_by?: string | null
+          created_at?: string
+          executed_by?: string | null
+          id?: string
+          proposal_id: string
+          revenue_split?: Json
+          technical_lead?: string | null
+          terms?: string | null
+          updated_at?: string
+        }
+        Update: {
+          closed_by?: string | null
+          created_at?: string
+          executed_by?: string | null
+          id?: string
+          proposal_id?: string
+          revenue_split?: Json
+          technical_lead?: string | null
+          terms?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_internal_contracts_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: true
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_package_items: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_courtesy: boolean
+          is_optional: boolean
+          name: string
+          package_id: string | null
+          proposal_id: string
+          quantity: number
+          unit_cost: number
+          unit_price: number
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_courtesy?: boolean
+          is_optional?: boolean
+          name: string
+          package_id?: string | null
+          proposal_id: string
+          quantity?: number
+          unit_cost?: number
+          unit_price?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_courtesy?: boolean
+          is_optional?: boolean
+          name?: string
+          package_id?: string | null
+          proposal_id?: string
+          quantity?: number
+          unit_cost?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_package_items_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_package_items_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_packages: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          internal_cost: number
+          is_courtesy: boolean
+          is_optional: boolean
+          name: string
+          proposal_id: string
+          recommended: boolean
+          sale_price: number
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          internal_cost?: number
+          is_courtesy?: boolean
+          is_optional?: boolean
+          name: string
+          proposal_id: string
+          recommended?: boolean
+          sale_price?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          internal_cost?: number
+          is_courtesy?: boolean
+          is_optional?: boolean
+          name?: string
+          proposal_id?: string
+          recommended?: boolean
+          sale_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_packages_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposals: {
         Row: {
           accepted_at: string | null
@@ -244,6 +448,7 @@ export type Database = {
           event_end_time: string
           event_start_time: string
           event_timeline: Json
+          event_type: string | null
           extras_bundle_price: number | null
           extras_bundle_title: string | null
           groom_name: string
@@ -260,6 +465,8 @@ export type Database = {
           pricing_plans: Json
           process_steps: Json
           proposal_deadline: string | null
+          region: string
+          selected_packages: Json
           show_optionals: boolean
           show_partnership: boolean
           showcase_songs: Json
@@ -293,6 +500,7 @@ export type Database = {
           event_end_time?: string
           event_start_time?: string
           event_timeline?: Json
+          event_type?: string | null
           extras_bundle_price?: number | null
           extras_bundle_title?: string | null
           groom_name: string
@@ -309,6 +517,8 @@ export type Database = {
           pricing_plans?: Json
           process_steps?: Json
           proposal_deadline?: string | null
+          region?: string
+          selected_packages?: Json
           show_optionals?: boolean
           show_partnership?: boolean
           showcase_songs?: Json
@@ -342,6 +552,7 @@ export type Database = {
           event_end_time?: string
           event_start_time?: string
           event_timeline?: Json
+          event_type?: string | null
           extras_bundle_price?: number | null
           extras_bundle_title?: string | null
           groom_name?: string
@@ -358,6 +569,8 @@ export type Database = {
           pricing_plans?: Json
           process_steps?: Json
           proposal_deadline?: string | null
+          region?: string
+          selected_packages?: Json
           show_optionals?: boolean
           show_partnership?: boolean
           showcase_songs?: Json
@@ -450,9 +663,53 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_proposal: {
+        Args: {
+          p_extras: Json
+          p_final_value: number
+          p_notes: string
+          p_payment_method: string
+          p_payment_types: string[]
+          p_plan: Json
+          p_selected_packages?: Json
+          p_slug: string
+        }
+        Returns: boolean
+      }
+      add_dj_playlist_link: {
+        Args: { p_name: string; p_token: string; p_url: string }
+        Returns: Json
+      }
+      add_song_suggestion: {
+        Args: {
+          p_artist: string
+          p_notes: string
+          p_title: string
+          p_token: string
+        }
+        Returns: Json
+      }
+      delete_dj_playlist_link: {
+        Args: { p_id: string; p_token: string }
+        Returns: boolean
+      }
+      delete_song_suggestion: {
+        Args: { p_id: string; p_token: string }
+        Returns: boolean
+      }
+      get_playlist_session: { Args: { p_token: string }; Returns: Json }
+      get_public_proposal: { Args: { p_slug: string }; Returns: Json }
       increment_view_count: {
         Args: { proposal_slug: string }
         Returns: undefined
+      }
+      set_block_orders: {
+        Args: { p_orders: Json; p_token: string }
+        Returns: boolean
+      }
+      set_song_preference: {
+        Args: { p_song_id: string; p_status: string; p_token: string }
+        Returns: boolean
       }
     }
     Enums: {
