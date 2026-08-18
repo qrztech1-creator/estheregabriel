@@ -87,38 +87,24 @@ const ProposalSummaryPage = () => {
       final_value: finalValue,
     };
 
-    const { error } = await supabase.from("proposals").update({
-      accepted_at: new Date().toISOString(),
-      accepted_plan: acceptedPlanData as any,
-      accepted_payment_method: paymentLabels[paymentMethod] || paymentMethod,
-      accepted_notes: notes || null,
-      accepted_extras: chosenExtras as any,
-      accepted_payment_types: paymentTypes,
-      contract_status: "accepted",
-      contract_value: finalValue,
-    }).eq("id", proposal.id);
+    const { data: ok, error } = await supabase.rpc("accept_proposal", {
+      p_slug: proposal.slug,
+      p_plan: acceptedPlanData as any,
+      p_payment_method: paymentLabels[paymentMethod] || paymentMethod,
+      p_payment_types: paymentTypes,
+      p_extras: chosenExtras as any,
+      p_notes: notes || null,
+      p_final_value: finalValue,
+      p_selected_packages: selectedPackages as any,
+    });
 
-    if (error) {
+    if (error || !ok) {
       toast.error("Erro ao confirmar proposta");
     } else {
-      // Log the acceptance
-      await supabase.from("proposal_audit_log" as any).insert({
-        proposal_id: proposal.id,
-        actor_type: "client",
-        actor_name: `${proposal.bride_name} & ${proposal.groom_name}`,
-        action: "accepted",
-        changes: {
-          plan: plan.label,
-          payment_discount: paymentLabels[paymentMethod],
-          payment_types: paymentTypes,
-          extras: chosenExtras.map((e: any) => e.title),
-          final_value: finalValue,
-          notes: notes || null,
-        },
-      });
       setAccepted(true);
       toast.success("Proposta confirmada com sucesso!");
     }
+
     setSubmitting(false);
   };
 
