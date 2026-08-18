@@ -30,7 +30,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
     pricing_plans: [] as any[], included_services: [] as any[], tech_details: [] as string[],
     event_timeline: [] as any[], process_steps: [] as any[], showcase_songs: [] as any[],
     optional_extras: [] as any[], extras_bundle_title: "", extras_bundle_price: 0, audio_url: "",
-    show_partnership: true, show_optionals: true,
+    show_partnership: true, show_optionals: true, region: "gv", event_type: "",
   });
 
   useEffect(() => { loadProposal(); }, [proposalId]);
@@ -43,6 +43,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
       bride_name: d.bride_name || "", groom_name: d.groom_name || "", event_date: d.event_date || "",
       event_start_time: d.event_start_time || "18:00", event_end_time: d.event_end_time || "22:00",
       venue_name: d.venue_name || "", guest_count: d.guest_count || 150,
+      region: d.region || "gv", event_type: d.event_type || "",
       duration_label: d.duration_label || "", proposal_deadline: d.proposal_deadline || "",
       whatsapp_number: d.whatsapp_number || "", slug: d.slug || "",
       partnership_name: d.partnership_name || "", partnership_instagram: d.partnership_instagram || "",
@@ -89,6 +90,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
         bride_name: form.bride_name, groom_name: form.groom_name, event_date: form.event_date,
         event_start_time: form.event_start_time, event_end_time: form.event_end_time,
         venue_name: form.venue_name, guest_count: form.guest_count,
+        region: form.region, event_type: form.event_type || null,
         duration_label: form.duration_label, proposal_deadline: form.proposal_deadline || null,
         whatsapp_number: form.whatsapp_number, partnership_name: form.show_partnership ? (form.partnership_name || null) : null,
         partnership_instagram: form.show_partnership ? (form.partnership_instagram || null) : null,
@@ -197,6 +199,13 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
             <div><Label>Horário fim</Label><Input value={form.event_end_time} onChange={e => set("event_end_time", e.target.value)} /></div>
             <div><Label>Convidados</Label><Input type="number" value={form.guest_count} onChange={e => set("guest_count", Number(e.target.value))} /></div>
             <div><Label>Duração (descrição)</Label><Input value={form.duration_label} onChange={e => set("duration_label", e.target.value)} /></div>
+            <div><Label>Região</Label>
+              <select value={form.region} onChange={e => set("region", e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
+                <option value="gv">Grande Vitória</option>
+                <option value="fora">Fora da Grande Vitória</option>
+              </select>
+            </div>
+            <div><Label>Tipo de evento</Label><Input value={form.event_type} onChange={e => set("event_type", e.target.value)} /></div>
           </div>
         )}
 
