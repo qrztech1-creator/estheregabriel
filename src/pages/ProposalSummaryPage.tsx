@@ -73,19 +73,29 @@ const ProposalSummaryPage = () => {
     const chosenExtras = sExtras.filter((_: any, i: number) => selectedExtras[`extra-${i}`]);
     const chosenExtrasTotal = chosenExtras.reduce((sum: number, e: any) => sum + (e.price || 0), 0);
 
-    const baseTotal = (plan.total || 0) + chosenExtrasTotal;
+    const chosenPkgs = ((proposal.packages || []) as any[]).filter((p: any) => selectedPkgIds[p.id]);
+    const packagesTotal = chosenPkgs.reduce((s: number, p: any) => s + (p.is_courtesy ? 0 : Number(p.sale_price) || 0), 0);
+    const selectedPackages = chosenPkgs.map((p: any) => ({
+      id: p.id, name: p.name, is_courtesy: !!p.is_courtesy,
+      sale_price: p.is_courtesy ? 0 : Number(p.sale_price) || 0,
+    }));
+
+    const baseTotal = (plan?.total || 0) + chosenExtrasTotal + packagesTotal;
     const discountRates: Record<string, number> = { entry30: 0.04, entry50: 0.10, aVista: 0.125 };
     const rate = discountRates[paymentMethod] || 0;
     const finalValue = +(baseTotal * (1 - rate)).toFixed(2);
 
     const acceptedPlanData = {
-      ...plan,
+      ...(plan || {}),
       payment_method: paymentLabels[paymentMethod] || paymentMethod,
       payment_types: paymentTypes,
       extras_chosen: chosenExtras,
       extras_total: chosenExtrasTotal,
+      packages_chosen: selectedPackages,
+      packages_total: packagesTotal,
       final_value: finalValue,
     };
+
 
     const { data: ok, error } = await supabase.rpc("accept_proposal", {
       p_slug: proposal.slug,
