@@ -155,7 +155,37 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
         proposal_id: proposalRow.id,
       } as any);
 
+      // Packages + items priced during creation (internal cost, sale price, courtesies)
+      for (let pi = 0; pi < draftPackages.length; pi++) {
+        const p = draftPackages[pi];
+        const { data: pkg } = await supabase.from("proposal_packages").insert({
+          proposal_id: proposalRow.id, name: p.name, description: p.description || null,
+          category: p.category, sale_price: Number(p.sale_price) || 0,
+          internal_cost: Number(p.internal_cost) || 0, is_optional: p.is_optional,
+          is_courtesy: p.is_courtesy, recommended: p.recommended, display_order: pi,
+        }).select().single();
+        if (pkg && p.items.length) {
+          await supabase.from("proposal_package_items").insert(p.items.map((it, ii) => ({
+            proposal_id: proposalRow.id, package_id: (pkg as any).id, name: it.name,
+            description: it.description || null, category: it.category,
+            quantity: Number(it.quantity) || 1, unit_cost: Number(it.unit_cost) || 0,
+            unit_price: Number(it.unit_price) || 0, is_courtesy: it.is_courtesy,
+            is_optional: it.is_optional, display_order: ii,
+          })));
+        }
+      }
+      if (looseItems.length) {
+        await supabase.from("proposal_package_items").insert(looseItems.map((it, ii) => ({
+          proposal_id: proposalRow.id, package_id: null, name: it.name,
+          description: it.description || null, category: it.category,
+          quantity: Number(it.quantity) || 1, unit_cost: Number(it.unit_cost) || 0,
+          unit_price: Number(it.unit_price) || 0, is_courtesy: it.is_courtesy,
+          is_optional: true, display_order: ii,
+        })));
+      }
+
       if (copyRepertoire) {
+
         const { data: srcProposals } = await (supabase.from("proposals") as any).select("id").neq("id", proposalRow.id).order("created_at").limit(1);
         const srcProposal = srcProposals?.[0];
         if (srcProposal) {
