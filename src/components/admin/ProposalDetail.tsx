@@ -6,12 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import ProposalPackages from "./ProposalPackages";
+import ProposalChecklist from "./ProposalChecklist";
+import ProposalInternalContract from "./ProposalInternalContract";
+import type { RegionKey } from "@/data/regionPricing";
 
 interface Props {
   proposalId: string;
   onBack: () => void;
   onHistory?: (id: string) => void;
 }
+
 
 const contractStatuses = [
   { value: "proposal_sent", label: "Proposta Enviada" },
