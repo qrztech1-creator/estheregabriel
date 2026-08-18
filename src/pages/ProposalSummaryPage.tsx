@@ -150,14 +150,17 @@ const ProposalSummaryPage = () => {
   };
 
   const summaryExtras = getSummaryExtras(extras, proposal);
+  const packages: any[] = (proposal as any).packages || [];
 
   const discountRates: Record<string, number> = { entry30: 0.04, entry50: 0.10, aVista: 0.125 };
   const rate = discountRates[paymentMethod] || 0;
 
   const chosenExtrasTotal = summaryExtras.reduce((sum: number, e: any, i: number) => sum + (selectedExtras[`extra-${i}`] ? (e.price || 0) : 0), 0);
-  const baseTotal = (plan.total || 0) + chosenExtrasTotal;
+  const packagesTotal = packages.reduce((sum: number, p: any) => sum + (selectedPkgIds[p.id] && !p.is_courtesy ? Number(p.sale_price) || 0 : 0), 0);
+  const baseTotal = (plan.total || 0) + chosenExtrasTotal + packagesTotal;
   const grandTotal = +(baseTotal * (1 - rate)).toFixed(2);
   const totalSavings = +(baseTotal * rate).toFixed(2);
+
 
   const paymentTypeOptions = [
     { key: "pix", label: "Pix" },
