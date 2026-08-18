@@ -34,7 +34,7 @@ const formatBRL = (val: number) => `R$ ${val.toLocaleString("pt-BR", { minimumFr
 
 const ProposalDetail = ({ proposalId, onBack, onHistory }: Props) => {
   const [proposal, setProposal] = useState<any>(null);
-  const [tab, setTab] = useState<"geral" | "pacotes" | "checklist" | "interno">("geral");
+  const [tab, setTab] = useState<"geral" | "pacotes" | "repertorio" | "aparencia" | "checklist" | "interno">("geral");
 
   const [saving, setSaving] = useState(false);
   const [uploadingContract, setUploadingContract] = useState(false);
@@ -206,8 +206,11 @@ const ProposalDetail = ({ proposalId, onBack, onHistory }: Props) => {
         {[
           { key: "geral", label: "Geral" },
           { key: "pacotes", label: "Pacotes & Custos" },
+          { key: "repertorio", label: "Repertório" },
+          { key: "aparencia", label: "Aparência & Ordem" },
           { key: "checklist", label: "Checklist" },
           { key: "interno", label: "Contrato Interno" },
+
         ].map(t => (
           <button key={t.key} onClick={() => setTab(t.key as any)}
             className={`px-3 py-2 text-xs whitespace-nowrap border-b-2 transition-colors ${tab === t.key ? "border-primary text-primary font-medium" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
