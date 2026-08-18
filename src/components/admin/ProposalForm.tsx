@@ -141,6 +141,8 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
         extras_bundle_title: form.extras_bundle_title || null,
         extras_bundle_price: form.extras_bundle_price || null,
         audio_url,
+        template: form.template,
+
       };
 
       const { data: proposal, error } = await supabase.from("proposals").insert(insertData).select().maybeSingle();
