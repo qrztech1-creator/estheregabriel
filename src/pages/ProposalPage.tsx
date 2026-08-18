@@ -30,19 +30,14 @@ const ProposalPage = () => {
 
   useEffect(() => {
     if (!slug) { navigate("/"); return; }
-    supabase.from("proposals")
-      .select("*")
-      .eq("slug", slug)
-      .eq("status", "active")
-      .maybeSingle()
-      .then(async ({ data, error }) => {
+    supabase.rpc("get_public_proposal", { p_slug: slug })
+      .then(({ data, error }) => {
         if (error || !data) { navigate("/"); return; }
         setProposal(data as unknown as ProposalData);
         setLoading(false);
-        // Increment view count via secure function
-        await supabase.rpc("increment_view_count", { proposal_slug: slug });
       });
   }, [slug]);
+
 
   useEffect(() => {
     if (!proposal || !entered) return;
