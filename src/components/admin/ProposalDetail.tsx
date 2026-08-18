@@ -196,6 +196,25 @@ const ProposalDetail = ({ proposalId, onBack, onHistory }: Props) => {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-1 border-b border-border overflow-x-auto">
+        {[
+          { key: "geral", label: "Geral" },
+          { key: "pacotes", label: "Pacotes & Custos" },
+          { key: "checklist", label: "Checklist" },
+          { key: "interno", label: "Contrato Interno" },
+        ].map(t => (
+          <button key={t.key} onClick={() => setTab(t.key as any)}
+            className={`px-3 py-2 text-xs whitespace-nowrap border-b-2 transition-colors ${tab === t.key ? "border-primary text-primary font-medium" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "geral" && (
+      <>
+
+
       {/* Accepted info */}
       {accepted && (
         <div className="bg-primary/5 border border-primary/30 rounded-xl p-4 sm:p-6 space-y-4">
