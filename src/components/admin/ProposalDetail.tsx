@@ -221,6 +221,8 @@ const ProposalDetail = ({ proposalId, onBack, onHistory }: Props) => {
 
       {tab === "geral" && (
       <>
+      <ProposalExport proposalId={proposalId} proposal={proposal} />
+
 
 
       {/* Accepted info */}
