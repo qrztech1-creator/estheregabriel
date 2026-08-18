@@ -334,7 +334,12 @@ const ProposalDetail = ({ proposalId, onBack, onHistory }: Props) => {
         />
       )}
 
+      {tab === "repertorio" && <ProposalPlaylist proposalId={proposalId} />}
+
+      {tab === "aparencia" && <ProposalAppearance proposalId={proposalId} />}
+
       {tab === "checklist" && <ProposalChecklist proposalId={proposalId} />}
+
 
       {tab === "interno" && <ProposalInternalContract proposalId={proposalId} contractValue={contractValue} />}
     </div>
