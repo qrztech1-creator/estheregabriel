@@ -37,6 +37,8 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
     guest_count: 150,
     region: "gv",
     event_type: "",
+    template: "classic",
+
     duration_label: "4 Horas de Música Imersiva",
     proposal_deadline: "",
     whatsapp_number: "5527999936682",
