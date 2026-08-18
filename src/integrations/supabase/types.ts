@@ -150,29 +150,41 @@ export type Database = {
         Row: {
           artist: string | null
           block_id: string
+          cover_url: string | null
           created_at: string | null
           display_order: number
+          energy: number
           id: string
           proposal_id: string | null
+          spotify_url: string | null
           title: string
+          youtube_url: string | null
         }
         Insert: {
           artist?: string | null
           block_id: string
+          cover_url?: string | null
           created_at?: string | null
           display_order: number
+          energy?: number
           id?: string
           proposal_id?: string | null
+          spotify_url?: string | null
           title: string
+          youtube_url?: string | null
         }
         Update: {
           artist?: string | null
           block_id?: string
+          cover_url?: string | null
           created_at?: string | null
           display_order?: number
+          energy?: number
           id?: string
           proposal_id?: string | null
+          spotify_url?: string | null
           title?: string
+          youtube_url?: string | null
         }
         Relationships: [
           {
@@ -466,6 +478,7 @@ export type Database = {
           process_steps: Json
           proposal_deadline: string | null
           region: string
+          section_order: Json
           selected_packages: Json
           show_optionals: boolean
           show_partnership: boolean
@@ -473,6 +486,8 @@ export type Database = {
           slug: string
           status: string
           tech_details: Json
+          template: string
+          theme: Json
           updated_at: string | null
           venue_name: string
           view_count: number | null
@@ -518,6 +533,7 @@ export type Database = {
           process_steps?: Json
           proposal_deadline?: string | null
           region?: string
+          section_order?: Json
           selected_packages?: Json
           show_optionals?: boolean
           show_partnership?: boolean
@@ -525,6 +541,8 @@ export type Database = {
           slug: string
           status?: string
           tech_details?: Json
+          template?: string
+          theme?: Json
           updated_at?: string | null
           venue_name: string
           view_count?: number | null
@@ -570,6 +588,7 @@ export type Database = {
           process_steps?: Json
           proposal_deadline?: string | null
           region?: string
+          section_order?: Json
           selected_packages?: Json
           show_optionals?: boolean
           show_partnership?: boolean
@@ -577,12 +596,50 @@ export type Database = {
           slug?: string
           status?: string
           tech_details?: Json
+          template?: string
+          theme?: Json
           updated_at?: string | null
           venue_name?: string
           view_count?: number | null
           whatsapp_number?: string
         }
         Relationships: []
+      }
+      song_order_preferences: {
+        Row: {
+          client_token_id: string
+          display_order: number
+          id: string
+          song_id: string
+        }
+        Insert: {
+          client_token_id: string
+          display_order: number
+          id?: string
+          song_id: string
+        }
+        Update: {
+          client_token_id?: string
+          display_order?: number
+          id?: string
+          song_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "song_order_preferences_client_token_id_fkey"
+            columns: ["client_token_id"]
+            isOneToOne: false
+            referencedRelation: "client_tokens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "song_order_preferences_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "playlist_songs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       song_preferences: {
         Row: {
@@ -704,6 +761,10 @@ export type Database = {
         Returns: undefined
       }
       set_block_orders: {
+        Args: { p_orders: Json; p_token: string }
+        Returns: boolean
+      }
+      set_song_orders: {
         Args: { p_orders: Json; p_token: string }
         Returns: boolean
       }
