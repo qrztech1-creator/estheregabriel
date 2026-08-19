@@ -177,8 +177,28 @@ export const buildClientPdf = (data: PdfData) => {
     });
   };
 
+  const included = (p.included_services || []).map((s: any) => s?.text || s?.title || String(s)).filter(Boolean);
+  if (included.length) {
+    h2(c, "O que está incluso");
+    included.forEach((t: string) => para(c, `• ${t}`, 9, GREY));
+    c.y += 4;
+  }
+
   renderPkgs(fixed, "Serviços e pacotes inclusos");
   renderPkgs(optional, "Opcionais e adicionais");
+
+  const legacyExtras = p.show_optionals === false ? [] : (p.optional_extras || []);
+  if (legacyExtras.length) {
+    if (!optional.length) h2(c, "Opcionais e adicionais");
+    legacyExtras.forEach((e: any) => {
+      ensure(c, 40);
+      row(c, [e.title || "", Number(e.price) ? BRL(Number(e.price)) : ""], [CW - 120, 120], { bold: true });
+      if (e.description) para(c, e.description, 8.5, GREY);
+      (e.details || []).forEach((d: string) => row(c, [`   • ${d}`, ""], [CW - 120, 120], { muted: true }));
+      c.y += 6;
+      divider(c);
+    });
+  }
 
   const standalone = itemsOf(items, null);
   if (standalone.length) {
