@@ -208,7 +208,8 @@ export const buildClientPdf = (data: PdfData) => {
 
   h2(c, "Contato");
   para(c, `WhatsApp: ${p.whatsapp_number || "5527999936682"}`, 9.5);
-  para(c, `Proposta online: ${window.location.origin}/proposta/${p.slug}`, 9.5, GREY);
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://homemusicp.lovable.app";
+  para(c, `Proposta online: ${origin}/proposta/${p.slug}`, 9.5, GREY);
 
   footer(c);
   return c.doc;
