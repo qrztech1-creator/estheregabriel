@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { recalcPlanDiscounts } from "@/data/proposalTemplate";
+import SortableList from "./SortableList";
+import AiTextButton from "./AiTextButton";
 
 interface Props {
   proposalId: string;
