@@ -132,8 +132,8 @@ const header = (c: Ctx, p: any, kicker: string) => {
   c.y += 26;
 };
 
-const itemsOf = (items: any[], pkgId: string | null) =>
-  items.filter(i => (i.package_id || null) === pkgId);
+const itemsOf = (items: any[] | undefined, pkgId: string | null) =>
+  (items || []).filter(i => (i.package_id || null) === pkgId);
 
 export const buildClientPdf = (data: PdfData) => {
   const { proposal: p, packages, items } = data;
