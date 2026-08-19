@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { recalcPlanDiscounts } from "@/data/proposalTemplate";
+import SortableList from "./SortableList";
+import AiTextButton from "./AiTextButton";
 
 interface Props {
   proposalId: string;
@@ -229,114 +231,156 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
           </div>
         )}
 
-        {renderSection("pricing", `💰 Planos de Preço (${form.pricing_plans.length})`,
+        {renderSection("pricing", `💰 Planos de Preço (${form.pricing_plans.length}) — arraste para reordenar`,
           <>
-            {form.pricing_plans.map((plan: any, i: number) => (
-              <div key={i} className="border border-border rounded-lg p-4 space-y-3 relative">
-                <button onClick={() => set("pricing_plans", form.pricing_plans.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div><Label>Nome</Label><Input value={plan.label} onChange={e => updatePlan(i, "label", e.target.value)} /></div>
-                  <div><Label>Descrição</Label><Input value={plan.description} onChange={e => updatePlan(i, "description", e.target.value)} /></div>
-                  <div><Label>Valor Total (R$)</Label><Input type="number" value={plan.total} onChange={e => updatePlanTotal(i, Number(e.target.value))} /></div>
-                  <div className="flex items-end"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={plan.recommended || false} onChange={e => updatePlan(i, "recommended", e.target.checked)} /> Recomendado</label></div>
+            <SortableList
+              items={form.pricing_plans}
+              getId={(p: any, i) => p.id || `plan-${i}`}
+              onReorder={arr => set("pricing_plans", arr)}
+              renderItem={(plan: any, i: number) => (
+                <div className="border border-border rounded-lg p-4 space-y-3 relative">
+                  <button onClick={() => set("pricing_plans", form.pricing_plans.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><Label>Nome</Label><Input value={plan.label} onChange={e => updatePlan(i, "label", e.target.value)} /></div>
+                    <div>
+                      <div className="flex items-center justify-between"><Label>Descrição</Label>
+                        <AiTextButton kind="descrição de plano de investimento" context={`${aiLabel}. Plano: ${plan.label}`} current={plan.description || ""} onResult={t => updatePlan(i, "description", t)} />
+                      </div>
+                      <Input value={plan.description} onChange={e => updatePlan(i, "description", e.target.value)} />
+                    </div>
+                    <div><Label>Valor Total (R$)</Label><Input type="number" value={plan.total} onChange={e => updatePlanTotal(i, Number(e.target.value))} /></div>
+                    <div className="flex items-end"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={plan.recommended || false} onChange={e => updatePlan(i, "recommended", e.target.checked)} /> Recomendado</label></div>
+                  </div>
                 </div>
-              </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={() => set("pricing_plans", [...form.pricing_plans, { id: `plano-${Date.now()}`, label: "", description: "", total: 0, ...recalcPlanDiscounts(0), recommended: false }])}>+ Adicionar plano</Button>
+              )}
+            />
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("pricing_plans", [...form.pricing_plans, { id: `plano-${Date.now()}`, label: "", description: "", total: 0, ...recalcPlanDiscounts(0), recommended: false }])}>+ Adicionar plano</Button>
           </>
         )}
 
-        {renderSection("services", `🎵 Serviços Inclusos (${form.included_services.length})`,
+        {renderSection("services", `🎵 Serviços Inclusos (${form.included_services.length}) — arraste para reordenar`,
           <>
-            {form.included_services.map((s: any, i: number) => (
-              <div key={i} className="flex gap-2 items-center">
-                <Input value={s.text} onChange={e => { const arr = [...form.included_services]; arr[i] = { ...arr[i], text: e.target.value }; set("included_services", arr); }} className="flex-1" />
-                <button onClick={() => set("included_services", form.included_services.filter((_: any, j: number) => j !== i))} className="text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
-              </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={() => set("included_services", [...form.included_services, { icon: "Music", text: "" }])}>+ Adicionar</Button>
-          </>
-        )}
-
-        {renderSection("tech", `🔧 Detalhes Técnicos (${form.tech_details.length})`,
-          <>
-            {form.tech_details.map((t: string, i: number) => (
-              <div key={i} className="flex gap-2">
-                <Input value={t} onChange={e => { const arr = [...form.tech_details]; arr[i] = e.target.value; set("tech_details", arr); }} className="flex-1" />
-                <button onClick={() => set("tech_details", form.tech_details.filter((_: string, j: number) => j !== i))} className="text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
-              </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={() => set("tech_details", [...form.tech_details, ""])}>+ Adicionar</Button>
-          </>
-        )}
-
-        {renderSection("timeline", `🕐 Timeline do Evento (${form.event_timeline.length})`,
-          <>
-            {form.event_timeline.map((item: any, i: number) => (
-              <div key={i} className="border border-border rounded p-3 space-y-2 relative">
-                <button onClick={() => set("event_timeline", form.event_timeline.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <Input value={item.time} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], time: e.target.value }; set("event_timeline", arr); }} placeholder="Horário" />
-                  <Input value={item.duration} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], duration: e.target.value }; set("event_timeline", arr); }} placeholder="Duração" />
-                  <Input value={item.title} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], title: e.target.value }; set("event_timeline", arr); }} placeholder="Título" />
+            <SortableList
+              items={form.included_services}
+              onReorder={arr => set("included_services", arr)}
+              renderItem={(s: any, i: number) => (
+                <div className="flex gap-2 items-center">
+                  <Input value={s.text} onChange={e => { const arr = [...form.included_services]; arr[i] = { ...arr[i], text: e.target.value }; set("included_services", arr); }} className="flex-1" />
+                  <AiTextButton kind="item de serviço incluso" context={aiLabel} current={s.text || ""} onResult={t => { const arr = [...form.included_services]; arr[i] = { ...arr[i], text: t }; set("included_services", arr); }} />
+                  <button onClick={() => set("included_services", form.included_services.filter((_: any, j: number) => j !== i))} className="text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
                 </div>
-                <Textarea value={item.description} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], description: e.target.value }; set("event_timeline", arr); }} placeholder="Descrição" rows={2} />
-              </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={() => set("event_timeline", [...form.event_timeline, { time: "", duration: "", title: "", description: "", icon: "Music", details: [] }])}>+ Adicionar</Button>
+              )}
+            />
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("included_services", [...form.included_services, { icon: "Music", text: "" }])}>+ Adicionar</Button>
           </>
         )}
 
-        {renderSection("process", `📋 Etapas do Processo (${form.process_steps.length})`,
+        {renderSection("tech", `🔧 Detalhes Técnicos (${form.tech_details.length}) — arraste para reordenar`,
           <>
-            {form.process_steps.map((step: any, i: number) => (
-              <div key={i} className="border border-border rounded p-3 space-y-2 relative">
-                <button onClick={() => set("process_steps", form.process_steps.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <Input value={step.title} onChange={e => { const arr = [...form.process_steps]; arr[i] = { ...arr[i], title: e.target.value }; set("process_steps", arr); }} placeholder="Título" />
-                  <Input value={step.date} onChange={e => { const arr = [...form.process_steps]; arr[i] = { ...arr[i], date: e.target.value }; set("process_steps", arr); }} placeholder="Data/Período" />
-                  <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={step.active || false} onChange={e => { const arr = [...form.process_steps]; arr[i] = { ...arr[i], active: e.target.checked }; set("process_steps", arr); }} /> Ativo</label>
+            <SortableList
+              items={form.tech_details}
+              onReorder={arr => set("tech_details", arr)}
+              renderItem={(t: string, i: number) => (
+                <div className="flex gap-2">
+                  <Input value={t} onChange={e => { const arr = [...form.tech_details]; arr[i] = e.target.value; set("tech_details", arr); }} className="flex-1" />
+                  <button onClick={() => set("tech_details", form.tech_details.filter((_: string, j: number) => j !== i))} className="text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
                 </div>
-                <Input value={step.description} onChange={e => { const arr = [...form.process_steps]; arr[i] = { ...arr[i], description: e.target.value }; set("process_steps", arr); }} placeholder="Descrição" />
-              </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={() => set("process_steps", [...form.process_steps, { icon: "CheckCircle2", title: "", date: "", description: "", active: false }])}>+ Adicionar</Button>
+              )}
+            />
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("tech_details", [...form.tech_details, ""])}>+ Adicionar</Button>
           </>
         )}
 
-        {renderSection("songs", `🎶 Músicas Destaque (${form.showcase_songs.length})`,
+        {renderSection("timeline", `🕐 Timeline do Evento (${form.event_timeline.length}) — arraste para reordenar`,
           <>
-            <div className="max-h-64 overflow-y-auto space-y-2">
-              {form.showcase_songs.map((song: any, i: number) => (
-                <div key={i} className="flex gap-2 items-center">
-                  <Input value={song.title} onChange={e => { const arr = [...form.showcase_songs]; arr[i] = { ...arr[i], title: e.target.value }; set("showcase_songs", arr); }} placeholder="Título" className="flex-1" />
-                  <Input value={song.artist} onChange={e => { const arr = [...form.showcase_songs]; arr[i] = { ...arr[i], artist: e.target.value }; set("showcase_songs", arr); }} placeholder="Artista" className="flex-1" />
-                  <button onClick={() => set("showcase_songs", form.showcase_songs.filter((_: any, j: number) => j !== i))} className="text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
+            <SortableList
+              items={form.event_timeline}
+              onReorder={arr => set("event_timeline", arr)}
+              renderItem={(item: any, i: number) => (
+                <div className="border border-border rounded p-3 space-y-2 relative">
+                  <button onClick={() => set("event_timeline", form.event_timeline.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <Input value={item.time} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], time: e.target.value }; set("event_timeline", arr); }} placeholder="Horário" />
+                    <Input value={item.duration} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], duration: e.target.value }; set("event_timeline", arr); }} placeholder="Duração" />
+                    <Input value={item.title} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], title: e.target.value }; set("event_timeline", arr); }} placeholder="Título" />
+                  </div>
+                  <div className="flex justify-end"><AiTextButton kind="descrição de momento da timeline" context={`${aiLabel}. Momento: ${item.title} às ${item.time}`} current={item.description || ""} onResult={t => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], description: t }; set("event_timeline", arr); }} /></div>
+                  <Textarea value={item.description} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], description: e.target.value }; set("event_timeline", arr); }} placeholder="Descrição" rows={2} />
                 </div>
-              ))}
+              )}
+            />
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("event_timeline", [...form.event_timeline, { time: "", duration: "", title: "", description: "", icon: "Music", details: [] }])}>+ Adicionar</Button>
+          </>
+        )}
+
+        {renderSection("process", `📋 Etapas do Processo (${form.process_steps.length}) — arraste para reordenar`,
+          <>
+            <SortableList
+              items={form.process_steps}
+              onReorder={arr => set("process_steps", arr)}
+              renderItem={(step: any, i: number) => (
+                <div className="border border-border rounded p-3 space-y-2 relative">
+                  <button onClick={() => set("process_steps", form.process_steps.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <Input value={step.title} onChange={e => { const arr = [...form.process_steps]; arr[i] = { ...arr[i], title: e.target.value }; set("process_steps", arr); }} placeholder="Título" />
+                    <Input value={step.date} onChange={e => { const arr = [...form.process_steps]; arr[i] = { ...arr[i], date: e.target.value }; set("process_steps", arr); }} placeholder="Data/Período" />
+                    <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={step.active || false} onChange={e => { const arr = [...form.process_steps]; arr[i] = { ...arr[i], active: e.target.checked }; set("process_steps", arr); }} /> Ativo</label>
+                  </div>
+                  <Input value={step.description} onChange={e => { const arr = [...form.process_steps]; arr[i] = { ...arr[i], description: e.target.value }; set("process_steps", arr); }} placeholder="Descrição" />
+                </div>
+              )}
+            />
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("process_steps", [...form.process_steps, { icon: "CheckCircle2", title: "", date: "", description: "", active: false }])}>+ Adicionar</Button>
+          </>
+        )}
+
+        {renderSection("songs", `🎶 Músicas Destaque (${form.showcase_songs.length}) — arraste para reordenar`,
+          <>
+            <div className="max-h-80 overflow-y-auto pr-1">
+              <SortableList
+                items={form.showcase_songs}
+                onReorder={arr => set("showcase_songs", arr)}
+                renderItem={(song: any, i: number) => (
+                  <div className="flex gap-2 items-center">
+                    <Input value={song.title} onChange={e => { const arr = [...form.showcase_songs]; arr[i] = { ...arr[i], title: e.target.value }; set("showcase_songs", arr); }} placeholder="Título" className="flex-1" />
+                    <Input value={song.artist} onChange={e => { const arr = [...form.showcase_songs]; arr[i] = { ...arr[i], artist: e.target.value }; set("showcase_songs", arr); }} placeholder="Artista" className="flex-1" />
+                    <button onClick={() => set("showcase_songs", form.showcase_songs.filter((_: any, j: number) => j !== i))} className="text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
+                  </div>
+                )}
+              />
             </div>
-            <Button variant="outline" size="sm" onClick={() => set("showcase_songs", [...form.showcase_songs, { title: "", artist: "", videoId: "" }])}>+ Adicionar</Button>
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("showcase_songs", [...form.showcase_songs, { title: "", artist: "", videoId: "" }])}>+ Adicionar</Button>
           </>
         )}
 
-        {renderSection("extras", "✨ Opcionais",
+        {renderSection("extras", "✨ Opcionais & Adicionais",
           <>
             <label className="flex items-center gap-3 mb-4">
               <input type="checkbox" checked={form.show_optionals} onChange={e => set("show_optionals", e.target.checked)} className="w-4 h-4" />
               <div>
-                <p className="text-sm font-medium">Exibir seção de opcionais (LED / Pista)</p>
+                <p className="text-sm font-medium">Exibir seção de opcionais</p>
                 <p className="text-xs text-muted-foreground">Desmarque quando não for oferecer nesta proposta</p>
               </div>
             </label>
             {form.show_optionals && <>
-            {form.optional_extras.map((extra: any, i: number) => (
-              <div key={i} className="border border-border rounded p-3 space-y-2 relative">
-                <button onClick={() => set("optional_extras", form.optional_extras.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
-                <Input value={extra.title} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], title: e.target.value }; set("optional_extras", arr); }} placeholder="Título" />
-                <Textarea value={extra.description} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], description: e.target.value }; set("optional_extras", arr); }} placeholder="Descrição" rows={2} />
-              </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={() => set("optional_extras", [...form.optional_extras, { icon: "Monitor", title: "", description: "", details: [] }])}>+ Adicionar</Button>
+            <p className="text-xs text-muted-foreground mb-2">Padrão: nome do serviço · descrição · preço. Arraste para reordenar.</p>
+            <SortableList
+              items={form.optional_extras}
+              onReorder={arr => set("optional_extras", arr)}
+              renderItem={(extra: any, i: number) => (
+                <div className="border border-border rounded p-3 space-y-2 relative">
+                  <button onClick={() => set("optional_extras", form.optional_extras.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <Input className="sm:col-span-2" value={extra.title} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], title: e.target.value }; set("optional_extras", arr); }} placeholder="Nome do serviço" />
+                    <Input type="number" value={extra.price ?? 0} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], price: Number(e.target.value) }; set("optional_extras", arr); }} placeholder="Preço (R$)" />
+                  </div>
+                  <div className="flex justify-end"><AiTextButton kind="descrição de serviço opcional" context={`${aiLabel}. Serviço: ${extra.title}`} current={extra.description || ""} onResult={t => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], description: t }; set("optional_extras", arr); }} /></div>
+                  <Textarea value={extra.description} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], description: e.target.value }; set("optional_extras", arr); }} placeholder="Descrição do serviço" rows={2} />
+                  <Input value={extra.image_url || ""} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], image_url: e.target.value }; set("optional_extras", arr); }} placeholder="URL da imagem (opcional)" />
+                </div>
+              )}
+            />
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("optional_extras", [...form.optional_extras, { icon: "Monitor", title: "", description: "", price: 0, image_url: "", details: [] }])}>+ Adicionar opcional</Button>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <div><Label>Título do pacote</Label><Input value={form.extras_bundle_title} onChange={e => set("extras_bundle_title", e.target.value)} /></div>
               <div><Label>Preço do pacote (R$)</Label><Input type="number" value={form.extras_bundle_price} onChange={e => set("extras_bundle_price", Number(e.target.value))} /></div>

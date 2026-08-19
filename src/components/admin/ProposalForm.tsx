@@ -275,6 +275,29 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
           </div>
         )}
 
+        {renderSection("modelo", "🎨 Modelo Visual",
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {TEMPLATES.map(t => (
+              <button key={t.key} type="button" onClick={() => set("template", t.key)}
+                className={`text-left p-4 rounded-lg border transition-all ${form.template === t.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+                <p className="font-medium text-sm">{t.label}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t.description}</p>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {renderSection("custos", "💵 Custos, Preço e Lucro (visão interna)",
+          <CostCalculator
+            region={form.region as RegionKey}
+            contextLabel={`${form.bride_name} & ${form.groom_name} — ${form.venue_name || "local a definir"}`}
+            packages={draftPackages}
+            looseItems={looseItems}
+            onChange={(p, l) => { setDraftPackages(p); setLooseItems(l); }}
+          />
+        )}
+
+
         {renderSection("audio", "🎵 Música de Fundo (MP3)",
           <div>
             <Label>Arquivo MP3 para a página do casal</Label>
@@ -292,8 +315,9 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
 
         {renderSection("pricing", `💰 Planos de Preço (${form.pricing_plans.length})`,
           <>
-            {form.pricing_plans.map((plan: any, i: number) => (
-              <div key={i} className="border border-border rounded-lg p-4 space-y-3 relative">
+            <SortableList items={form.pricing_plans} onReorder={arr => set("pricing_plans", arr)} getId={(_, i) => `plan-${i}`}
+              renderItem={(plan: any, i: number) => (
+              <div className="border border-border rounded-lg p-4 space-y-3 relative">
                 <button onClick={() => set("pricing_plans", form.pricing_plans.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><Label>Nome</Label><Input value={plan.label} onChange={e => updatePlan(i, "label", e.target.value)} /></div>
@@ -307,15 +331,16 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
                   <span>À vista: R$ {plan.aVista?.toFixed(2)}</span>
                 </div>
               </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={() => set("pricing_plans", [...form.pricing_plans, { id: `plano-${form.pricing_plans.length + 1}`, label: "", description: "", total: 0, entry30: 0, savings30: 0, entry50: 0, savings50: 0, aVista: 0, savingsAVista: 0, recommended: false }])}>+ Adicionar plano</Button>
+            )} />
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("pricing_plans", [...form.pricing_plans, { id: `plano-${form.pricing_plans.length + 1}`, label: "", description: "", total: 0, entry30: 0, savings30: 0, entry50: 0, savings50: 0, aVista: 0, savingsAVista: 0, recommended: false }])}>+ Adicionar plano</Button>
           </>
         )}
 
         {renderSection("services", `🎵 Serviços Inclusos (${form.included_services.length})`,
           <>
-            {form.included_services.map((s: any, i: number) => (
-              <div key={i} className="flex gap-2 items-center">
+            <SortableList items={form.included_services} onReorder={arr => set("included_services", arr)} getId={(_, i) => `svc-${i}`}
+              renderItem={(s: any, i: number) => (
+              <div className="flex gap-2 items-center">
                 <select value={s.icon} onChange={e => { const arr = [...form.included_services]; arr[i] = { ...arr[i], icon: e.target.value }; set("included_services", arr); }} className="bg-card border border-border rounded px-2 py-2 text-sm">
                   <option value="Music">🎵 Música</option><option value="Disc3">💿 DJ</option><option value="Lightbulb">💡 Luz</option><option value="Volume2">🔊 Som</option>
                 </select>
@@ -323,44 +348,51 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
                 <Input value={s.badge || ""} onChange={e => { const arr = [...form.included_services]; arr[i] = { ...arr[i], badge: e.target.value }; set("included_services", arr); }} placeholder="Badge" className="w-24" />
                 <button onClick={() => set("included_services", form.included_services.filter((_: any, j: number) => j !== i))} className="text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
               </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={() => set("included_services", [...form.included_services, { icon: "Music", text: "" }])}>+ Adicionar</Button>
+            )} />
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("included_services", [...form.included_services, { icon: "Music", text: "" }])}>+ Adicionar</Button>
           </>
         )}
 
         {renderSection("tech", `🔧 Detalhes Técnicos (${form.tech_details.length})`,
           <>
-            {form.tech_details.map((t: string, i: number) => (
-              <div key={i} className="flex gap-2">
+            <SortableList items={form.tech_details} onReorder={arr => set("tech_details", arr)} getId={(_, i) => `tech-${i}`}
+              renderItem={(t: string, i: number) => (
+              <div className="flex gap-2">
                 <Input value={t} onChange={e => { const arr = [...form.tech_details]; arr[i] = e.target.value; set("tech_details", arr); }} className="flex-1" />
                 <button onClick={() => set("tech_details", form.tech_details.filter((_: string, j: number) => j !== i))} className="text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
               </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={() => set("tech_details", [...form.tech_details, ""])}>+ Adicionar</Button>
+            )} />
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("tech_details", [...form.tech_details, ""])}>+ Adicionar</Button>
           </>
         )}
 
         {renderSection("timeline", `🕐 Timeline do Evento (${form.event_timeline.length})`,
           <>
-            {form.event_timeline.map((item: any, i: number) => (
-              <div key={i} className="border border-border rounded p-3 space-y-2 relative">
+            <SortableList items={form.event_timeline} onReorder={arr => set("event_timeline", arr)} getId={(_, i) => `tl-${i}`}
+              renderItem={(item: any, i: number) => (
+              <div className="border border-border rounded p-3 space-y-2 relative">
                 <button onClick={() => set("event_timeline", form.event_timeline.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <Input value={item.time} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], time: e.target.value }; set("event_timeline", arr); }} placeholder="Horário" />
                   <Input value={item.duration} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], duration: e.target.value }; set("event_timeline", arr); }} placeholder="Duração" />
                   <Input value={item.title} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], title: e.target.value }; set("event_timeline", arr); }} placeholder="Título" />
                 </div>
+                <div className="flex items-center justify-end">
+                  <AiTextButton kind="descrição de bloco musical do evento" context={`${form.bride_name} & ${form.groom_name}. Momento: ${item.title}`} current={item.description || ""}
+                    onResult={t => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], description: t }; set("event_timeline", arr); }} />
+                </div>
                 <Textarea value={item.description} onChange={e => { const arr = [...form.event_timeline]; arr[i] = { ...arr[i], description: e.target.value }; set("event_timeline", arr); }} placeholder="Descrição" rows={2} />
               </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={() => set("event_timeline", [...form.event_timeline, { time: "", duration: "", title: "", description: "", icon: "Music", details: [] }])}>+ Adicionar bloco</Button>
+            )} />
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("event_timeline", [...form.event_timeline, { time: "", duration: "", title: "", description: "", icon: "Music", details: [] }])}>+ Adicionar bloco</Button>
           </>
         )}
 
         {renderSection("process", `📋 Etapas do Processo (${form.process_steps.length})`,
           <>
-            {form.process_steps.map((step: any, i: number) => (
-              <div key={i} className="border border-border rounded p-3 space-y-2 relative">
+            <SortableList items={form.process_steps} onReorder={arr => set("process_steps", arr)} getId={(_, i) => `ps-${i}`}
+              renderItem={(step: any, i: number) => (
+              <div className="border border-border rounded p-3 space-y-2 relative">
                 <button onClick={() => set("process_steps", form.process_steps.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <Input value={step.title} onChange={e => { const arr = [...form.process_steps]; arr[i] = { ...arr[i], title: e.target.value }; set("process_steps", arr); }} placeholder="Título" />
@@ -369,45 +401,56 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
                 </div>
                 <Input value={step.description} onChange={e => { const arr = [...form.process_steps]; arr[i] = { ...arr[i], description: e.target.value }; set("process_steps", arr); }} placeholder="Descrição" />
               </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={() => set("process_steps", [...form.process_steps, { icon: "CheckCircle2", title: "", date: "", description: "", active: false }])}>+ Adicionar etapa</Button>
+            )} />
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("process_steps", [...form.process_steps, { icon: "CheckCircle2", title: "", date: "", description: "", active: false }])}>+ Adicionar etapa</Button>
           </>
         )}
 
         {renderSection("songs", `🎶 Músicas Destaque (${form.showcase_songs.length})`,
           <>
-            <div className="max-h-64 overflow-y-auto space-y-2">
-              {form.showcase_songs.map((song: any, i: number) => (
-                <div key={i} className="flex gap-2 items-center">
+            <div className="max-h-80 overflow-y-auto">
+              <SortableList items={form.showcase_songs} onReorder={arr => set("showcase_songs", arr)} getId={(_, i) => `song-${i}`}
+                renderItem={(song: any, i: number) => (
+                <div className="flex gap-2 items-center">
                   <Input value={song.title} onChange={e => { const arr = [...form.showcase_songs]; arr[i] = { ...arr[i], title: e.target.value }; set("showcase_songs", arr); }} placeholder="Título" className="flex-1" />
                   <Input value={song.artist} onChange={e => { const arr = [...form.showcase_songs]; arr[i] = { ...arr[i], artist: e.target.value }; set("showcase_songs", arr); }} placeholder="Artista" className="flex-1" />
                   <Input value={song.videoId} onChange={e => { const arr = [...form.showcase_songs]; arr[i] = { ...arr[i], videoId: e.target.value }; set("showcase_songs", arr); }} placeholder="YouTube ID" className="w-32" />
                   <button onClick={() => set("showcase_songs", form.showcase_songs.filter((_: any, j: number) => j !== i))} className="text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
                 </div>
-              ))}
+              )} />
             </div>
-            <Button variant="outline" size="sm" onClick={() => set("showcase_songs", [...form.showcase_songs, { title: "", artist: "", videoId: "" }])}>+ Adicionar música</Button>
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("showcase_songs", [...form.showcase_songs, { title: "", artist: "", videoId: "" }])}>+ Adicionar música</Button>
           </>
         )}
 
-        {renderSection("extras", "✨ Opcionais",
+        {renderSection("extras", "✨ Opcionais & Adicionais",
           <>
             <label className="flex items-center gap-3 mb-4">
               <input type="checkbox" checked={form.show_optionals} onChange={e => set("show_optionals", e.target.checked)} className="w-4 h-4" />
               <div>
-                <p className="text-sm font-medium">Exibir seção de opcionais (LED / Pista)</p>
+                <p className="text-sm font-medium">Exibir seção de opcionais</p>
                 <p className="text-xs text-muted-foreground">Desmarque quando o local já tem cênica e você não vai oferecer</p>
               </div>
             </label>
             {form.show_optionals && <>
-            {form.optional_extras.map((extra: any, i: number) => (
-              <div key={i} className="border border-border rounded p-3 space-y-2 relative">
+            <p className="text-xs text-muted-foreground mb-2">Padrão: serviço · preço · descrição · imagem (opcional).</p>
+            <SortableList items={form.optional_extras} onReorder={arr => set("optional_extras", arr)} getId={(_, i) => `ex-${i}`}
+              renderItem={(extra: any, i: number) => (
+              <div className="border border-border rounded p-3 space-y-2 relative">
                 <button onClick={() => set("optional_extras", form.optional_extras.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
-                <Input value={extra.title} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], title: e.target.value }; set("optional_extras", arr); }} placeholder="Título" />
-                <Textarea value={extra.description} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], description: e.target.value }; set("optional_extras", arr); }} placeholder="Descrição" rows={2} />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pr-6">
+                  <Input value={extra.title} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], title: e.target.value }; set("optional_extras", arr); }} placeholder="Serviço" />
+                  <Input type="number" value={extra.price ?? 0} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], price: Number(e.target.value) }; set("optional_extras", arr); }} placeholder="Preço (R$)" />
+                  <Input value={extra.image_url || ""} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], image_url: e.target.value }; set("optional_extras", arr); }} placeholder="URL da imagem" />
+                </div>
+                <div className="flex items-center justify-end">
+                  <AiTextButton kind="descrição de serviço opcional" context={`Serviço: ${extra.title}. Evento: ${form.bride_name} & ${form.groom_name}`} current={extra.description || ""}
+                    onResult={t => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], description: t }; set("optional_extras", arr); }} />
+                </div>
+                <Textarea value={extra.description} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], description: e.target.value }; set("optional_extras", arr); }} placeholder="Descrição do serviço" rows={2} />
               </div>
-            ))}
-            <Button variant="outline" size="sm" onClick={() => set("optional_extras", [...form.optional_extras, { icon: "Monitor", title: "", description: "", details: [] }])}>+ Adicionar</Button>
+            )} />
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("optional_extras", [...form.optional_extras, { icon: "Monitor", title: "", price: 0, description: "", image_url: "", details: [] }])}>+ Adicionar opcional</Button>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <div><Label>Título do pacote</Label><Input value={form.extras_bundle_title} onChange={e => set("extras_bundle_title", e.target.value)} /></div>
               <div><Label>Preço do pacote (R$)</Label><Input type="number" value={form.extras_bundle_price} onChange={e => set("extras_bundle_price", Number(e.target.value))} /></div>
@@ -415,6 +458,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
             </>}
           </>
         )}
+
 
         {renderSection("partnership", "🤝 Parceria / Indicação",
           <>
