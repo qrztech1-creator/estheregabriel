@@ -756,10 +756,6 @@ export type Database = {
       }
       get_playlist_session: { Args: { p_token: string }; Returns: Json }
       get_public_proposal: { Args: { p_slug: string }; Returns: Json }
-      increment_view_count: {
-        Args: { proposal_slug: string }
-        Returns: undefined
-      }
       set_block_orders: {
         Args: { p_orders: Json; p_token: string }
         Returns: boolean
