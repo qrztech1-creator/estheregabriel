@@ -61,6 +61,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
   };
 
   const set = (field: string, value: any) => setForm(f => ({ ...f, [field]: value }));
+  const aiLabel = `Casamento de ${form.bride_name} & ${form.groom_name} em ${form.venue_name}`;
   const toggle = (key: string) => { const s = new Set(openSections); s.has(key) ? s.delete(key) : s.add(key); setOpenSections(s); };
 
   const updatePlanTotal = (i: number, total: number) => {
