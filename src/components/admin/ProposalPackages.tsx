@@ -130,6 +130,47 @@ const ProposalPackages = ({ proposalId, proposalLabel, region, onRegionChange }:
 
   const itemsOf = (pkgId: string | null) => items.filter(i => (i.package_id || null) === pkgId);
 
+  const field = (label: string, node: React.ReactNode) => (
+    <div className="flex flex-col gap-1">
+      <span className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</span>
+      {node}
+    </div>
+  );
+
+  const itemRow = (i: Item) => {
+    const cost = (Number(i.unit_cost) || 0) * (Number(i.quantity) || 1);
+    const price = i.is_courtesy ? 0 : (Number(i.unit_price) || 0) * (Number(i.quantity) || 1);
+    return (
+      <div key={i.id} className="rounded-lg border border-border/70 bg-background/40 p-2.5 space-y-2">
+        <div className="flex items-center gap-2">
+          <Input value={i.name} onChange={e => updateItem(i.id, { name: e.target.value })} className="h-9 flex-1 text-sm" placeholder="Nome do item" />
+          <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => removeItem(i.id)}>
+            <Trash2 className="w-3.5 h-3.5 text-destructive" />
+          </Button>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          {field("Categoria",
+            <select value={i.category} onChange={e => updateItem(i.id, { category: e.target.value })} className="h-9 w-full rounded-md border border-input bg-background px-2 text-xs">
+              {ITEM_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+            </select>)}
+          {field("Qtd", <Input type="number" min={1} value={i.quantity} onChange={e => updateItem(i.id, { quantity: e.target.value })} className="h-9 text-xs" />)}
+          {field("Custo unit.", <Input type="number" value={i.unit_cost} onChange={e => updateItem(i.id, { unit_cost: e.target.value })} className="h-9 text-xs" />)}
+          {field("Venda unit.", <Input type="number" value={i.unit_price} onChange={e => updateItem(i.id, { unit_price: e.target.value })} className="h-9 text-xs" />)}
+          {field("Cortesia",
+            <label className="h-9 flex items-center gap-2 text-xs">
+              <Checkbox checked={!!i.is_courtesy} onCheckedChange={v => updateItem(i.id, { is_courtesy: !!v })} />
+              <span className="text-muted-foreground">grátis</span>
+            </label>)}
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Custo {formatBRL(cost)} · Venda {formatBRL(price)} ·
+          <span className={price - cost >= 0 ? " text-primary" : " text-destructive"}> Lucro {formatBRL(price - cost)}</span>
+        </p>
+      </div>
+    );
+  };
+
+
   const pkgItemsCost = (pkgId: string) =>
     itemsOf(pkgId).reduce((s, i) => s + (Number(i.unit_cost) || 0) * (Number(i.quantity) || 1), 0);
   const pkgItemsPrice = (pkgId: string) =>
