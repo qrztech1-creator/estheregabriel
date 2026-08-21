@@ -171,9 +171,9 @@ const ProposalPackages = ({ proposalId, proposalLabel, region, onRegionChange }:
           <summary className="cursor-pointer text-muted-foreground">Faixas de referência — {REGIONS.find(r => r.key === region)?.label}</summary>
           <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1">
             {PRICE_BANDS[region].map(b => (
-              <div key={b.role} className="flex justify-between gap-2 py-1 border-b border-border/50">
+              <div key={b.role} className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-2 py-1 border-b border-border/50">
                 <span>{b.role}</span>
-                <span className="text-muted-foreground whitespace-nowrap">
+                <span className="text-muted-foreground sm:whitespace-nowrap">
                   custo {formatBRL(b.costMin)}–{formatBRL(b.costMax)} · venda {formatBRL(b.priceMin)}–{formatBRL(b.priceMax)}
                 </span>
               </div>
@@ -181,6 +181,57 @@ const ProposalPackages = ({ proposalId, proposalLabel, region, onRegionChange }:
           </div>
         </details>
       </div>
+
+      {/* Sugestões por região */}
+      <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex-1">
+          <p className="text-sm font-medium flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-primary" /> Pacotes sugeridos — {REGIONS.find(r => r.key === region)?.label}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Ponto de partida com custo e venda sugeridos. Depois de adicionar, tudo é editável.</p>
+        </div>
+        <Dialog open={presetOpen} onOpenChange={setPresetOpen}>
+          <DialogTrigger asChild>
+            <Button type="button" size="sm" className="gap-1.5 w-full sm:w-auto"><Wand2 className="w-3.5 h-3.5" /> Ver sugestões</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Pacotes sugeridos — {REGIONS.find(r => r.key === region)?.label}</DialogTitle>
+              <DialogDescription>Escolha um modelo; ele entra na proposta já editável.</DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {presets.map(p => {
+                const pt = presetTotals(p);
+                return (
+                  <div key={p.key} className="rounded-xl border border-border bg-card p-3 flex flex-col">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-medium text-sm">{p.name}</p>
+                      <div className="flex gap-1 flex-wrap justify-end">
+                        {p.tags.map(tag => (
+                          <span key={tag} className="text-[9px] uppercase tracking-wide border border-primary/40 text-primary rounded px-1.5 py-0.5">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{p.description}</p>
+                    <ul className="mt-2 space-y-0.5 text-xs text-muted-foreground">
+                      {p.items.map(i => (
+                        <li key={i.name}>• {i.quantity > 1 ? `${i.quantity}× ` : ""}{i.name} <span className="opacity-70">({formatBRL(i.unit_cost)} → {formatBRL(i.unit_price)})</span></li>
+                      ))}
+                    </ul>
+                    <div className="mt-3 pt-2 border-t border-border grid grid-cols-3 gap-1 text-[11px]">
+                      <div><span className="block text-muted-foreground">Custo</span>{formatBRL(pt.cost)}</div>
+                      <div><span className="block text-muted-foreground">Venda</span>{formatBRL(pt.price)}</div>
+                      <div><span className="block text-muted-foreground">Margem</span><span className="text-primary">{pt.marginPct.toFixed(0)}%</span></div>
+                    </div>
+                    <Button type="button" size="sm" variant="outline" className="mt-3 gap-1.5" onClick={() => addPreset(p)}>
+                      <Plus className="w-3.5 h-3.5" /> Adicionar e editar
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
 
       {/* Packages */}
       <div className="space-y-3">
