@@ -1,16 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Trash2, Save, ChevronDown, ChevronRight, Gift } from "lucide-react";
+import { Plus, Trash2, Save, ChevronDown, ChevronRight, Gift, Wand2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import AiTextButton from "./AiTextButton";
+import { getPackagePresets, presetTotals, type PackagePreset } from "@/data/packagePresets";
 import {
   ITEM_CATEGORIES, PACKAGE_CATEGORIES, PRICE_BANDS, REGIONS, formatBRL, type RegionKey,
 } from "@/data/regionPricing";
+
 
 interface Props {
   proposalId: string;
@@ -27,6 +30,29 @@ const ProposalPackages = ({ proposalId, proposalLabel, region, onRegionChange }:
   const [items, setItems] = useState<Item[]>([]);
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
+  const [presetOpen, setPresetOpen] = useState(false);
+  const presets = useMemo(() => getPackagePresets(region), [region]);
+
+  const addPreset = async (preset: PackagePreset) => {
+    const { data: pkg, error } = await supabase.from("proposal_packages").insert({
+      proposal_id: proposalId, name: preset.name, description: preset.description,
+      category: preset.category, sale_price: presetTotals(preset).price,
+      is_optional: !!preset.is_optional, display_order: packages.length,
+    }).select().single();
+    if (error || !pkg) { toast.error("Erro ao adicionar sugestão"); return; }
+    const { data: its } = await supabase.from("proposal_package_items").insert(
+      preset.items.map((i, idx) => ({
+        proposal_id: proposalId, package_id: pkg.id, name: i.name, category: i.category,
+        quantity: i.quantity, unit_cost: i.unit_cost, unit_price: i.unit_price,
+        is_optional: !!preset.is_optional, display_order: items.length + idx,
+      }))).select();
+    setPackages(ps => [...ps, pkg]);
+    setItems(is => [...is, ...(its || [])]);
+    setOpen(o => ({ ...o, [pkg.id]: true }));
+    setPresetOpen(false);
+    toast.success("Sugestão adicionada — edite à vontade");
+  };
+
 
   useEffect(() => { load(); }, [proposalId]);
 
@@ -104,6 +130,47 @@ const ProposalPackages = ({ proposalId, proposalLabel, region, onRegionChange }:
 
   const itemsOf = (pkgId: string | null) => items.filter(i => (i.package_id || null) === pkgId);
 
+  const field = (label: string, node: React.ReactNode) => (
+    <div className="flex flex-col gap-1">
+      <span className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</span>
+      {node}
+    </div>
+  );
+
+  const itemRow = (i: Item) => {
+    const cost = (Number(i.unit_cost) || 0) * (Number(i.quantity) || 1);
+    const price = i.is_courtesy ? 0 : (Number(i.unit_price) || 0) * (Number(i.quantity) || 1);
+    return (
+      <div key={i.id} className="rounded-lg border border-border/70 bg-background/40 p-2.5 space-y-2">
+        <div className="flex items-center gap-2">
+          <Input value={i.name} onChange={e => updateItem(i.id, { name: e.target.value })} className="h-9 flex-1 text-sm" placeholder="Nome do item" />
+          <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => removeItem(i.id)}>
+            <Trash2 className="w-3.5 h-3.5 text-destructive" />
+          </Button>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          {field("Categoria",
+            <select value={i.category} onChange={e => updateItem(i.id, { category: e.target.value })} className="h-9 w-full rounded-md border border-input bg-background px-2 text-xs">
+              {ITEM_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+            </select>)}
+          {field("Qtd", <Input type="number" min={1} value={i.quantity} onChange={e => updateItem(i.id, { quantity: e.target.value })} className="h-9 text-xs" />)}
+          {field("Custo unit.", <Input type="number" value={i.unit_cost} onChange={e => updateItem(i.id, { unit_cost: e.target.value })} className="h-9 text-xs" />)}
+          {field("Venda unit.", <Input type="number" value={i.unit_price} onChange={e => updateItem(i.id, { unit_price: e.target.value })} className="h-9 text-xs" />)}
+          {field("Cortesia",
+            <label className="h-9 flex items-center gap-2 text-xs">
+              <Checkbox checked={!!i.is_courtesy} onCheckedChange={v => updateItem(i.id, { is_courtesy: !!v })} />
+              <span className="text-muted-foreground">grátis</span>
+            </label>)}
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Custo {formatBRL(cost)} · Venda {formatBRL(price)} ·
+          <span className={price - cost >= 0 ? " text-primary" : " text-destructive"}> Lucro {formatBRL(price - cost)}</span>
+        </p>
+      </div>
+    );
+  };
+
+
   const pkgItemsCost = (pkgId: string) =>
     itemsOf(pkgId).reduce((s, i) => s + (Number(i.unit_cost) || 0) * (Number(i.quantity) || 1), 0);
   const pkgItemsPrice = (pkgId: string) =>
@@ -145,9 +212,9 @@ const ProposalPackages = ({ proposalId, proposalLabel, region, onRegionChange }:
           <summary className="cursor-pointer text-muted-foreground">Faixas de referência — {REGIONS.find(r => r.key === region)?.label}</summary>
           <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1">
             {PRICE_BANDS[region].map(b => (
-              <div key={b.role} className="flex justify-between gap-2 py-1 border-b border-border/50">
+              <div key={b.role} className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-2 py-1 border-b border-border/50">
                 <span>{b.role}</span>
-                <span className="text-muted-foreground whitespace-nowrap">
+                <span className="text-muted-foreground sm:whitespace-nowrap">
                   custo {formatBRL(b.costMin)}–{formatBRL(b.costMax)} · venda {formatBRL(b.priceMin)}–{formatBRL(b.priceMax)}
                 </span>
               </div>
@@ -155,6 +222,57 @@ const ProposalPackages = ({ proposalId, proposalLabel, region, onRegionChange }:
           </div>
         </details>
       </div>
+
+      {/* Sugestões por região */}
+      <div className="rounded-xl border border-primary/30 bg-primary/5 p-3 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex-1">
+          <p className="text-sm font-medium flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-primary" /> Pacotes sugeridos — {REGIONS.find(r => r.key === region)?.label}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Ponto de partida com custo e venda sugeridos. Depois de adicionar, tudo é editável.</p>
+        </div>
+        <Dialog open={presetOpen} onOpenChange={setPresetOpen}>
+          <DialogTrigger asChild>
+            <Button type="button" size="sm" className="gap-1.5 w-full sm:w-auto"><Wand2 className="w-3.5 h-3.5" /> Ver sugestões</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Pacotes sugeridos — {REGIONS.find(r => r.key === region)?.label}</DialogTitle>
+              <DialogDescription>Escolha um modelo; ele entra na proposta já editável.</DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {presets.map(p => {
+                const pt = presetTotals(p);
+                return (
+                  <div key={p.key} className="rounded-xl border border-border bg-card p-3 flex flex-col">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-medium text-sm">{p.name}</p>
+                      <div className="flex gap-1 flex-wrap justify-end">
+                        {p.tags.map(tag => (
+                          <span key={tag} className="text-[9px] uppercase tracking-wide border border-primary/40 text-primary rounded px-1.5 py-0.5">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{p.description}</p>
+                    <ul className="mt-2 space-y-0.5 text-xs text-muted-foreground">
+                      {p.items.map(i => (
+                        <li key={i.name}>• {i.quantity > 1 ? `${i.quantity}× ` : ""}{i.name} <span className="opacity-70">({formatBRL(i.unit_cost)} → {formatBRL(i.unit_price)})</span></li>
+                      ))}
+                    </ul>
+                    <div className="mt-3 pt-2 border-t border-border grid grid-cols-3 gap-1 text-[11px]">
+                      <div><span className="block text-muted-foreground">Custo</span>{formatBRL(pt.cost)}</div>
+                      <div><span className="block text-muted-foreground">Venda</span>{formatBRL(pt.price)}</div>
+                      <div><span className="block text-muted-foreground">Margem</span><span className="text-primary">{pt.marginPct.toFixed(0)}%</span></div>
+                    </div>
+                    <Button type="button" size="sm" variant="outline" className="mt-3 gap-1.5" onClick={() => addPreset(p)}>
+                      <Plus className="w-3.5 h-3.5" /> Adicionar e editar
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
 
       {/* Packages */}
       <div className="space-y-3">
@@ -208,21 +326,8 @@ const ProposalPackages = ({ proposalId, proposalLabel, region, onRegionChange }:
                       <Label className="text-xs">Itens do pacote — custo {formatBRL(pkgItemsCost(p.id))} · venda {formatBRL(pkgItemsPrice(p.id))}</Label>
                       <Button variant="outline" size="sm" className="h-7 gap-1 text-xs" onClick={() => addItem(p.id)}><Plus className="w-3 h-3" /> Item</Button>
                     </div>
-                    {itemsOf(p.id).map(i => (
-                      <div key={i.id} className="grid grid-cols-12 gap-2 items-center">
-                        <Input value={i.name} onChange={e => updateItem(i.id, { name: e.target.value })} className="h-8 col-span-12 sm:col-span-4 text-xs" placeholder="Nome" />
-                        <select value={i.category} onChange={e => updateItem(i.id, { category: e.target.value })} className="h-8 col-span-5 sm:col-span-2 rounded-md border border-input bg-background px-1 text-xs">
-                          {ITEM_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-                        </select>
-                        <Input type="number" value={i.quantity} onChange={e => updateItem(i.id, { quantity: e.target.value })} className="h-8 col-span-2 sm:col-span-1 text-xs" title="Qtd" />
-                        <Input type="number" value={i.unit_cost} onChange={e => updateItem(i.id, { unit_cost: e.target.value })} className="h-8 col-span-2 sm:col-span-2 text-xs" title="Custo unit." placeholder="Custo" />
-                        <Input type="number" value={i.unit_price} onChange={e => updateItem(i.id, { unit_price: e.target.value })} className="h-8 col-span-2 sm:col-span-2 text-xs" title="Venda unit." placeholder="Venda" />
-                        <div className="col-span-1 flex items-center justify-end gap-1">
-                          <Checkbox checked={!!i.is_courtesy} onCheckedChange={v => updateItem(i.id, { is_courtesy: !!v })} title="Cortesia" />
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeItem(i.id)}><Trash2 className="w-3 h-3 text-destructive" /></Button>
-                        </div>
-                      </div>
-                    ))}
+                    {itemsOf(p.id).map(i => itemRow(i))}
+
                   </div>
                 </div>
               )}
@@ -241,21 +346,8 @@ const ProposalPackages = ({ proposalId, proposalLabel, region, onRegionChange }:
       {itemsOf(null).length > 0 && (
         <div className="bg-card border border-border rounded-xl p-4 space-y-2">
           <Label className="text-xs">Itens avulsos (opcionais fora dos pacotes)</Label>
-          {itemsOf(null).map(i => (
-            <div key={i.id} className="grid grid-cols-12 gap-2 items-center">
-              <Input value={i.name} onChange={e => updateItem(i.id, { name: e.target.value })} className="h-8 col-span-12 sm:col-span-4 text-xs" />
-              <select value={i.category} onChange={e => updateItem(i.id, { category: e.target.value })} className="h-8 col-span-5 sm:col-span-2 rounded-md border border-input bg-background px-1 text-xs">
-                {ITEM_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-              </select>
-              <Input type="number" value={i.quantity} onChange={e => updateItem(i.id, { quantity: e.target.value })} className="h-8 col-span-2 sm:col-span-1 text-xs" />
-              <Input type="number" value={i.unit_cost} onChange={e => updateItem(i.id, { unit_cost: e.target.value })} className="h-8 col-span-2 sm:col-span-2 text-xs" placeholder="Custo" />
-              <Input type="number" value={i.unit_price} onChange={e => updateItem(i.id, { unit_price: e.target.value })} className="h-8 col-span-2 sm:col-span-2 text-xs" placeholder="Venda" />
-              <div className="col-span-1 flex items-center justify-end gap-1">
-                <Checkbox checked={!!i.is_courtesy} onCheckedChange={v => updateItem(i.id, { is_courtesy: !!v })} />
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeItem(i.id)}><Trash2 className="w-3 h-3 text-destructive" /></Button>
-              </div>
-            </div>
-          ))}
+          {itemsOf(null).map(i => itemRow(i))}
+
         </div>
       )}
     </div>
