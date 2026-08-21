@@ -285,21 +285,8 @@ const ProposalPackages = ({ proposalId, proposalLabel, region, onRegionChange }:
                       <Label className="text-xs">Itens do pacote — custo {formatBRL(pkgItemsCost(p.id))} · venda {formatBRL(pkgItemsPrice(p.id))}</Label>
                       <Button variant="outline" size="sm" className="h-7 gap-1 text-xs" onClick={() => addItem(p.id)}><Plus className="w-3 h-3" /> Item</Button>
                     </div>
-                    {itemsOf(p.id).map(i => (
-                      <div key={i.id} className="grid grid-cols-12 gap-2 items-center">
-                        <Input value={i.name} onChange={e => updateItem(i.id, { name: e.target.value })} className="h-8 col-span-12 sm:col-span-4 text-xs" placeholder="Nome" />
-                        <select value={i.category} onChange={e => updateItem(i.id, { category: e.target.value })} className="h-8 col-span-5 sm:col-span-2 rounded-md border border-input bg-background px-1 text-xs">
-                          {ITEM_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-                        </select>
-                        <Input type="number" value={i.quantity} onChange={e => updateItem(i.id, { quantity: e.target.value })} className="h-8 col-span-2 sm:col-span-1 text-xs" title="Qtd" />
-                        <Input type="number" value={i.unit_cost} onChange={e => updateItem(i.id, { unit_cost: e.target.value })} className="h-8 col-span-2 sm:col-span-2 text-xs" title="Custo unit." placeholder="Custo" />
-                        <Input type="number" value={i.unit_price} onChange={e => updateItem(i.id, { unit_price: e.target.value })} className="h-8 col-span-2 sm:col-span-2 text-xs" title="Venda unit." placeholder="Venda" />
-                        <div className="col-span-1 flex items-center justify-end gap-1">
-                          <Checkbox checked={!!i.is_courtesy} onCheckedChange={v => updateItem(i.id, { is_courtesy: !!v })} title="Cortesia" />
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeItem(i.id)}><Trash2 className="w-3 h-3 text-destructive" /></Button>
-                        </div>
-                      </div>
-                    ))}
+                    {itemsOf(p.id).map(i => itemRow(i))}
+
                   </div>
                 </div>
               )}
