@@ -30,6 +30,29 @@ const ProposalPackages = ({ proposalId, proposalLabel, region, onRegionChange }:
   const [items, setItems] = useState<Item[]>([]);
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
+  const [presetOpen, setPresetOpen] = useState(false);
+  const presets = useMemo(() => getPackagePresets(region), [region]);
+
+  const addPreset = async (preset: PackagePreset) => {
+    const { data: pkg, error } = await supabase.from("proposal_packages").insert({
+      proposal_id: proposalId, name: preset.name, description: preset.description,
+      category: preset.category, sale_price: presetTotals(preset).price,
+      is_optional: !!preset.is_optional, display_order: packages.length,
+    }).select().single();
+    if (error || !pkg) { toast.error("Erro ao adicionar sugestão"); return; }
+    const { data: its } = await supabase.from("proposal_package_items").insert(
+      preset.items.map((i, idx) => ({
+        proposal_id: proposalId, package_id: pkg.id, name: i.name, category: i.category,
+        quantity: i.quantity, unit_cost: i.unit_cost, unit_price: i.unit_price,
+        is_optional: !!preset.is_optional, display_order: items.length + idx,
+      }))).select();
+    setPackages(ps => [...ps, pkg]);
+    setItems(is => [...is, ...(its || [])]);
+    setOpen(o => ({ ...o, [pkg.id]: true }));
+    setPresetOpen(false);
+    toast.success("Sugestão adicionada — edite à vontade");
+  };
+
 
   useEffect(() => { load(); }, [proposalId]);
 
