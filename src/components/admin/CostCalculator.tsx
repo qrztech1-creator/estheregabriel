@@ -20,6 +20,7 @@ export interface DraftPackage {
   name: string; description: string; category: string;
   sale_price: number; internal_cost: number;
   is_optional: boolean; is_courtesy: boolean; recommended: boolean;
+  media?: MediaEntry[];
   items: DraftItem[];
 }
 
@@ -30,7 +31,7 @@ export const emptyItem = (): DraftItem => ({
 export const emptyPackage = (): DraftPackage => ({
   name: "Novo pacote", description: "", category: "festa",
   sale_price: 0, internal_cost: 0, is_optional: false, is_courtesy: false,
-  recommended: false, items: [],
+  recommended: false, media: [], items: [],
 });
 
 const itemsCost = (its: DraftItem[]) => its.reduce((s, i) => s + (Number(i.unit_cost) || 0) * (Number(i.quantity) || 1), 0);
