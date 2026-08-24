@@ -17,7 +17,7 @@ import EntranceGate from "@/components/EntranceGate";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import logo from "@/assets/logo-homemusic.png";
 import { Music } from "lucide-react";
-import { buildThemeStyle, normalizeSectionOrder, getTemplate, type SectionKey } from "@/data/templates";
+import { buildThemeStyle, normalizeSectionOrder, normalizeSections, getTemplate, type SectionKey } from "@/data/templates";
 
 
 gsap.registerPlugin(ScrollTrigger);
@@ -78,7 +78,8 @@ const ProposalPage = () => {
   const p = proposal as any;
   const tpl = getTemplate(p.template);
   const themeStyle = buildThemeStyle(p.template, p.theme);
-  const order = normalizeSectionOrder(p.section_order);
+  const sections = normalizeSections(p.sections);
+  const order = normalizeSectionOrder(p.section_order).filter(k => sections[k].visible);
 
   const sectionMap: Record<SectionKey, JSX.Element | null> = {
     hero: (
