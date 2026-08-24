@@ -237,47 +237,73 @@ const ProposalSummaryPage = () => {
           </div>
         </div>
 
-        {/* Modular packages */}
-        {packages.length > 0 && (
-          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-            <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Serviços & Pacotes</h2>
-            <div className="grid gap-3">
-              {packages.map((pk: any) => {
-                const active = !!selectedPkgIds[pk.id];
-                return (
-                  <button key={pk.id} onClick={() => setSelectedPkgIds(prev => ({ ...prev, [pk.id]: !prev[pk.id] }))}
-                    className={`p-4 rounded-lg border text-left transition-all ${active ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
-                    <div className="flex items-start gap-3">
-                      <div className={`w-5 h-5 rounded border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${active ? "bg-primary border-primary" : "border-muted-foreground/40"}`}>
-                        {active && <Check className="w-3 h-3 text-primary-foreground" />}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">
-                          {pk.name}
-                          {pk.is_courtesy && <span className="ml-2 text-[10px] uppercase tracking-wider text-primary">Cortesia</span>}
-                          {pk.is_optional && <span className="ml-2 text-[10px] uppercase tracking-wider text-muted-foreground">Opcional</span>}
+        {/* Modular packages — multi-select */}
+        {packages.length > 0 && (() => {
+          const isExtra = (pk: any) => !!pk.is_optional || pk.category === "extra";
+          const groups = [
+            {
+              key: "base",
+              title: "Planos & Serviços",
+              hint: "Selecione quantos quiser — pode acoplar cerimônia, festa e mais.",
+              list: packages.filter(pk => !isExtra(pk)),
+            },
+            {
+              key: "extra",
+              title: "Opcionais & Adicionais",
+              hint: "Iluminação, palco, painel e pista de LED — combine à vontade.",
+              list: packages.filter(isExtra),
+            },
+          ].filter(g => g.list.length > 0);
+
+          return groups.map(group => (
+            <div key={group.key} className="bg-card border border-border rounded-xl p-6 space-y-4">
+              <div>
+                <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">{group.title}</h2>
+                <p className="text-xs text-muted-foreground mt-1">{group.hint}</p>
+              </div>
+              <div className="grid gap-3">
+                {group.list.map((pk: any) => {
+                  const active = !!selectedPkgIds[pk.id];
+                  return (
+                    <div key={pk.id}
+                      role="button" tabIndex={0}
+                      onClick={() => setSelectedPkgIds(prev => ({ ...prev, [pk.id]: !prev[pk.id] }))}
+                      onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedPkgIds(prev => ({ ...prev, [pk.id]: !prev[pk.id] })); } }}
+                      className={`p-4 rounded-lg border text-left transition-all cursor-pointer ${active ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+                      <div className="flex items-start gap-3">
+                        <div className={`w-5 h-5 rounded border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${active ? "bg-primary border-primary" : "border-muted-foreground/40"}`}>
+                          {active && <Check className="w-3 h-3 text-primary-foreground" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm">
+                            {pk.name}
+                            {pk.is_courtesy && <span className="ml-2 text-[10px] uppercase tracking-wider text-primary">Cortesia</span>}
+                            {pk.recommended && <span className="ml-2 text-[10px] uppercase tracking-wider text-primary">Recomendado</span>}
+                          </p>
+                          {pk.description && <p className="text-xs text-muted-foreground mt-1">{pk.description}</p>}
+                          {(pk.items || []).length > 0 && (
+                            <ul className="mt-2 space-y-0.5">
+                              {pk.items.map((it: any) => (
+                                <li key={it.id} className="text-[11px] text-muted-foreground">
+                                  • {it.quantity > 1 ? `${it.quantity}× ` : ""}{it.name}{it.is_courtesy ? " (cortesia)" : ""}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          <MediaGallery media={pk.media} />
+                        </div>
+                        <p className="font-display text-sm text-foreground whitespace-nowrap">
+                          {pk.is_courtesy ? "Cortesia" : formatBRL(Number(pk.sale_price) || 0)}
                         </p>
-                        {pk.description && <p className="text-xs text-muted-foreground mt-1">{pk.description}</p>}
-                        {(pk.items || []).length > 0 && (
-                          <ul className="mt-2 space-y-0.5">
-                            {pk.items.map((it: any) => (
-                              <li key={it.id} className="text-[11px] text-muted-foreground">
-                                • {it.quantity > 1 ? `${it.quantity}× ` : ""}{it.name}{it.is_courtesy ? " (cortesia)" : ""}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
                       </div>
-                      <p className="font-display text-sm text-foreground whitespace-nowrap">
-                        {pk.is_courtesy ? "Cortesia" : formatBRL(Number(pk.sale_price) || 0)}
-                      </p>
                     </div>
-                  </button>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          ));
+        })()}
+
 
         {/* Optional Extras */}
         {(proposal as any).show_optionals !== false && (
