@@ -488,6 +488,7 @@ export type Database = {
           proposal_deadline: string | null
           region: string
           section_order: Json
+          sections: Json
           selected_packages: Json
           show_optionals: boolean
           show_partnership: boolean
@@ -543,6 +544,7 @@ export type Database = {
           proposal_deadline?: string | null
           region?: string
           section_order?: Json
+          sections?: Json
           selected_packages?: Json
           show_optionals?: boolean
           show_partnership?: boolean
@@ -598,6 +600,7 @@ export type Database = {
           proposal_deadline?: string | null
           region?: string
           section_order?: Json
+          sections?: Json
           selected_packages?: Json
           show_optionals?: boolean
           show_partnership?: boolean
