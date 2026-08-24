@@ -58,11 +58,24 @@ const MediaGallery = ({ media, compact = false }: { media?: MediaEntry[] | null;
               </a>
             );
           }
+          const yt = youtubeId(m.url);
+          const thumb = m.kind === "image" ? m.url : yt ? `https://img.youtube.com/vi/${yt}/mqdefault.jpg` : null;
           return (
             <button key={m.id || i} type="button"
               onClick={e => { e.stopPropagation(); e.preventDefault(); setActive(m); }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm border border-primary/40 text-[10px] tracking-[0.15em] uppercase text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
-              <Eye className="w-3 h-3" /> {m.title || (m.kind === "video" ? "Ver vídeo" : "Ver imagem")}
+              className="group relative overflow-hidden rounded-sm border border-primary/40 hover:border-primary transition-colors">
+              {thumb ? (
+                <>
+                  <img src={thumb} alt={m.title || "Mídia"} loading="lazy" className="w-28 h-20 object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <span className="absolute inset-0 flex items-center justify-center gap-1.5 bg-background/50 opacity-0 group-hover:opacity-100 transition-opacity font-ui text-[10px] tracking-[0.15em] uppercase text-primary">
+                    <Eye className="w-3 h-3" /> Ver
+                  </span>
+                </>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] tracking-[0.15em] uppercase text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <Eye className="w-3 h-3" /> {m.title || "Ver vídeo"}
+                </span>
+              )}
             </button>
           );
         })}
