@@ -313,10 +313,11 @@ const ProposalSummaryPage = () => {
                           </p>
                           {pk.description && <p className="text-xs text-muted-foreground mt-1">{pk.description}</p>}
                           {(pk.items || []).length > 0 && (
-                            <ul className="mt-2 space-y-0.5">
+                            <ul className="mt-2 space-y-1">
                               {pk.items.map((it: any) => (
                                 <li key={it.id} className="text-[11px] text-muted-foreground">
                                   • {it.quantity > 1 ? `${it.quantity}× ` : ""}{it.name}{it.is_courtesy ? " (cortesia)" : ""}
+                                  <MediaGallery media={it.media} compact />
                                 </li>
                               ))}
                             </ul>
