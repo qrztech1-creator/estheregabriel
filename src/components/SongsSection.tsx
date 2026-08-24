@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import StrokeText from "./StrokeText";
 import FloatingScene from "./FloatingScene";
 import { useProposal } from "@/contexts/ProposalContext";
+import { getSectionCopy } from "@/data/templates";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -56,6 +57,7 @@ const defaultSongs = [
 
 const SongsSection = () => {
   const proposal = useProposal();
+  const copy = getSectionCopy(proposal, "songs");
   const songs = (proposal?.showcase_songs?.length ? proposal.showcase_songs : defaultSongs) as any[];
   const slug = proposal?.slug ?? "esther-gabriel-2027";
   const cardsRef = useRef<(HTMLAnchorElement | null)[]>([]);

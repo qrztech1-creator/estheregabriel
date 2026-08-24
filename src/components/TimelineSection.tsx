@@ -7,6 +7,7 @@ import StrokeText from "./StrokeText";
 import FloatingScene from "./FloatingScene";
 import AnimatedBorderCard from "./AnimatedBorderCard";
 import { useProposal } from "@/contexts/ProposalContext";
+import { getSectionCopy } from "@/data/templates";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,6 +21,7 @@ const defaultTimeline = [
 
 const TimelineSection = () => {
   const proposal = useProposal();
+  const copy = getSectionCopy(proposal, "timeline");
   const timelineItems = (proposal?.event_timeline?.length ? proposal.event_timeline : defaultTimeline) as any[];
   const durationLabel = proposal?.duration_label ?? "4 Horas de Música Imersiva";
 

@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import StrokeText from "./StrokeText";
 import { useProposal } from "@/contexts/ProposalContext";
+import { getSectionCopy } from "@/data/templates";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -57,6 +58,7 @@ function computeDynamicDates(eventDate: string, proposalDeadline: string | null)
 
 const ProcessTimeline = () => {
   const proposal = useProposal();
+  const copy = getSectionCopy(proposal, "process");
 
   // Use saved steps if they have real dates, otherwise compute dynamically
   let steps: any[];

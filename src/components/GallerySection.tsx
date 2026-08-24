@@ -27,6 +27,7 @@ import gallery12 from "@/assets/gallery-12.jpg";
 import gallery13 from "@/assets/gallery-13.jpg";
 import gallery14 from "@/assets/gallery-14.jpg";
 import gallery15 from "@/assets/gallery-15.jpg";
+import { getSectionCopy } from "@/data/templates";
 
 gsap.registerPlugin(ScrollTrigger);
 

@@ -7,6 +7,7 @@ import StrokeText from "./StrokeText";
 import AnimatedBorderCard from "./AnimatedBorderCard";
 import { useProposal } from "@/contexts/ProposalContext";
 import carolPhoto from "@/assets/carol-suhet.png";
+import { getSectionCopy } from "@/data/templates";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,6 +40,7 @@ const formatBRL = (val: number) => {
 
 const PricingSection = () => {
   const proposal = useProposal();
+  const copy = getSectionCopy(proposal, "pricing");
   const plans = (proposal?.pricing_plans?.length ? proposal.pricing_plans : defaultPlans) as any[];
   const included = (proposal?.included_services?.length ? proposal.included_services : defaultIncluded) as any[];
   const techDetails = (proposal?.tech_details?.length ? proposal.tech_details : defaultTechDetails) as string[];

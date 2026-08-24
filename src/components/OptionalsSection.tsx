@@ -3,6 +3,7 @@ import { MessageCircle, Sparkles } from "lucide-react";
 import StrokeText from "./StrokeText";
 import { useProposal } from "@/contexts/ProposalContext";
 import MediaGallery, { type MediaEntry } from "./MediaGallery";
+import { getSectionCopy } from "@/data/templates";
 
 const formatBRL = (v: number) =>
   `R$ ${(Number(v) || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -75,6 +76,7 @@ export const collectOptionals = (proposal: any): OptionalEntry[] => {
 
 const OptionalsSection = () => {
   const proposal = useProposal();
+  const copy = getSectionCopy(proposal, "optionals");
   const options = collectOptionals(proposal);
   const whatsappNumber = proposal?.whatsapp_number ?? "5527999936682";
 
