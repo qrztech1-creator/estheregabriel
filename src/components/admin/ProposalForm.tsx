@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { defaultSongs } from "@/data/defaultSongs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ChevronDown, X, FileDown, Upload } from "lucide-react";
@@ -55,7 +56,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
     tech_details: [] as string[],
     event_timeline: [] as any[],
     process_steps: [] as any[],
-    showcase_songs: [] as any[],
+    showcase_songs: [...defaultSongs] as any[],
     optional_extras: [] as any[],
     extras_bundle_title: "",
     extras_bundle_price: 0,
