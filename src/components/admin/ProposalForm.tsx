@@ -12,6 +12,7 @@ import AiTextButton from "./AiTextButton";
 import CostCalculator, { type DraftItem, type DraftPackage } from "./CostCalculator";
 import { TEMPLATES } from "@/data/templates";
 import type { RegionKey } from "@/data/regionPricing";
+import MediaEditor from "./MediaEditor";
 
 interface Props {
   onCreated: () => void;
@@ -171,7 +172,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
             description: it.description || null, category: it.category,
             quantity: Number(it.quantity) || 1, unit_cost: Number(it.unit_cost) || 0,
             unit_price: Number(it.unit_price) || 0, is_courtesy: it.is_courtesy,
-            is_optional: it.is_optional, display_order: ii,
+             is_optional: it.is_optional, media: (it.media || []) as any, display_order: ii,
           })));
         }
       }
@@ -181,7 +182,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
           description: it.description || null, category: it.category,
           quantity: Number(it.quantity) || 1, unit_cost: Number(it.unit_cost) || 0,
           unit_price: Number(it.unit_price) || 0, is_courtesy: it.is_courtesy,
-          is_optional: true, display_order: ii,
+           is_optional: true, media: (it.media || []) as any, display_order: ii,
         })));
       }
 
@@ -331,6 +332,11 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
                   <span>50%: R$ {plan.entry50?.toFixed(2)}</span>
                   <span>À vista: R$ {plan.aVista?.toFixed(2)}</span>
                 </div>
+                 <MediaEditor
+                   media={Array.isArray(plan.media) ? plan.media : []}
+                   onChange={media => updatePlan(i, "media", media)}
+                   label="Fotos e vídeos deste plano"
+                 />
               </div>
             )} />
             <Button variant="outline" size="sm" className="mt-2" onClick={() => set("pricing_plans", [...form.pricing_plans, { id: `plano-${form.pricing_plans.length + 1}`, label: "", description: "", total: 0, entry30: 0, savings30: 0, entry50: 0, savings50: 0, aVista: 0, savingsAVista: 0, recommended: false }])}>+ Adicionar plano</Button>
@@ -442,16 +448,21 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pr-6">
                   <Input value={extra.title} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], title: e.target.value }; set("optional_extras", arr); }} placeholder="Serviço" />
                   <Input type="number" value={extra.price ?? 0} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], price: Number(e.target.value) }; set("optional_extras", arr); }} placeholder="Preço (R$)" />
-                  <Input value={extra.image_url || ""} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], image_url: e.target.value }; set("optional_extras", arr); }} placeholder="URL da imagem" />
+                   <Input value={extra.image_url || ""} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], image_url: e.target.value }; set("optional_extras", arr); }} placeholder="URL de capa (opcional)" />
                 </div>
                 <div className="flex items-center justify-end">
                   <AiTextButton kind="descrição de serviço opcional" context={`Serviço: ${extra.title}. Evento: ${form.bride_name} & ${form.groom_name}`} current={extra.description || ""}
                     onResult={t => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], description: t }; set("optional_extras", arr); }} />
                 </div>
                 <Textarea value={extra.description} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], description: e.target.value }; set("optional_extras", arr); }} placeholder="Descrição do serviço" rows={2} />
+                 <MediaEditor
+                   media={Array.isArray(extra.media) ? extra.media : []}
+                   onChange={media => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], media }; set("optional_extras", arr); }}
+                   label="Fotos e vídeos deste opcional"
+                 />
               </div>
             )} />
-            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("optional_extras", [...form.optional_extras, { icon: "Monitor", title: "", price: 0, description: "", image_url: "", details: [] }])}>+ Adicionar opcional</Button>
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("optional_extras", [...form.optional_extras, { icon: "Monitor", title: "", price: 0, description: "", image_url: "", media: [], details: [] }])}>+ Adicionar opcional</Button>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <div><Label>Título do pacote</Label><Input value={form.extras_bundle_title} onChange={e => set("extras_bundle_title", e.target.value)} /></div>
               <div><Label>Preço do pacote (R$)</Label><Input type="number" value={form.extras_bundle_price} onChange={e => set("extras_bundle_price", Number(e.target.value))} /></div>

@@ -16,6 +16,7 @@ export interface DraftItem {
   name: string; description?: string; category: string;
   quantity: number; unit_cost: number; unit_price: number;
   is_courtesy: boolean; is_optional: boolean;
+  media?: MediaEntry[];
 }
 export interface DraftPackage {
   name: string; description: string; category: string;
@@ -27,7 +28,7 @@ export interface DraftPackage {
 
 export const emptyItem = (): DraftItem => ({
   name: "", description: "", category: "artista", quantity: 1,
-  unit_cost: 0, unit_price: 0, is_courtesy: false, is_optional: false,
+  unit_cost: 0, unit_price: 0, is_courtesy: false, is_optional: false, media: [],
 });
 export const emptyPackage = (): DraftPackage => ({
   name: "Novo pacote", description: "", category: "festa",
@@ -62,6 +63,7 @@ const presetToDraft = (preset: PackagePreset): DraftPackage => ({
     name: i.name, description: "", category: i.category,
     quantity: i.quantity, unit_cost: i.unit_cost, unit_price: i.unit_price,
     is_courtesy: false, is_optional: !!preset.is_optional,
+    media: [],
   })),
 });
 
@@ -123,6 +125,7 @@ const CostCalculator = ({ region, contextLabel, packages, looseItems, onChange }
               <span className="text-muted-foreground">grátis</span>
             </label>)}
         </div>
+        <MediaEditor media={it.media || []} onChange={media => onPatch({ media })} label="Fotos e vídeos deste item" />
         <p className="text-[11px] text-muted-foreground">
           Custo {formatBRL(cost)} · Venda {formatBRL(it.is_courtesy ? 0 : total)} ·
           <span className={(it.is_courtesy ? -cost : total - cost) >= 0 ? " text-primary" : " text-destructive"}>
@@ -292,7 +295,7 @@ const CostCalculator = ({ region, contextLabel, packages, looseItems, onChange }
                     <Textarea rows={2} value={p.description} onChange={e => setPkg(i, { description: e.target.value })} />
                   </div>
 
-                  <MediaEditor media={p.media || []} onChange={m => setPkg(i, { media: m })} />
+                  <MediaEditor media={p.media || []} onChange={m => setPkg(i, { media: m })} label="Fotos e vídeos deste plano / pacote" />
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">

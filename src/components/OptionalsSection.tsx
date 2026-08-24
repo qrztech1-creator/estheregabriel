@@ -66,6 +66,8 @@ export const collectOptionals = (proposal: any): OptionalEntry[] => {
         title: e.title,
         description: e.description || "",
         price: Number(e.price) || perItem,
+        image_url: e.image_url || null,
+        media: Array.isArray(e.media) ? e.media : [],
         details: e.details || [],
       });
     });

@@ -8,6 +8,7 @@ import AnimatedBorderCard from "./AnimatedBorderCard";
 import { useProposal } from "@/contexts/ProposalContext";
 import carolPhoto from "@/assets/carol-suhet.png";
 import { getSectionCopy } from "@/data/templates";
+import MediaGallery from "./MediaGallery";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -183,12 +184,16 @@ const PricingSection = () => {
                   <p className="font-body text-xs text-muted-foreground mb-5 text-center">Selecione quantos pacotes quiser para combinar cerimônia, festa e adicionais.</p>
                   <div className={`grid gap-2 ${plans.length <= 3 ? 'grid-cols-1 sm:grid-cols-3 max-w-2xl mx-auto' : 'grid-cols-2 md:grid-cols-4'}`}>
                     {plans.map((p: any, i: number) => (
-                      <button key={p.id || i} onClick={() => togglePlan(i)} aria-pressed={selectedPlans.includes(i)}
+                      <div key={p.id || i}
                         className={`relative p-3 rounded-sm border text-center transition-all duration-200 ${selectedPlans.includes(i) ? "border-primary bg-primary/10 shadow-[0_0_20px_hsla(43,59%,52%,0.15)]" : "border-border hover:border-primary/40 bg-secondary/20 hover:bg-secondary/30"}`}>
+                        <button type="button" className="absolute inset-0 z-0" onClick={() => togglePlan(i)} aria-label={`Selecionar ${p.label}`} aria-pressed={selectedPlans.includes(i)} />
                         {p.recommended && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 font-ui text-[8px] tracking-[0.15em] uppercase px-2 py-0.5 bg-primary text-primary-foreground rounded-sm whitespace-nowrap">Recomendado</span>}
-                        <p className={`font-ui text-[10px] tracking-[0.1em] uppercase ${selectedPlans.includes(i) ? "text-primary" : "text-muted-foreground"}`}>{p.label}</p>
-                        <p className="font-display text-lg text-foreground font-light mt-1">R$ {(p.total || 0).toLocaleString("pt-BR")}</p>
-                      </button>
+                        <div className="relative z-10 pointer-events-none">
+                          <p className={`font-ui text-[10px] tracking-[0.1em] uppercase ${selectedPlans.includes(i) ? "text-primary" : "text-muted-foreground"}`}>{p.label}</p>
+                          <p className="font-display text-lg text-foreground font-light mt-1">R$ {(p.total || 0).toLocaleString("pt-BR")}</p>
+                        </div>
+                        <div className="relative z-20 flex justify-center"><MediaGallery media={p.media} compact /></div>
+                      </div>
                     ))}
                   </div>
                 </div>

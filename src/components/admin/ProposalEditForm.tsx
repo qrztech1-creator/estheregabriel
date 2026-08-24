@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { recalcPlanDiscounts } from "@/data/proposalTemplate";
 import SortableList from "./SortableList";
 import AiTextButton from "./AiTextButton";
+import MediaEditor from "./MediaEditor";
 
 interface Props {
   proposalId: string;
@@ -252,6 +253,11 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
                     <div><Label>Valor Total (R$)</Label><Input type="number" value={plan.total} onChange={e => updatePlanTotal(i, Number(e.target.value))} /></div>
                     <div className="flex items-end"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={plan.recommended || false} onChange={e => updatePlan(i, "recommended", e.target.checked)} /> Recomendado</label></div>
                   </div>
+                   <MediaEditor
+                     media={Array.isArray(plan.media) ? plan.media : []}
+                     onChange={media => updatePlan(i, "media", media)}
+                     label="Fotos e vídeos deste plano"
+                   />
                 </div>
               )}
             />
@@ -378,10 +384,15 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
                   <div className="flex justify-end"><AiTextButton kind="descrição de serviço opcional" context={`${aiLabel}. Serviço: ${extra.title}`} current={extra.description || ""} onResult={t => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], description: t }; set("optional_extras", arr); }} /></div>
                   <Textarea value={extra.description} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], description: e.target.value }; set("optional_extras", arr); }} placeholder="Descrição do serviço" rows={2} />
                   <Input value={extra.image_url || ""} onChange={e => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], image_url: e.target.value }; set("optional_extras", arr); }} placeholder="URL da imagem (opcional)" />
+                   <MediaEditor
+                     media={Array.isArray(extra.media) ? extra.media : []}
+                     onChange={media => { const arr = [...form.optional_extras]; arr[i] = { ...arr[i], media }; set("optional_extras", arr); }}
+                     label="Fotos e vídeos deste opcional"
+                   />
                 </div>
               )}
             />
-            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("optional_extras", [...form.optional_extras, { icon: "Monitor", title: "", description: "", price: 0, image_url: "", details: [] }])}>+ Adicionar opcional</Button>
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("optional_extras", [...form.optional_extras, { icon: "Monitor", title: "", description: "", price: 0, image_url: "", media: [], details: [] }])}>+ Adicionar opcional</Button>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <div><Label>Título do pacote</Label><Input value={form.extras_bundle_title} onChange={e => set("extras_bundle_title", e.target.value)} /></div>
               <div><Label>Preço do pacote (R$)</Label><Input type="number" value={form.extras_bundle_price} onChange={e => set("extras_bundle_price", Number(e.target.value))} /></div>
