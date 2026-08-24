@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { defaultSongs } from "@/data/defaultSongs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ChevronDown, X, Upload, Save, ArrowLeft, Trash2 } from "lucide-react";
@@ -53,7 +54,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
       partnership_photo_url: d.partnership_photo_url || "", created_by: d.created_by || "",
       pricing_plans: d.pricing_plans || [], included_services: d.included_services || [],
       tech_details: d.tech_details || [], event_timeline: d.event_timeline || [],
-      process_steps: d.process_steps || [], showcase_songs: d.showcase_songs || [],
+      process_steps: d.process_steps || [], showcase_songs: (d.showcase_songs?.length ? d.showcase_songs : defaultSongs),
       optional_extras: d.optional_extras || [], extras_bundle_title: d.extras_bundle_title || "",
       extras_bundle_price: Number(d.extras_bundle_price) || 0, audio_url: d.audio_url || "",
       show_partnership: d.show_partnership !== false, show_optionals: d.show_optionals !== false,
@@ -351,6 +352,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
                   <div className="flex gap-2 items-center">
                     <Input value={song.title} onChange={e => { const arr = [...form.showcase_songs]; arr[i] = { ...arr[i], title: e.target.value }; set("showcase_songs", arr); }} placeholder="Título" className="flex-1" />
                     <Input value={song.artist} onChange={e => { const arr = [...form.showcase_songs]; arr[i] = { ...arr[i], artist: e.target.value }; set("showcase_songs", arr); }} placeholder="Artista" className="flex-1" />
+                    <Input value={song.videoId || ""} onChange={e => { const arr = [...form.showcase_songs]; arr[i] = { ...arr[i], videoId: e.target.value }; set("showcase_songs", arr); }} placeholder="YouTube ID" className="w-full sm:w-32" />
                     <button onClick={() => set("showcase_songs", form.showcase_songs.filter((_: any, j: number) => j !== i))} className="text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
                   </div>
                 )}

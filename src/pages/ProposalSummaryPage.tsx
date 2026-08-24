@@ -74,12 +74,9 @@ const ProposalSummaryPage = () => {
   };
 
   const getSummaryExtrasForAccept = (dbExtras: any[], prop: any) => {
-    const items = dbExtras.map((e: any) => ({ ...e, price: 0 }));
-    if (prop.extras_bundle_price && dbExtras.length > 0) {
-      const perItem = Number(prop.extras_bundle_price) / dbExtras.length;
-      items.forEach((it: any, i: number) => { if (i < dbExtras.length) it.price = perItem; });
-    }
-    return items;
+    const bundle = Number(prop.extras_bundle_price) || 0;
+    const perItem = bundle > 0 && dbExtras.length > 0 ? bundle / dbExtras.length : 0;
+    return dbExtras.map((e: any) => ({ ...e, price: Number(e.price) || perItem }));
   };
 
   const handleAccept = async () => {
@@ -161,12 +158,9 @@ const ProposalSummaryPage = () => {
   const extras = (proposal as any).show_optionals === false ? [] : (proposal.optional_extras || []);
 
   const getSummaryExtras = (dbExtras: any[], prop: any) => {
-    const items = dbExtras.map((e: any) => ({ ...e, price: 0 }));
-    if (prop.extras_bundle_price && dbExtras.length > 0) {
-      const perItem = Number(prop.extras_bundle_price) / dbExtras.length;
-      items.forEach((it: any, i: number) => { if (i < dbExtras.length) it.price = perItem; });
-    }
-    return items;
+    const bundle = Number(prop.extras_bundle_price) || 0;
+    const perItem = bundle > 0 && dbExtras.length > 0 ? bundle / dbExtras.length : 0;
+    return dbExtras.map((e: any) => ({ ...e, price: Number(e.price) || perItem }));
   };
 
   const summaryExtras = getSummaryExtras(extras, proposal);
