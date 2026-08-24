@@ -248,19 +248,21 @@ const ProposalSummaryPage = () => {
             {plans.map((p: any, i: number) => {
               const active = selectedPlanIndices.includes(i);
               return (
-                <button key={i} onClick={() => togglePlan(i)}
-                  className={`p-4 rounded-lg border text-left transition-all ${active ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+                <div key={i} role="button" tabIndex={0} onClick={() => togglePlan(i)}
+                  onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); togglePlan(i); } }}
+                  className={`p-4 rounded-lg border text-left transition-all cursor-pointer ${active ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
                   <div className="flex items-start gap-3">
                     <div className={`w-5 h-5 rounded border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${active ? "bg-primary border-primary" : "border-muted-foreground/40"}`}>
                       {active && <Check className="w-3 h-3 text-primary-foreground" />}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm">{p.label}</p>
                       <p className="text-xs text-muted-foreground">{p.description}</p>
+                      <MediaGallery media={p.media} />
                     </div>
                     <p className="font-display text-lg">{formatBRL(p.total || 0)}</p>
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -311,10 +313,11 @@ const ProposalSummaryPage = () => {
                           </p>
                           {pk.description && <p className="text-xs text-muted-foreground mt-1">{pk.description}</p>}
                           {(pk.items || []).length > 0 && (
-                            <ul className="mt-2 space-y-0.5">
+                            <ul className="mt-2 space-y-1">
                               {pk.items.map((it: any) => (
                                 <li key={it.id} className="text-[11px] text-muted-foreground">
                                   • {it.quantity > 1 ? `${it.quantity}× ` : ""}{it.name}{it.is_courtesy ? " (cortesia)" : ""}
+                                  <MediaGallery media={it.media} compact />
                                 </li>
                               ))}
                             </ul>
@@ -339,19 +342,24 @@ const ProposalSummaryPage = () => {
           <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Opcionais</h2>
           <div className="grid gap-3">
             {summaryExtras.map((extra: any, i: number) => (
-              <button key={i} onClick={() => toggleExtra(`extra-${i}`)}
-                className={`p-4 rounded-lg border text-left transition-all ${selectedExtras[`extra-${i}`] ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+              <div key={i} role="button" tabIndex={0} onClick={() => toggleExtra(`extra-${i}`)}
+                onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleExtra(`extra-${i}`); } }}
+                className={`p-4 rounded-lg border text-left transition-all cursor-pointer ${selectedExtras[`extra-${i}`] ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
                 <div className="flex items-start gap-3">
                   <div className={`w-5 h-5 rounded border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${selectedExtras[`extra-${i}`] ? "bg-primary border-primary" : "border-muted-foreground/40"}`}>
                     {selectedExtras[`extra-${i}`] && <Check className="w-3 h-3 text-primary-foreground" />}
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm">{extra.title}</p>
                     <p className="text-xs text-muted-foreground mt-1">{extra.description}</p>
+                    {extra.image_url && (
+                      <img src={extra.image_url} alt={extra.title} loading="lazy" className="mt-2 w-28 h-20 object-cover rounded-sm border border-border" />
+                    )}
+                    <MediaGallery media={extra.media} />
                   </div>
                   <p className="font-display text-sm text-foreground whitespace-nowrap">{formatBRL(extra.price)}</p>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         </div>

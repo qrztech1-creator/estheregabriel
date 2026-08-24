@@ -198,6 +198,40 @@ const PricingSection = () => {
                   </div>
                 </div>
 
+                {(() => {
+                  const basePackages = ((proposal as any)?.packages || []).filter((pk: any) => !pk.is_optional && pk.category !== "extra");
+                  if (!basePackages.length) return null;
+                  return (
+                    <div className="mb-10">
+                      <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-5 text-center">Planos & serviços disponíveis</p>
+                      <div className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+                        {basePackages.map((pk: any) => (
+                          <div key={pk.id} className="rounded-sm border border-border/50 bg-secondary/20 p-5">
+                            <div className="flex items-start justify-between gap-3">
+                              <h4 className="font-display text-lg text-foreground font-light">{pk.name}</h4>
+                              <span className="font-display text-base text-foreground font-light whitespace-nowrap">
+                                {pk.is_courtesy ? "Cortesia" : `R$ ${(Number(pk.sale_price) || 0).toLocaleString("pt-BR")}`}
+                              </span>
+                            </div>
+                            {pk.description && <p className="font-body text-sm text-foreground/70 mt-2 leading-relaxed">{pk.description}</p>}
+                            {!!(pk.items || []).length && (
+                              <ul className="mt-3 space-y-2">
+                                {pk.items.map((it: any) => (
+                                  <li key={it.id} className="font-body text-xs text-foreground/60">
+                                    • {it.quantity > 1 ? `${it.quantity}× ` : ""}{it.name}{it.is_courtesy ? " (cortesia)" : ""}
+                                    <MediaGallery media={it.media} compact />
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                            <MediaGallery media={pk.media} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 <div className="text-center mb-6">
                   <p className="font-body text-sm text-muted-foreground mb-2">{selectedDescription || "Selecione ao menos um pacote"}</p>
                   <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-2">Valor total do investimento</p>
