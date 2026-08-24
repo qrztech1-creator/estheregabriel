@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { MessageCircle, Sparkles } from "lucide-react";
 import StrokeText from "./StrokeText";
 import { useProposal } from "@/contexts/ProposalContext";
+import MediaGallery, { type MediaEntry } from "./MediaGallery";
 
 const formatBRL = (v: number) =>
   `R$ ${(Number(v) || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -14,6 +15,7 @@ export interface OptionalEntry {
   is_courtesy?: boolean;
   recommended?: boolean;
   image_url?: string | null;
+  media?: MediaEntry[];
   details?: string[];
 }
 
@@ -36,6 +38,7 @@ export const collectOptionals = (proposal: any): OptionalEntry[] => {
       is_courtesy: !!p.is_courtesy,
       recommended: !!p.recommended,
       image_url: p.image_url || null,
+      media: Array.isArray(p.media) ? p.media : [],
       details: (p.items || []).map((it: any) =>
         `${it.quantity > 1 ? `${it.quantity}× ` : ""}${it.name}${it.is_courtesy ? " (cortesia)" : ""}`),
     });
@@ -48,6 +51,7 @@ export const collectOptionals = (proposal: any): OptionalEntry[] => {
       description: it.description || "",
       price: it.is_courtesy ? 0 : (Number(it.unit_price) || 0) * (Number(it.quantity) || 1),
       is_courtesy: !!it.is_courtesy,
+      media: Array.isArray(it.media) ? it.media : [],
     });
   });
 
@@ -122,6 +126,7 @@ const OptionalsSection = () => {
                     ))}
                   </ul>
                 )}
+                <MediaGallery media={opt.media} />
                 <div className="mt-auto pt-4 border-t border-border/40 flex items-center justify-between gap-3">
                   <span className="font-ui text-[10px] tracking-[0.2em] uppercase text-muted-foreground">Investimento</span>
                   <span className="font-display text-2xl text-foreground font-light">

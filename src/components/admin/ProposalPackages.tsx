@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import AiTextButton from "./AiTextButton";
+import MediaEditor from "./MediaEditor";
 import { getPackagePresets, presetTotals, type PackagePreset } from "@/data/packagePresets";
 import {
   ITEM_CATEGORIES, PACKAGE_CATEGORIES, PRICE_BANDS, REGIONS, formatBRL, type RegionKey,
@@ -108,14 +109,14 @@ const ProposalPackages = ({ proposalId, proposalLabel, region, onRegionChange }:
         name: p.name, description: p.description, category: p.category,
         sale_price: Number(p.sale_price) || 0, internal_cost: Number(p.internal_cost) || 0,
         is_optional: !!p.is_optional, is_courtesy: !!p.is_courtesy, recommended: !!p.recommended,
-        display_order: idx,
+        media: (p.media || []) as any, display_order: idx,
       }).eq("id", p.id));
     const itemOps = items.map((i, idx) =>
       supabase.from("proposal_package_items").update({
         name: i.name, description: i.description, category: i.category,
         quantity: Number(i.quantity) || 1, unit_cost: Number(i.unit_cost) || 0,
         unit_price: Number(i.unit_price) || 0, is_courtesy: !!i.is_courtesy, is_optional: !!i.is_optional,
-        display_order: idx,
+        media: (i.media || []) as any, display_order: idx,
       }).eq("id", i.id));
     const results = await Promise.all([...pkgOps, ...itemOps]);
     setSaving(false);
@@ -162,6 +163,7 @@ const ProposalPackages = ({ proposalId, proposalLabel, region, onRegionChange }:
               <span className="text-muted-foreground">grátis</span>
             </label>)}
         </div>
+        <MediaEditor media={i.media || []} onChange={m => updateItem(i.id, { media: m })} label="Mídias do item" />
         <p className="text-[11px] text-muted-foreground">
           Custo {formatBRL(cost)} · Venda {formatBRL(price)} ·
           <span className={price - cost >= 0 ? " text-primary" : " text-destructive"}> Lucro {formatBRL(price - cost)}</span>
@@ -320,6 +322,8 @@ const ProposalPackages = ({ proposalId, proposalLabel, region, onRegionChange }:
                     </div>
                     <Textarea rows={2} value={p.description || ""} onChange={e => updatePackage(p.id, { description: e.target.value })} />
                   </div>
+
+                  <MediaEditor media={p.media || []} onChange={m => updatePackage(p.id, { media: m })} />
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">

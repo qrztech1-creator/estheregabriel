@@ -163,6 +163,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
           category: p.category, sale_price: Number(p.sale_price) || 0,
           internal_cost: Number(p.internal_cost) || 0, is_optional: p.is_optional,
           is_courtesy: p.is_courtesy, recommended: p.recommended, display_order: pi,
+          media: (p.media || []) as any,
         }).select().single();
         if (pkg && p.items.length) {
           await supabase.from("proposal_package_items").insert(p.items.map((it, ii) => ({
