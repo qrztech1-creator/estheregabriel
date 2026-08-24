@@ -28,6 +28,7 @@ import gallery13 from "@/assets/gallery-13.jpg";
 import gallery14 from "@/assets/gallery-14.jpg";
 import gallery15 from "@/assets/gallery-15.jpg";
 import { getSectionCopy } from "@/data/templates";
+import { useProposal } from "@/contexts/ProposalContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,6 +40,8 @@ const images = [
 ].filter((src, i, arr) => arr.indexOf(src) === i);
 
 const GallerySection = () => {
+  const proposal = useProposal();
+  const copy = getSectionCopy(proposal, "gallery");
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
