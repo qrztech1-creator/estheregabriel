@@ -6,6 +6,7 @@ import { Check, ArrowLeft, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import MediaGallery from "@/components/MediaGallery";
 import logo from "@/assets/logo-homemusic.png";
 
 const formatBRL = (val: number) => `R$ ${val.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
