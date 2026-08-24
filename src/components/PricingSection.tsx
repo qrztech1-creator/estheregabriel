@@ -52,9 +52,17 @@ const PricingSection = () => {
   const [proposalTime, setProposalTime] = useState({ d: "0", h: "00", m: "00", s: "00" });
   const [revealed, setRevealed] = useState(false);
 
-  const defaultIdx = plans.findIndex((p: any) => p.recommended);
-  const [selectedPlan, setSelectedPlan] = useState(defaultIdx >= 0 ? defaultIdx : plans.length - 1);
-  const plan = plans[selectedPlan];
+  const defaultIndices = plans.reduce<number[]>((acc, p, index) => p.recommended ? [...acc, index] : acc, []);
+  const [selectedPlans, setSelectedPlans] = useState<number[]>(defaultIndices.length ? defaultIndices : (plans.length ? [plans.length - 1] : []));
+  const selectedEntries = selectedPlans.map(index => plans[index]).filter(Boolean);
+  const selectedTotal = selectedEntries.reduce((sum, current) => sum + (Number(current.total) || 0), 0);
+  const selectedDescription = selectedEntries.map(current => current.description).filter(Boolean).join(" + ");
+
+  const togglePlan = (index: number) => {
+    setSelectedPlans(current => current.includes(index)
+      ? current.filter(item => item !== index)
+      : [...current, index]);
+  };
 
   useEffect(() => {
     if (!revealed) return;
@@ -62,12 +70,12 @@ const PricingSection = () => {
       if (!priceRef.current) return;
       const target = { val: 0 };
       gsap.to(target, {
-        val: plan.total, duration: 2, ease: "power2.out",
+        val: selectedTotal, duration: 2, ease: "power2.out",
         onUpdate: () => { if (priceRef.current) priceRef.current.textContent = `R$ ${Math.round(target.val).toLocaleString("pt-BR")}`; },
       });
     }, 400);
     return () => clearTimeout(timer);
-  }, [revealed, selectedPlan, plan.total]);
+  }, [revealed, selectedTotal]);
 
   useEffect(() => {
     const deadlineStr = proposal?.proposal_deadline;
@@ -88,9 +96,9 @@ const PricingSection = () => {
     return () => clearInterval(interval);
   }, [proposal?.proposal_deadline]);
 
-  const e30 = formatBRL(plan.entry30 || 0);
-  const e50 = formatBRL(plan.entry50 || 0);
-  const eAV = formatBRL(plan.aVista || 0);
+  const e30 = formatBRL(selectedTotal * 0.96);
+  const e50 = formatBRL(selectedTotal * 0.90);
+  const eAV = formatBRL(selectedTotal * 0.875);
 
   // Use uploaded photo URL, or fallback to local carol-suhet asset if partnership is Carol Suhet
   const partnerPhotoSrc: string | null = partnershipPhotoUrl || (partnershipName?.includes("Carol Suhet") ? carolPhoto : null);
@@ -169,13 +177,14 @@ const PricingSection = () => {
                 )}
 
                 <div className="mb-8">
-                  <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-4 text-center">Escolha o formato ideal</p>
+                  <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-2 text-center">Escolha os formatos ideais</p>
+                  <p className="font-body text-xs text-muted-foreground mb-5 text-center">Selecione quantos pacotes quiser para combinar cerimônia, festa e adicionais.</p>
                   <div className={`grid gap-2 ${plans.length <= 3 ? 'grid-cols-1 sm:grid-cols-3 max-w-2xl mx-auto' : 'grid-cols-2 md:grid-cols-4'}`}>
                     {plans.map((p: any, i: number) => (
-                      <button key={p.id || i} onClick={() => setSelectedPlan(i)}
-                        className={`relative p-3 rounded-sm border text-center transition-all duration-200 ${selectedPlan === i ? "border-primary bg-primary/10 shadow-[0_0_20px_hsla(43,59%,52%,0.15)]" : "border-border hover:border-primary/40 bg-secondary/20 hover:bg-secondary/30"}`}>
+                      <button key={p.id || i} onClick={() => togglePlan(i)} aria-pressed={selectedPlans.includes(i)}
+                        className={`relative p-3 rounded-sm border text-center transition-all duration-200 ${selectedPlans.includes(i) ? "border-primary bg-primary/10 shadow-[0_0_20px_hsla(43,59%,52%,0.15)]" : "border-border hover:border-primary/40 bg-secondary/20 hover:bg-secondary/30"}`}>
                         {p.recommended && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 font-ui text-[8px] tracking-[0.15em] uppercase px-2 py-0.5 bg-primary text-primary-foreground rounded-sm whitespace-nowrap">Recomendado</span>}
-                        <p className={`font-ui text-[10px] tracking-[0.1em] uppercase ${selectedPlan === i ? "text-primary" : "text-muted-foreground"}`}>{p.label}</p>
+                        <p className={`font-ui text-[10px] tracking-[0.1em] uppercase ${selectedPlans.includes(i) ? "text-primary" : "text-muted-foreground"}`}>{p.label}</p>
                         <p className="font-display text-lg text-foreground font-light mt-1">R$ {(p.total || 0).toLocaleString("pt-BR")}</p>
                       </button>
                     ))}
@@ -183,9 +192,9 @@ const PricingSection = () => {
                 </div>
 
                 <div className="text-center mb-6">
-                  <p className="font-body text-sm text-muted-foreground mb-2">{plan.description}</p>
+                  <p className="font-body text-sm text-muted-foreground mb-2">{selectedDescription || "Selecione ao menos um pacote"}</p>
                   <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-2">Valor total do investimento</p>
-                  <p ref={priceRef} className="font-display text-5xl md:text-7xl font-light text-gold-gradient tabular-nums">R$ {(plan.total || 0).toLocaleString("pt-BR")}</p>
+                  <p ref={priceRef} className="font-display text-5xl md:text-7xl font-light text-gold-gradient tabular-nums">R$ {selectedTotal.toLocaleString("pt-BR")}</p>
                 </div>
 
                 <div className="grid sm:grid-cols-3 gap-4 mb-6 max-w-3xl mx-auto">
@@ -193,7 +202,7 @@ const PricingSection = () => {
                     <div className="p-5 text-center hover:bg-secondary/20 transition-colors duration-150 rounded-sm">
                       <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">Entrada de 30%</p>
                       <p className="font-display text-2xl md:text-3xl text-foreground font-light">R$ {e30.int}<span className="text-base">,{e30.dec}</span></p>
-                      <p className="font-body text-xs text-primary mt-2">Economia de R$ {formatBRL(plan.savings30 || 0).int},{formatBRL(plan.savings30 || 0).dec}</p>
+                      <p className="font-body text-xs text-primary mt-2">Economia de R$ {formatBRL(selectedTotal * 0.04).int},{formatBRL(selectedTotal * 0.04).dec}</p>
                     </div>
                   </AnimatedBorderCard>
                   <AnimatedBorderCard delay={0.2}>
@@ -201,7 +210,7 @@ const PricingSection = () => {
                       <div className="absolute top-0 right-0 bg-primary px-2 py-0.5"><p className="font-ui text-[9px] tracking-wider uppercase text-primary-foreground">Mais popular</p></div>
                       <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">Entrada de 50%</p>
                       <p className="font-display text-2xl md:text-3xl text-foreground font-light">R$ {e50.int}<span className="text-base">,{e50.dec}</span></p>
-                      <p className="font-body text-xs text-primary mt-2">Economia de R$ {formatBRL(plan.savings50 || 0).int},{formatBRL(plan.savings50 || 0).dec}</p>
+                      <p className="font-body text-xs text-primary mt-2">Economia de R$ {formatBRL(selectedTotal * 0.10).int},{formatBRL(selectedTotal * 0.10).dec}</p>
                     </div>
                   </AnimatedBorderCard>
                   <AnimatedBorderCard delay={0.3}>
@@ -209,7 +218,7 @@ const PricingSection = () => {
                       <div className="absolute top-0 right-0 bg-primary px-2 py-0.5"><p className="font-ui text-[9px] tracking-wider uppercase text-primary-foreground flex items-center gap-1"><Banknote className="w-3 h-3" /> Melhor preço</p></div>
                       <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">À Vista</p>
                       <p className="font-display text-2xl md:text-3xl text-foreground font-light">R$ {eAV.int}<span className="text-base">,{eAV.dec}</span></p>
-                      <p className="font-body text-xs text-primary mt-2">Economia de R$ {formatBRL(plan.savingsAVista || 0).int},{formatBRL(plan.savingsAVista || 0).dec}</p>
+                      <p className="font-body text-xs text-primary mt-2">Economia de R$ {formatBRL(selectedTotal * 0.125).int},{formatBRL(selectedTotal * 0.125).dec}</p>
                     </div>
                   </AnimatedBorderCard>
                 </div>
@@ -235,7 +244,7 @@ const PricingSection = () => {
                 )}
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <a href={`/proposta/${proposal?.slug}/resumo`}
+                  <a href={`/proposta/${proposal?.slug}/resumo?planos=${selectedPlans.join(",")}`}
                     className="inline-flex items-center gap-3 px-8 py-4 rounded-sm bg-primary text-primary-foreground hover:shadow-[0_0_30px_hsla(43,59%,52%,0.4)] transition-all duration-150 font-ui text-xs tracking-[0.15em] uppercase group font-bold">
                     <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-150" />RESUMIR MINHA PROPOSTA
                   </a>

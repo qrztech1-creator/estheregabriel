@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import MediaGallery from "@/components/MediaGallery";
+import BackgroundMusic from "@/components/BackgroundMusic";
 import logo from "@/assets/logo-homemusic.png";
 
 const formatBRL = (val: number) => `R$ ${val.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
@@ -16,7 +17,7 @@ const ProposalSummaryPage = () => {
   const navigate = useNavigate();
   const [proposal, setProposal] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedPlanIdx, setSelectedPlanIdx] = useState(0);
+  const [selectedPlanIndices, setSelectedPlanIndices] = useState<number[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("entry50");
   const [paymentTypes, setPaymentTypes] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
@@ -33,8 +34,10 @@ const ProposalSummaryPage = () => {
         if (!data) { navigate("/"); return; }
         setProposal(data);
         const plans = (data as any).pricing_plans || [];
-        const recIdx = plans.findIndex((p: any) => p.recommended);
-        setSelectedPlanIdx(recIdx >= 0 ? recIdx : plans.length - 1);
+        const queryIndices = new URLSearchParams(window.location.search).get("planos")
+          ?.split(",").map(Number).filter(index => Number.isInteger(index) && index >= 0 && index < plans.length) || [];
+        const recommended = plans.reduce((acc: number[], plan: any, index: number) => plan.recommended ? [...acc, index] : acc, []);
+        setSelectedPlanIndices(queryIndices.length ? queryIndices : (recommended.length ? recommended : (plans.length ? [plans.length - 1] : [])));
         const pkgDefaults: Record<string, boolean> = {};
         ((data as any).packages || []).forEach((p: any) => { pkgDefaults[p.id] = !p.is_optional; });
         setSelectedPkgIds(pkgDefaults);
@@ -53,6 +56,12 @@ const ProposalSummaryPage = () => {
     setSelectedExtras(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const togglePlan = (index: number) => {
+    setSelectedPlanIndices(current => current.includes(index)
+      ? current.filter(item => item !== index)
+      : [...current, index]);
+  };
+
   const getSummaryExtrasForAccept = (dbExtras: any[], prop: any) => {
     const items = dbExtras.map((e: any) => ({ ...e, price: 0 }));
     items.push({ icon: "Square", title: "Palco 4×3", description: "Estrutura de palco profissional 4×3 metros para a banda.", price: 1200, details: ["Montagem e desmontagem inclusa", "Estrutura segura e resistente"] });
@@ -68,7 +77,7 @@ const ProposalSummaryPage = () => {
     if (paymentTypes.length === 0) { toast.error("Selecione pelo menos uma forma de pagamento"); return; }
     setSubmitting(true);
     const plans = proposal.pricing_plans || [];
-    const plan = plans[selectedPlanIdx];
+    const chosenPlans = selectedPlanIndices.map(index => plans[index]).filter(Boolean);
     const paymentLabels: Record<string, string> = {
       entry30: "Entrada de 30%",
       entry50: "Entrada de 50%",
@@ -87,13 +96,17 @@ const ProposalSummaryPage = () => {
       sale_price: p.is_courtesy ? 0 : Number(p.sale_price) || 0,
     }));
 
-    const baseTotal = (plan?.total || 0) + chosenExtrasTotal + packagesTotal;
+    const plansTotal = chosenPlans.reduce((sum: number, current: any) => sum + (Number(current.total) || 0), 0);
+    const baseTotal = plansTotal + chosenExtrasTotal + packagesTotal;
     const discountRates: Record<string, number> = { entry30: 0.04, entry50: 0.10, aVista: 0.125 };
     const rate = discountRates[paymentMethod] || 0;
     const finalValue = +(baseTotal * (1 - rate)).toFixed(2);
 
     const acceptedPlanData = {
-      ...(plan || {}),
+      label: chosenPlans.map((current: any) => current.label).join(" + "),
+      description: chosenPlans.map((current: any) => current.description).filter(Boolean).join(" + "),
+      plans_chosen: chosenPlans,
+      plans_total: plansTotal,
       payment_method: paymentLabels[paymentMethod] || paymentMethod,
       payment_types: paymentTypes,
       extras_chosen: chosenExtras,
@@ -134,7 +147,8 @@ const ProposalSummaryPage = () => {
   if (!proposal) return null;
 
   const plans = proposal.pricing_plans || [];
-  const plan = plans[selectedPlanIdx] || {};
+  const chosenPlans = selectedPlanIndices.map(index => plans[index]).filter(Boolean);
+  const plansTotal = chosenPlans.reduce((sum: number, current: any) => sum + (Number(current.total) || 0), 0);
   const eventDate = new Date(proposal.event_date + "T12:00:00");
   const extras = (proposal as any).show_optionals === false ? [] : (proposal.optional_extras || []);
 
@@ -158,7 +172,7 @@ const ProposalSummaryPage = () => {
 
   const chosenExtrasTotal = summaryExtras.reduce((sum: number, e: any, i: number) => sum + (selectedExtras[`extra-${i}`] ? (e.price || 0) : 0), 0);
   const packagesTotal = packages.reduce((sum: number, p: any) => sum + (selectedPkgIds[p.id] && !p.is_courtesy ? Number(p.sale_price) || 0 : 0), 0);
-  const baseTotal = (plan.total || 0) + chosenExtrasTotal + packagesTotal;
+  const baseTotal = plansTotal + chosenExtrasTotal + packagesTotal;
   const grandTotal = +(baseTotal * (1 - rate)).toFixed(2);
   const totalSavings = +(baseTotal * rate).toFixed(2);
 
@@ -192,6 +206,7 @@ const ProposalSummaryPage = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <BackgroundMusic startPlaying audioUrl={proposal.audio_url || "/audio/background-music.mp3"} />
       <nav className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <img src={logo} alt="Home Music" className="h-8" />
@@ -221,13 +236,19 @@ const ProposalSummaryPage = () => {
 
         {/* Plan selection */}
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-          <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Pacote Selecionado</h2>
+          <div>
+            <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Pacotes selecionados</h2>
+            <p className="text-xs text-muted-foreground mt-1">Selecione quantos quiser para montar sua proposta.</p>
+          </div>
           <div className="grid gap-2">
             {plans.map((p: any, i: number) => (
-              <button key={i} onClick={() => setSelectedPlanIdx(i)}
-                className={`p-4 rounded-lg border text-left transition-all ${selectedPlanIdx === i ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
-                <div className="flex justify-between items-center">
-                  <div>
+              <button key={i} onClick={() => togglePlan(i)} aria-pressed={selectedPlanIndices.includes(i)}
+                className={`p-4 rounded-lg border text-left transition-all ${selectedPlanIndices.includes(i) ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+                <div className="flex items-center gap-3">
+                  <div className={`w-5 h-5 rounded border flex-shrink-0 flex items-center justify-center ${selectedPlanIndices.includes(i) ? "bg-primary border-primary" : "border-muted-foreground/40"}`}>
+                    {selectedPlanIndices.includes(i) && <Check className="w-3 h-3 text-primary-foreground" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm">{p.label}</p>
                     <p className="text-xs text-muted-foreground">{p.description}</p>
                   </div>
@@ -384,7 +405,8 @@ const ProposalSummaryPage = () => {
         <div className="bg-card border border-primary/30 rounded-xl p-6 text-center space-y-3">
           <p className="text-sm text-muted-foreground">Valor final com desconto</p>
           <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">Pacote: {formatBRL(plan.total || 0)}</p>
+            <p className="text-sm text-muted-foreground">Pacotes: {formatBRL(plansTotal)}</p>
+            {packagesTotal > 0 && <p className="text-sm text-muted-foreground">Serviços adicionais: {formatBRL(packagesTotal)}</p>}
             {chosenExtrasTotal > 0 && (
               <p className="text-sm text-muted-foreground">Opcionais: {formatBRL(chosenExtrasTotal)}</p>
             )}
