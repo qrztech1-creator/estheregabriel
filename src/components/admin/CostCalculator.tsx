@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { useMemo, useState } from "react";
 import SortableList from "./SortableList";
 import AiTextButton from "./AiTextButton";
+import MediaEditor, { type MediaEntry } from "./MediaEditor";
 import { ITEM_CATEGORIES, PACKAGE_CATEGORIES, PRICE_BANDS, REGIONS, formatBRL, type RegionKey } from "@/data/regionPricing";
 import { getPackagePresets, presetTotals, type PackagePreset } from "@/data/packagePresets";
 
@@ -290,6 +291,8 @@ const CostCalculator = ({ region, contextLabel, packages, looseItems, onChange }
                     </div>
                     <Textarea rows={2} value={p.description} onChange={e => setPkg(i, { description: e.target.value })} />
                   </div>
+
+                  <MediaEditor media={p.media || []} onChange={m => setPkg(i, { media: m })} />
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
