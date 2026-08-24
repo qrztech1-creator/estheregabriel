@@ -107,3 +107,69 @@ export const buildThemeStyle = (templateKey?: string | null, theme?: ProposalThe
   }
   return style as React.CSSProperties;
 };
+
+/* ------------------------------------------------------------------ */
+/* Per-section visibility + editable copy (proposals.sections)         */
+/* ------------------------------------------------------------------ */
+
+export interface SectionConfig {
+  visible?: boolean;
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
+}
+
+export type SectionsConfig = Partial<Record<SectionKey, SectionConfig>>;
+
+export const SECTION_DEFAULT_COPY: Record<SectionKey, Required<Omit<SectionConfig, "visible">>> = {
+  hero: { eyebrow: "", title: "", subtitle: "" },
+  timeline: {
+    eyebrow: "",
+    title: "A Noite É Sua",
+    subtitle: "Cada minuto orquestrado para criar a festa que vocês sempre sonharam — do primeiro acorde ao último drop.",
+  },
+  songs: {
+    eyebrow: "A Trilha da Noite Mais Épica",
+    title: "O Som da Festa",
+    subtitle: "Cada música foi escolhida para criar momentos impossíveis de esquecer.",
+  },
+  process: {
+    eyebrow: "Cada Passo Rumo à Festa",
+    title: "Do Sim ao Palco",
+    subtitle: "Da assinatura do contrato ao grande dia — acompanhe como transformamos cada detalhe em uma experiência impecável.",
+  },
+  pricing: {
+    eyebrow: "O Investimento na Noite Perfeita",
+    title: "Nosso Combinado",
+    subtitle: "",
+  },
+  optionals: {
+    eyebrow: "Opcionais & Adicionais",
+    title: "Adicionais",
+    subtitle: "Serviços extras que podem ser adicionados à sua proposta. Escolha apenas o que fizer sentido.",
+  },
+  gallery: {
+    eyebrow: "Momentos que Contam Histórias",
+    title: "Galeria",
+    subtitle: "",
+  },
+};
+
+export const normalizeSections = (raw: unknown): Record<SectionKey, Required<SectionConfig>> => {
+  const cfg = (raw && typeof raw === "object" ? raw : {}) as SectionsConfig;
+  const out = {} as Record<SectionKey, Required<SectionConfig>>;
+  SECTION_KEYS.forEach(k => {
+    const c = cfg[k] || {};
+    out[k] = {
+      visible: c.visible !== false,
+      eyebrow: c.eyebrow ?? SECTION_DEFAULT_COPY[k].eyebrow,
+      title: c.title ?? SECTION_DEFAULT_COPY[k].title,
+      subtitle: c.subtitle ?? SECTION_DEFAULT_COPY[k].subtitle,
+    };
+  });
+  return out;
+};
+
+/** Reads the resolved copy/visibility for a section from a proposal object */
+export const getSectionCopy = (proposal: any, key: SectionKey) =>
+  normalizeSections(proposal?.sections)[key];

@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import StrokeText from "./StrokeText";
 import { useProposal } from "@/contexts/ProposalContext";
+import { getSectionCopy } from "@/data/templates";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -57,6 +58,7 @@ function computeDynamicDates(eventDate: string, proposalDeadline: string | null)
 
 const ProcessTimeline = () => {
   const proposal = useProposal();
+  const copy = getSectionCopy(proposal, "process");
 
   // Use saved steps if they have real dates, otherwise compute dynamically
   let steps: any[];
@@ -92,10 +94,10 @@ const ProcessTimeline = () => {
     <section className="py-12 px-6 relative">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">Cada Passo Rumo à Festa</motion.p>
-          <StrokeText text="Do Sim ao Palco" fontSize="12rem" />
+          <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">{copy.eyebrow}</motion.p>
+          <StrokeText text={copy.title} fontSize="12rem" />
           <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }} className="font-body text-muted-foreground mt-4 max-w-xl mx-auto">
-            Da assinatura do contrato ao grande dia — acompanhe como transformamos cada detalhe em uma experiência impecável.
+            {copy.subtitle}
           </motion.p>
         </div>
 

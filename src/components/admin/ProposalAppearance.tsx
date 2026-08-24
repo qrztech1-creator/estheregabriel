@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import SortableList from "./SortableList";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import {
   TEMPLATES, SECTION_LABELS, normalizeSectionOrder, buildThemeStyle,
+  normalizeSections, SECTION_DEFAULT_COPY,
   type SectionKey, type ProposalTheme,
 } from "@/data/templates";
 
@@ -46,23 +49,25 @@ const ProposalAppearance = ({ proposalId }: Props) => {
   const [template, setTemplate] = useState("classic");
   const [theme, setTheme] = useState<ProposalTheme>({});
   const [order, setOrder] = useState<SectionKey[]>(normalizeSectionOrder([]));
+  const [sections, setSections] = useState(normalizeSections({}));
   const [saving, setSaving] = useState(false);
 
   useEffect(() => { load(); }, [proposalId]);
 
   const load = async () => {
-    const { data } = await supabase.from("proposals").select("template, theme, section_order").eq("id", proposalId).maybeSingle();
+    const { data } = await supabase.from("proposals").select("template, theme, section_order, sections").eq("id", proposalId).maybeSingle();
     if (!data) return;
     const d = data as any;
     setTemplate(d.template || "classic");
     setTheme((d.theme || {}) as ProposalTheme);
     setOrder(normalizeSectionOrder(d.section_order));
+    setSections(normalizeSections(d.sections));
   };
 
   const save = async () => {
     setSaving(true);
     const { error } = await supabase.from("proposals")
-      .update({ template, theme: theme as any, section_order: order as any })
+      .update({ template, theme: theme as any, section_order: order as any, sections: sections as any })
       .eq("id", proposalId);
     setSaving(false);
     if (error) { toast.error("Erro ao salvar aparência"); return; }
@@ -141,18 +146,52 @@ const ProposalAppearance = ({ proposalId }: Props) => {
       </div>
 
       <div className="bg-card border border-border rounded-xl p-4 sm:p-6 space-y-3">
-        <h3 className="font-semibold text-sm">Ordem das seções da página</h3>
-        <p className="text-xs text-muted-foreground">Arraste para reordenar como o cliente vê a proposta.</p>
+        <h3 className="font-semibold text-sm">Seções da página</h3>
+        <p className="text-xs text-muted-foreground">
+          Arraste para reordenar, ligue/desligue cada seção e edite os textos que o cliente vê.
+        </p>
         <SortableList
           items={order}
           getId={s => s}
           onReorder={setOrder}
-          renderItem={(s, i) => (
-            <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-background">
-              <span className="text-xs text-muted-foreground tabular-nums w-5">{String(i + 1).padStart(2, "0")}</span>
-              <span className="text-sm">{SECTION_LABELS[s]}</span>
-            </div>
-          )}
+          className="space-y-3"
+          renderItem={(k, i) => {
+            const cfg = sections[k];
+            const setCfg = (patch: Partial<typeof cfg>) =>
+              setSections(prev => ({ ...prev, [k]: { ...prev[k], ...patch } }));
+            return (
+              <div className={`rounded-lg border p-3 sm:p-4 space-y-3 bg-background ${cfg.visible ? "border-border" : "border-dashed border-border/60 opacity-70"}`}>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground tabular-nums w-5">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="text-sm flex-1 min-w-0 truncate">{SECTION_LABELS[k]}</span>
+                  <span className="text-[11px] text-muted-foreground hidden sm:inline">{cfg.visible ? "Visível" : "Oculta"}</span>
+                  <Switch checked={cfg.visible} onCheckedChange={v => setCfg({ visible: v })} aria-label={`Exibir ${SECTION_LABELS[k]}`} />
+                </div>
+                {cfg.visible && k !== "hero" && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Rótulo (linha superior)</Label>
+                      <Input className="h-9 text-xs" value={cfg.eyebrow}
+                        placeholder={SECTION_DEFAULT_COPY[k].eyebrow || "opcional"}
+                        onChange={e => setCfg({ eyebrow: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Título</Label>
+                      <Input className="h-9 text-xs" value={cfg.title}
+                        placeholder={SECTION_DEFAULT_COPY[k].title}
+                        onChange={e => setCfg({ title: e.target.value })} />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label className="text-xs">Descrição</Label>
+                      <Textarea rows={2} className="text-xs" value={cfg.subtitle}
+                        placeholder={SECTION_DEFAULT_COPY[k].subtitle || "opcional"}
+                        onChange={e => setCfg({ subtitle: e.target.value })} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          }}
         />
       </div>
 
