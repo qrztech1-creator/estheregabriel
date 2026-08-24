@@ -47,10 +47,10 @@ const TimelineSection = () => {
       <div className="absolute inset-0 opacity-40"><FloatingScene variant="waveform" height="100%" /></div>
       <div className="max-w-5xl mx-auto relative z-10">
         <div className="text-center mb-12">
-          <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">{durationLabel}</motion.p>
-          <StrokeText text="A Noite É Sua" fontSize="12rem" />
+          <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">{copy.eyebrow || durationLabel}</motion.p>
+          <StrokeText text={copy.title} fontSize="12rem" />
           <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }} className="font-body text-muted-foreground mt-4 max-w-xl mx-auto">
-            Cada minuto orquestrado para criar a festa que vocês sempre sonharam — do primeiro acorde ao último drop.
+            {copy.subtitle}
           </motion.p>
         </div>
 

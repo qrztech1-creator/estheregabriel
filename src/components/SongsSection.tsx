@@ -76,10 +76,10 @@ const SongsSection = () => {
       <div className="absolute inset-0 opacity-30"><FloatingScene variant="notes" height="100%" /></div>
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-10">
-          <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">A Trilha da Noite Mais Épica</motion.p>
-          <StrokeText text="O Som da Festa" fontSize="12rem" />
+          <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">{copy.eyebrow}</motion.p>
+          <StrokeText text={copy.title} fontSize="12rem" />
           <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }} className="font-body text-muted-foreground mt-4 max-w-xl mx-auto">
-            Cada música foi escolhida para criar momentos impossíveis de esquecer.
+            {copy.subtitle}
           </motion.p>
         </div>
 

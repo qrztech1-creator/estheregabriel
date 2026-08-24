@@ -67,10 +67,10 @@ const GallerySection = () => {
             viewport={{ once: true }}
             className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4"
           >
-            Momentos que Contam Histórias
+            {copy.eyebrow}
           </motion.p>
 
-          <StrokeText text="Galeria" fontSize="12rem" />
+          <StrokeText text={copy.title} fontSize="12rem" />
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

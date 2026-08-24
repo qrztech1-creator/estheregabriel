@@ -86,12 +86,12 @@ const OptionalsSection = () => {
         <div className="text-center mb-10">
           <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             className="font-ui text-xs tracking-[0.3em] uppercase text-primary mb-4">
-            Opcionais &amp; Adicionais
+            {copy.eyebrow}
           </motion.p>
-          <StrokeText text="Adicionais" fontSize="12rem" />
+          <StrokeText text={copy.title} fontSize="12rem" />
           <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.3 }}
             className="font-body text-muted-foreground mt-4 max-w-xl mx-auto leading-relaxed">
-            Serviços extras que podem ser adicionados à sua proposta. Escolha apenas o que fizer sentido.
+            {copy.subtitle}
           </motion.p>
         </div>
 

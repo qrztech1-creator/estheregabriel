@@ -107,8 +107,8 @@ const PricingSection = () => {
     <section className="py-12 px-6 relative">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-10">
-          <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">O Investimento na Noite Perfeita</motion.p>
-          <StrokeText text="Nosso Combinado" fontSize="12rem" />
+          <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="font-ui text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">{copy.eyebrow}</motion.p>
+          <StrokeText text={copy.title} fontSize="12rem" />
         </div>
 
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.2 }} className="glass-surface p-8 md:p-12 rounded-sm">
