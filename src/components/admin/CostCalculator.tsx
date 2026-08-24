@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { useMemo, useState } from "react";
 import SortableList from "./SortableList";
 import AiTextButton from "./AiTextButton";
+import MediaEditor, { type MediaEntry } from "./MediaEditor";
 import { ITEM_CATEGORIES, PACKAGE_CATEGORIES, PRICE_BANDS, REGIONS, formatBRL, type RegionKey } from "@/data/regionPricing";
 import { getPackagePresets, presetTotals, type PackagePreset } from "@/data/packagePresets";
 
@@ -20,6 +21,7 @@ export interface DraftPackage {
   name: string; description: string; category: string;
   sale_price: number; internal_cost: number;
   is_optional: boolean; is_courtesy: boolean; recommended: boolean;
+  media?: MediaEntry[];
   items: DraftItem[];
 }
 
@@ -30,7 +32,7 @@ export const emptyItem = (): DraftItem => ({
 export const emptyPackage = (): DraftPackage => ({
   name: "Novo pacote", description: "", category: "festa",
   sale_price: 0, internal_cost: 0, is_optional: false, is_courtesy: false,
-  recommended: false, items: [],
+  recommended: false, media: [], items: [],
 });
 
 const itemsCost = (its: DraftItem[]) => its.reduce((s, i) => s + (Number(i.unit_cost) || 0) * (Number(i.quantity) || 1), 0);
@@ -289,6 +291,8 @@ const CostCalculator = ({ region, contextLabel, packages, looseItems, onChange }
                     </div>
                     <Textarea rows={2} value={p.description} onChange={e => setPkg(i, { description: e.target.value })} />
                   </div>
+
+                  <MediaEditor media={p.media || []} onChange={m => setPkg(i, { media: m })} />
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">

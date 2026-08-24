@@ -330,6 +330,7 @@ export type Database = {
           id: string
           is_courtesy: boolean
           is_optional: boolean
+          media: Json
           name: string
           package_id: string | null
           proposal_id: string
@@ -345,6 +346,7 @@ export type Database = {
           id?: string
           is_courtesy?: boolean
           is_optional?: boolean
+          media?: Json
           name: string
           package_id?: string | null
           proposal_id: string
@@ -360,6 +362,7 @@ export type Database = {
           id?: string
           is_courtesy?: boolean
           is_optional?: boolean
+          media?: Json
           name?: string
           package_id?: string | null
           proposal_id?: string
@@ -391,9 +394,11 @@ export type Database = {
           description: string | null
           display_order: number
           id: string
+          image_url: string | null
           internal_cost: number
           is_courtesy: boolean
           is_optional: boolean
+          media: Json
           name: string
           proposal_id: string
           recommended: boolean
@@ -405,9 +410,11 @@ export type Database = {
           description?: string | null
           display_order?: number
           id?: string
+          image_url?: string | null
           internal_cost?: number
           is_courtesy?: boolean
           is_optional?: boolean
+          media?: Json
           name: string
           proposal_id: string
           recommended?: boolean
@@ -419,9 +426,11 @@ export type Database = {
           description?: string | null
           display_order?: number
           id?: string
+          image_url?: string | null
           internal_cost?: number
           is_courtesy?: boolean
           is_optional?: boolean
+          media?: Json
           name?: string
           proposal_id?: string
           recommended?: boolean
