@@ -248,19 +248,21 @@ const ProposalSummaryPage = () => {
             {plans.map((p: any, i: number) => {
               const active = selectedPlanIndices.includes(i);
               return (
-                <button key={i} onClick={() => togglePlan(i)}
-                  className={`p-4 rounded-lg border text-left transition-all ${active ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+                <div key={i} role="button" tabIndex={0} onClick={() => togglePlan(i)}
+                  onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); togglePlan(i); } }}
+                  className={`p-4 rounded-lg border text-left transition-all cursor-pointer ${active ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
                   <div className="flex items-start gap-3">
                     <div className={`w-5 h-5 rounded border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${active ? "bg-primary border-primary" : "border-muted-foreground/40"}`}>
                       {active && <Check className="w-3 h-3 text-primary-foreground" />}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm">{p.label}</p>
                       <p className="text-xs text-muted-foreground">{p.description}</p>
+                      <MediaGallery media={p.media} />
                     </div>
                     <p className="font-display text-lg">{formatBRL(p.total || 0)}</p>
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
