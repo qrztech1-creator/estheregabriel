@@ -1,9 +1,8 @@
-import BackgroundMusic from "@/components/BackgroundMusic";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Check, ArrowLeft, Send } from "lucide-react";
+import { Check, ArrowLeft, Send, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -27,7 +26,6 @@ const ProposalSummaryPage = () => {
   const [selectedExtras, setSelectedExtras] = useState<Record<string, boolean>>({});
   const [selectedPkgIds, setSelectedPkgIds] = useState<Record<string, boolean>>({});
 
-
   useEffect(() => {
     if (!slug) { navigate("/"); return; }
     supabase.rpc("get_public_proposal", { p_slug: slug })
@@ -35,10 +33,23 @@ const ProposalSummaryPage = () => {
         if (!data) { navigate("/"); return; }
         setProposal(data);
         const plans = (data as any).pricing_plans || [];
-        const queryIndices = new URLSearchParams(window.location.search).get("planos")
-          ?.split(",").map(Number).filter(index => Number.isInteger(index) && index >= 0 && index < plans.length) || [];
-        const recommended = plans.reduce((acc: number[], plan: any, index: number) => plan.recommended ? [...acc, index] : acc, []);
-        setSelectedPlanIndices(queryIndices.length ? queryIndices : (recommended.length ? recommended : (plans.length ? [plans.length - 1] : [])));
+        
+        // Try to get selected plans from URL query params
+        const params = new URLSearchParams(window.location.search);
+        const planosParam = params.get("planos");
+        let initialIndices: number[] = [];
+        
+        if (planosParam) {
+          initialIndices = planosParam.split(",").map(Number).filter(n => !isNaN(n) && n >= 0 && n < plans.length);
+        }
+        
+        if (initialIndices.length === 0) {
+          const recIdx = plans.findIndex((p: any) => p.recommended);
+          initialIndices = [recIdx >= 0 ? recIdx : plans.length - 1].filter(n => n >= 0);
+        }
+        
+        setSelectedPlanIndices(initialIndices);
+        
         const pkgDefaults: Record<string, boolean> = {};
         ((data as any).packages || []).forEach((p: any) => { pkgDefaults[p.id] = !p.is_optional; });
         setSelectedPkgIds(pkgDefaults);
@@ -46,8 +57,13 @@ const ProposalSummaryPage = () => {
 
         setLoading(false);
       });
-  }, [slug]);
+  }, [slug, navigate]);
 
+  const togglePlan = (idx: number) => {
+    setSelectedPlanIndices(prev => 
+      prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
+    );
+  };
 
   const togglePaymentType = (type: string) => {
     setPaymentTypes(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]);
@@ -55,12 +71,6 @@ const ProposalSummaryPage = () => {
 
   const toggleExtra = (key: string) => {
     setSelectedExtras(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const togglePlan = (index: number) => {
-    setSelectedPlanIndices(current => current.includes(index)
-      ? current.filter(item => item !== index)
-      : [...current, index]);
   };
 
   const getSummaryExtrasForAccept = (dbExtras: any[], prop: any) => {
@@ -75,10 +85,13 @@ const ProposalSummaryPage = () => {
 
   const handleAccept = async () => {
     if (!proposal) return;
+    if (selectedPlanIndices.length === 0) { toast.error("Selecione pelo menos um pacote principal"); return; }
     if (paymentTypes.length === 0) { toast.error("Selecione pelo menos uma forma de pagamento"); return; }
     setSubmitting(true);
+    
     const plans = proposal.pricing_plans || [];
-    const chosenPlans = selectedPlanIndices.map(index => plans[index]).filter(Boolean);
+    const chosenPlans = selectedPlanIndices.map(i => plans[i]);
+    
     const paymentLabels: Record<string, string> = {
       entry30: "Entrada de 30%",
       entry50: "Entrada de 50%",
@@ -97,17 +110,14 @@ const ProposalSummaryPage = () => {
       sale_price: p.is_courtesy ? 0 : Number(p.sale_price) || 0,
     }));
 
-    const plansTotal = chosenPlans.reduce((sum: number, current: any) => sum + (Number(current.total) || 0), 0);
+    const plansTotal = chosenPlans.reduce((sum: number, p: any) => sum + (p.total || 0), 0);
     const baseTotal = plansTotal + chosenExtrasTotal + packagesTotal;
     const discountRates: Record<string, number> = { entry30: 0.04, entry50: 0.10, aVista: 0.125 };
     const rate = discountRates[paymentMethod] || 0;
     const finalValue = +(baseTotal * (1 - rate)).toFixed(2);
 
     const acceptedPlanData = {
-      label: chosenPlans.map((current: any) => current.label).join(" + "),
-      description: chosenPlans.map((current: any) => current.description).filter(Boolean).join(" + "),
-      plans_chosen: chosenPlans,
-      plans_total: plansTotal,
+      plans: chosenPlans,
       payment_method: paymentLabels[paymentMethod] || paymentMethod,
       payment_types: paymentTypes,
       extras_chosen: chosenExtras,
@@ -116,7 +126,6 @@ const ProposalSummaryPage = () => {
       packages_total: packagesTotal,
       final_value: finalValue,
     };
-
 
     const { data: ok, error } = await supabase.rpc("accept_proposal", {
       p_slug: proposal.slug,
@@ -141,23 +150,20 @@ const ProposalSummaryPage = () => {
 
   if (loading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
+      <Music className="w-8 h-8 text-primary animate-pulse" />
     </div>
   );
 
   if (!proposal) return null;
 
   const plans = proposal.pricing_plans || [];
-  const chosenPlans = selectedPlanIndices.map(index => plans[index]).filter(Boolean);
-  const plansTotal = chosenPlans.reduce((sum: number, current: any) => sum + (Number(current.total) || 0), 0);
+  const chosenPlans = selectedPlanIndices.map(i => plans[i]) || [];
   const eventDate = new Date(proposal.event_date + "T12:00:00");
   const extras = (proposal as any).show_optionals === false ? [] : (proposal.optional_extras || []);
 
   const getSummaryExtras = (dbExtras: any[], prop: any) => {
     const items = dbExtras.map((e: any) => ({ ...e, price: 0 }));
-    // Add palco option
     items.push({ icon: "Square", title: "Palco 4×3", description: "Estrutura de palco profissional 4×3 metros para a banda.", price: 1200, details: ["Montagem e desmontagem inclusa", "Estrutura segura e resistente"] });
-    // Distribute bundle price across original extras
     if (prop.extras_bundle_price && dbExtras.length > 0) {
       const perItem = Number(prop.extras_bundle_price) / dbExtras.length;
       items.forEach((it: any, i: number) => { if (i < dbExtras.length) it.price = perItem; });
@@ -173,10 +179,10 @@ const ProposalSummaryPage = () => {
 
   const chosenExtrasTotal = summaryExtras.reduce((sum: number, e: any, i: number) => sum + (selectedExtras[`extra-${i}`] ? (e.price || 0) : 0), 0);
   const packagesTotal = packages.reduce((sum: number, p: any) => sum + (selectedPkgIds[p.id] && !p.is_courtesy ? Number(p.sale_price) || 0 : 0), 0);
+  const plansTotal = chosenPlans.reduce((sum: number, p: any) => sum + (p.total || 0), 0);
   const baseTotal = plansTotal + chosenExtrasTotal + packagesTotal;
   const grandTotal = +(baseTotal * (1 - rate)).toFixed(2);
   const totalSavings = +(baseTotal * rate).toFixed(2);
-
 
   const paymentTypeOptions = [
     { key: "pix", label: "Pix" },
@@ -188,6 +194,7 @@ const ProposalSummaryPage = () => {
   if (accepted) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-6">
+        <BackgroundMusic startPlaying audioUrl={proposal.audio_url || "/audio/background-music.mp3"} />
         <div className="max-w-lg w-full text-center space-y-6">
           <img src={logo} alt="Home Music" className="h-10 mx-auto" />
           <div className="w-20 h-20 rounded-full bg-primary/20 border border-primary mx-auto flex items-center justify-center">
@@ -207,7 +214,6 @@ const ProposalSummaryPage = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <BackgroundMusic startPlaying audioUrl={proposal.audio_url || "/audio/background-music.mp3"} />
       <BackgroundMusic startPlaying audioUrl={proposal.audio_url || "/audio/background-music.mp3"} />
       <nav className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -236,28 +242,29 @@ const ProposalSummaryPage = () => {
           </div>
         </div>
 
-        {/* Plan selection */}
+        {/* Plan selection - Multi-select */}
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-          <div>
-            <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Pacotes selecionados</h2>
-            <p className="text-xs text-muted-foreground mt-1">Selecione quantos quiser para montar sua proposta.</p>
-          </div>
+          <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Pacotes Principais</h2>
+          <p className="text-xs text-muted-foreground">Selecione os pacotes que deseja incluir na sua proposta.</p>
           <div className="grid gap-2">
-            {plans.map((p: any, i: number) => (
-              <button key={i} onClick={() => togglePlan(i)} aria-pressed={selectedPlanIndices.includes(i)}
-                className={`p-4 rounded-lg border text-left transition-all ${selectedPlanIndices.includes(i) ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
-                <div className="flex items-center gap-3">
-                  <div className={`w-5 h-5 rounded border flex-shrink-0 flex items-center justify-center ${selectedPlanIndices.includes(i) ? "bg-primary border-primary" : "border-muted-foreground/40"}`}>
-                    {selectedPlanIndices.includes(i) && <Check className="w-3 h-3 text-primary-foreground" />}
+            {plans.map((p: any, i: number) => {
+              const active = selectedPlanIndices.includes(i);
+              return (
+                <button key={i} onClick={() => togglePlan(i)}
+                  className={`p-4 rounded-lg border text-left transition-all ${active ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+                  <div className="flex items-start gap-3">
+                    <div className={`w-5 h-5 rounded border flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${active ? "bg-primary border-primary" : "border-muted-foreground/40"}`}>
+                      {active && <Check className="w-3 h-3 text-primary-foreground" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{p.label}</p>
+                      <p className="text-xs text-muted-foreground">{p.description}</p>
+                    </div>
+                    <p className="font-display text-lg">{formatBRL(p.total || 0)}</p>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{p.label}</p>
-                    <p className="text-xs text-muted-foreground">{p.description}</p>
-                  </div>
-                  <p className="font-display text-lg">{formatBRL(p.total || 0)}</p>
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -328,9 +335,8 @@ const ProposalSummaryPage = () => {
           ));
         })()}
 
-
         {/* Optional Extras */}
-        {(proposal as any).show_optionals !== false && (
+        {(proposal as any).show_optionals !== false && summaryExtras.length > 0 && (
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
           <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Opcionais</h2>
           <div className="grid gap-3">
@@ -352,8 +358,6 @@ const ProposalSummaryPage = () => {
           </div>
         </div>
         )}
-
-
 
         {/* Payment discount */}
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
@@ -383,53 +387,65 @@ const ProposalSummaryPage = () => {
           </div>
         </div>
 
-        {/* Payment type (checkbox) */}
+        {/* Payment types */}
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-          <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Forma de Pagamento</h2>
-          <p className="text-xs text-muted-foreground">Selecione como pretende realizar o pagamento:</p>
-          <div className="grid gap-3">
+          <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Formas de Pagamento</h2>
+          <p className="text-xs text-muted-foreground">Selecione uma ou mais formas de pagamento para o restante do valor.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {paymentTypeOptions.map(opt => (
-              <label key={opt.key}
-                className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${paymentTypes.includes(opt.key) ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
-                <Checkbox checked={paymentTypes.includes(opt.key)} onCheckedChange={() => togglePaymentType(opt.key)} className="mt-0.5" />
-                <div>
-                  <p className="font-medium text-sm">{opt.label}</p>
-                  {opt.warning && (
-                    <p className="text-[11px] text-yellow-500 mt-0.5">⚠️ {opt.warning}</p>
-                  )}
+              <button key={opt.key} onClick={() => togglePaymentType(opt.key)}
+                className={`p-4 rounded-lg border text-left transition-all ${paymentTypes.includes(opt.key) ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+                <div className="flex items-center gap-3">
+                  <div className={`w-5 h-5 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${paymentTypes.includes(opt.key) ? "bg-primary border-primary" : "border-muted-foreground/40"}`}>
+                    {paymentTypes.includes(opt.key) && <Check className="w-3 h-3 text-primary-foreground" />}
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{opt.label}</p>
+                    {opt.warning && <p className="text-[10px] text-destructive leading-tight mt-0.5">{opt.warning}</p>}
+                  </div>
                 </div>
-              </label>
+              </button>
             ))}
           </div>
         </div>
 
-        {/* Total */}
-        <div className="bg-card border border-primary/30 rounded-xl p-6 text-center space-y-3">
-          <p className="text-sm text-muted-foreground">Valor final com desconto</p>
-          <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">Pacotes: {formatBRL(plansTotal)}</p>
-            {packagesTotal > 0 && <p className="text-sm text-muted-foreground">Serviços adicionais: {formatBRL(packagesTotal)}</p>}
-            {chosenExtrasTotal > 0 && (
-              <p className="text-sm text-muted-foreground">Opcionais: {formatBRL(chosenExtrasTotal)}</p>
-            )}
-          </div>
-          <p className="font-display text-4xl text-foreground">{formatBRL(grandTotal)}</p>
-          {totalSavings > 0 && <p className="text-xs text-primary">Economia de {formatBRL(totalSavings)}</p>}
-        </div>
-
         {/* Notes */}
-        <div className="bg-card border border-border rounded-xl p-6 space-y-3">
-          <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Observações (opcional)</h2>
-          <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Qualquer observação adicional..." rows={3} />
+        <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+          <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Observações Adicionais</h2>
+          <Textarea placeholder="Alguma dúvida ou observação sobre o contrato, repertório ou logística?"
+            value={notes} onChange={e => setNotes(e.target.value)}
+            className="min-h-[100px] resize-none" />
         </div>
 
-        {/* Accept */}
-        <div className="flex flex-col gap-3">
-          <Button onClick={handleAccept} disabled={submitting} className="w-full py-6 text-base gap-2">
-            <Send className="w-5 h-5" />
-            {submitting ? "Confirmando..." : "CONFIRMAR PROPOSTA"}
+        {/* Final Summary & Action */}
+        <div className="bg-primary/5 border border-primary/30 rounded-xl p-6 space-y-6">
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Subtotal (Itens Selecionados)</span>
+              <span>{formatBRL(baseTotal)}</span>
+            </div>
+            {totalSavings > 0 && (
+              <div className="flex justify-between text-sm text-primary">
+                <span>Desconto ({paymentMethod === "aVista" ? "12,5%" : paymentMethod === "entry50" ? "10%" : "4%"})</span>
+                <span>- {formatBRL(totalSavings)}</span>
+              </div>
+            )}
+            <div className="pt-3 border-t border-primary/20 flex justify-between items-baseline">
+              <span className="font-semibold text-lg">Total do Investimento</span>
+              <div className="text-right">
+                <span className="font-display text-3xl text-primary">{formatBRL(grandTotal)}</span>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">Valor Final com Desconto</p>
+              </div>
+            </div>
+          </div>
+
+          <Button className="w-full h-14 text-base font-bold uppercase tracking-widest gap-2"
+            disabled={submitting} onClick={handleAccept}>
+            {submitting ? "Confirmando..." : <><Send className="w-5 h-5" /> Confirmar Proposta</>}
           </Button>
-          <p className="text-[10px] text-center text-muted-foreground">Ao confirmar, nossa equipe entrará em contato para formalizar o contrato.</p>
+          <p className="text-[10px] text-center text-muted-foreground">
+            Ao confirmar, nossa equipe receberá sua escolha e entrará em contato para formalização do contrato.
+          </p>
         </div>
       </div>
     </div>
