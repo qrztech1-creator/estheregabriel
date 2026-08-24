@@ -62,19 +62,32 @@ const MediaEditor = ({ media, onChange, label = "Mídias (imagens, vídeos e lin
   const onFiles = async (files: FileList | null) => {
     if (!files?.length) return;
     setBusy(true);
+    const uploaded: MediaEntry[] = [];
     for (const file of Array.from(files)) {
       const signed = await uploadProposalMedia(file);
       if (signed) {
-        add({ kind: file.type.startsWith("video") ? "video" : "image", url: signed, title: file.name });
+        uploaded.push({
+          id: crypto.randomUUID(),
+          kind: file.type.startsWith("video") ? "video" : "image",
+          url: signed,
+          title: file.name,
+        });
       }
+    }
+    if (uploaded.length) {
+      onChange([...list, ...uploaded]);
+      toast.success(uploaded.length === 1 ? "Mídia adicionada" : `${uploaded.length} mídias adicionadas`);
     }
     setBusy(false);
     if (fileRef.current) fileRef.current.value = "";
   };
 
   return (
-    <div className="space-y-2">
-      <Label className="text-xs">{label}</Label>
+    <div className="space-y-3 rounded-md border border-primary/30 bg-primary/5 p-3">
+      <div>
+        <Label className="text-sm font-medium">{label}</Label>
+        <p className="mt-0.5 text-xs text-muted-foreground">Envie imagens ou vídeos do dispositivo, ou cole um link. A mídia aparecerá no card para o cliente abrir em tela cheia.</p>
+      </div>
 
       {list.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -105,15 +118,15 @@ const MediaEditor = ({ media, onChange, label = "Mídias (imagens, vídeos e lin
       )}
 
       <div className="flex flex-col sm:flex-row gap-2">
-        <Input value={url} onChange={e => setUrl(e.target.value)} placeholder="Colar link (imagem, vídeo, YouTube, drive...)" className="h-9 text-xs flex-1" />
+        <Input value={url} onChange={e => setUrl(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addLink(); } }} placeholder="Cole o link da imagem, vídeo, YouTube ou Drive" className="h-10 text-xs flex-1" />
         <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Título" className="h-9 text-xs sm:w-40" />
         <div className="flex gap-2">
-          <Button type="button" variant="outline" size="sm" className="h-9 gap-1 flex-1 sm:flex-none" onClick={addLink}>
-            <Plus className="w-3.5 h-3.5" /> Link
+          <Button type="button" variant="outline" size="sm" className="h-10 gap-1 flex-1 sm:flex-none" onClick={addLink} disabled={!url.trim()}>
+            <Plus className="w-3.5 h-3.5" /> Adicionar link
           </Button>
-          <Button type="button" variant="outline" size="sm" className="h-9 gap-1 flex-1 sm:flex-none" disabled={busy}
+          <Button type="button" size="sm" className="h-10 gap-1 flex-1 sm:flex-none" disabled={busy}
             onClick={() => fileRef.current?.click()}>
-            <Upload className="w-3.5 h-3.5" /> {busy ? "Enviando..." : "Do PC"}
+            <Upload className="w-3.5 h-3.5" /> {busy ? "Enviando..." : "Subir do dispositivo"}
           </Button>
         </div>
       </div>
