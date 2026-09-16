@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import MediaGallery from "@/components/MediaGallery";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import logo from "@/assets/logo-homemusic.png";
+import { getProposalDiscounts } from "@/data/proposalTemplate";
 
 const formatBRL = (val: number) => `R$ ${val.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
@@ -108,7 +109,12 @@ const ProposalSummaryPage = () => {
 
     const plansTotal = chosenPlans.reduce((sum: number, p: any) => sum + (p.total || 0), 0);
     const baseTotal = plansTotal + chosenExtrasTotal + packagesTotal;
-    const discountRates: Record<string, number> = { entry30: 0.04, entry50: 0.10, aVista: 0.125 };
+    const discounts = getProposalDiscounts(proposal);
+    const discountRates: Record<string, number> = {
+      entry30: discounts.entry30 / 100,
+      entry50: discounts.entry50 / 100,
+      aVista: discounts.aVista / 100,
+    };
     const rate = discountRates[paymentMethod] || 0;
     const finalValue = +(baseTotal * (1 - rate)).toFixed(2);
 
@@ -166,7 +172,12 @@ const ProposalSummaryPage = () => {
   const summaryExtras = getSummaryExtras(extras, proposal);
   const packages: any[] = (proposal as any).packages || [];
 
-  const discountRates: Record<string, number> = { entry30: 0.04, entry50: 0.10, aVista: 0.125 };
+  const discounts = getProposalDiscounts(proposal);
+  const discountRates: Record<string, number> = {
+    entry30: discounts.entry30 / 100,
+    entry50: discounts.entry50 / 100,
+    aVista: discounts.aVista / 100,
+  };
   const rate = discountRates[paymentMethod] || 0;
 
   const chosenExtrasTotal = summaryExtras.reduce((sum: number, e: any, i: number) => sum + (selectedExtras[`extra-${i}`] ? (e.price || 0) : 0), 0);
@@ -364,18 +375,22 @@ const ProposalSummaryPage = () => {
           <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Condição de Pagamento</h2>
           <div className="grid gap-2">
             {[
-              { key: "entry30", label: "Entrada de 30%" },
-              { key: "entry50", label: "Entrada de 50%" },
-              { key: "aVista", label: "À Vista" },
+              { key: "entry30", label: "Entrada de 30%", pct: discounts.entry30 },
+              { key: "entry50", label: "Entrada de 50%", pct: discounts.entry50 },
+              { key: "aVista", label: "À Vista", pct: discounts.aVista },
             ].map(opt => {
               const r = discountRates[opt.key] || 0;
               const val = +(baseTotal * (1 - r)).toFixed(2);
               const sav = +(baseTotal * r).toFixed(2);
+              const formattedPct = String(opt.pct).replace(".", ",");
               return (
                 <button key={opt.key} onClick={() => setPaymentMethod(opt.key)}
                   className={`p-4 rounded-lg border text-left transition-all ${paymentMethod === opt.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
                   <div className="flex justify-between items-center">
-                    <p className="font-medium text-sm">{opt.label}</p>
+                    <div>
+                      <p className="font-medium text-sm">{opt.label}</p>
+                      {opt.pct > 0 && <span className="text-[11px] text-primary/80 font-normal">({formattedPct}% de desconto)</span>}
+                    </div>
                     <div className="text-right">
                       <p className="font-display text-lg">{formatBRL(val)}</p>
                       {sav > 0 && <p className="text-xs text-primary">Economia: {formatBRL(sav)}</p>}
@@ -426,7 +441,15 @@ const ProposalSummaryPage = () => {
             </div>
             {totalSavings > 0 && (
               <div className="flex justify-between text-sm text-primary">
-                <span>Desconto ({paymentMethod === "aVista" ? "12,5%" : paymentMethod === "entry50" ? "10%" : "4%"})</span>
+                <span>
+                  Desconto (
+                  {paymentMethod === "aVista"
+                    ? `${String(discounts.aVista).replace(".", ",")}%`
+                    : paymentMethod === "entry50"
+                    ? `${String(discounts.entry50).replace(".", ",")}%`
+                    : `${String(discounts.entry30).replace(".", ",")}%`}
+                  )
+                </span>
                 <span>- {formatBRL(totalSavings)}</span>
               </div>
             )}

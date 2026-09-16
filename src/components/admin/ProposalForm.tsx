@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { proposalTemplate, generateSlug, recalcPlanDiscounts } from "@/data/proposalTemplate";
+import { proposalTemplate, generateSlug, recalcPlanDiscounts, DEFAULT_PAYMENT_DISCOUNTS, type PaymentDiscounts } from "@/data/proposalTemplate";
 import SortableList from "./SortableList";
 import AiTextButton from "./AiTextButton";
 import CostCalculator, { type DraftItem, type DraftPackage } from "./CostCalculator";
@@ -60,6 +60,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
     optional_extras: [] as any[],
     extras_bundle_title: "",
     extras_bundle_price: 0,
+    payment_discounts: { ...DEFAULT_PAYMENT_DISCOUNTS } as PaymentDiscounts,
   });
 
   const set = (field: string, value: any) => setForm(f => ({ ...f, [field]: value }));
@@ -69,10 +70,24 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
     setOpenSections(s);
   };
 
+  const updateDiscounts = (key: keyof PaymentDiscounts, val: number) => {
+    const updated = { ...form.payment_discounts, [key]: val };
+    const plans = form.pricing_plans.map((p: any) => ({
+      ...p,
+      ...recalcPlanDiscounts(Number(p.total) || 0, updated),
+    }));
+    setForm(f => ({ ...f, payment_discounts: updated, pricing_plans: plans }));
+  };
+
   const loadTemplate = () => {
+    const initialPlans = (proposalTemplate.pricing_plans || []).map((p: any) => ({
+      ...p,
+      ...recalcPlanDiscounts(Number(p.total) || 0, form.payment_discounts),
+    }));
     setForm(f => ({
       ...f,
       ...proposalTemplate,
+      pricing_plans: initialPlans,
       bride_name: f.bride_name,
       groom_name: f.groom_name,
       event_date: f.event_date,
@@ -86,7 +101,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
 
   const updatePlanTotal = (i: number, total: number) => {
     const plans = [...form.pricing_plans];
-    plans[i] = { ...plans[i], total, ...recalcPlanDiscounts(total) };
+    plans[i] = { ...plans[i], total, ...recalcPlanDiscounts(total, form.payment_discounts) };
     set("pricing_plans", plans);
   };
 
@@ -144,7 +159,9 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
         extras_bundle_price: form.extras_bundle_price || null,
         audio_url,
         template: form.template,
-
+        theme: {
+          payment_discounts: form.payment_discounts,
+        },
       };
 
       const { data: proposal, error } = await supabase.from("proposals").insert(insertData).select().maybeSingle();
@@ -318,6 +335,48 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
 
         {renderSection("pricing", `💰 Planos de Preço (${form.pricing_plans.length})`,
           <>
+            <div className="bg-secondary/40 border border-border/80 rounded-lg p-4 mb-4 space-y-3">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Descontos por Condição de Pagamento (%)</p>
+                <p className="text-xs text-muted-foreground">Defina a porcentagem de desconto para cada opção. Os valores abaixo recalculam automaticamente.</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <Label className="text-xs">Entrada de 30% (% desc.)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={form.payment_discounts.entry30}
+                    onChange={e => updateDiscounts("entry30", Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Entrada de 50% (% desc.)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={form.payment_discounts.entry50}
+                    onChange={e => updateDiscounts("entry50", Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">À Vista (% desc.)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={form.payment_discounts.aVista}
+                    onChange={e => updateDiscounts("aVista", Number(e.target.value))}
+                  />
+                </div>
+              </div>
+            </div>
+
             <SortableList items={form.pricing_plans} onReorder={arr => set("pricing_plans", arr)} getId={(_, i) => `plan-${i}`}
               renderItem={(plan: any, i: number) => (
               <div className="border border-border rounded-lg p-4 space-y-3 relative">
@@ -329,9 +388,9 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
                   <div className="flex items-end"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={plan.recommended || false} onChange={e => updatePlan(i, "recommended", e.target.checked)} /> Recomendado</label></div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
-                  <span>30%: R$ {plan.entry30?.toFixed(2)}</span>
-                  <span>50%: R$ {plan.entry50?.toFixed(2)}</span>
-                  <span>À vista: R$ {plan.aVista?.toFixed(2)}</span>
+                  <span>30% (-{form.payment_discounts.entry30}%): R$ {plan.entry30?.toFixed(2)}</span>
+                  <span>50% (-{form.payment_discounts.entry50}%): R$ {plan.entry50?.toFixed(2)}</span>
+                  <span>À vista (-{form.payment_discounts.aVista}%): R$ {plan.aVista?.toFixed(2)}</span>
                 </div>
                  <MediaEditor
                    media={Array.isArray(plan.media) ? plan.media : []}
@@ -340,7 +399,7 @@ const ProposalForm = ({ onCreated, onCancel }: Props) => {
                  />
               </div>
             )} />
-            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("pricing_plans", [...form.pricing_plans, { id: `plano-${form.pricing_plans.length + 1}`, label: "", description: "", total: 0, entry30: 0, savings30: 0, entry50: 0, savings50: 0, aVista: 0, savingsAVista: 0, recommended: false }])}>+ Adicionar plano</Button>
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("pricing_plans", [...form.pricing_plans, { id: `plano-${form.pricing_plans.length + 1}`, label: "", description: "", total: 0, ...recalcPlanDiscounts(0, form.payment_discounts), recommended: false }])}>+ Adicionar plano</Button>
           </>
         )}
 

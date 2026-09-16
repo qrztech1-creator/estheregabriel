@@ -163,11 +163,60 @@ export const generateSlug = (bride: string, groom: string, date: string) => {
   return `${normalize(bride)}-${normalize(groom)}-${year}`;
 };
 
-export const recalcPlanDiscounts = (total: number) => ({
-  entry30: +(total * 0.96).toFixed(2),
-  savings30: +(total * 0.04).toFixed(2),
-  entry50: +(total * 0.90).toFixed(2),
-  savings50: +(total * 0.10).toFixed(2),
-  aVista: +(total * 0.875).toFixed(2),
-  savingsAVista: +(total * 0.125).toFixed(2),
-});
+export interface PaymentDiscounts {
+  entry30: number; // % desconto para entrada de 30
+  entry50: number; // % desconto para entrada de 50
+  aVista: number;  // % desconto para à vista
+}
+
+export const DEFAULT_PAYMENT_DISCOUNTS: PaymentDiscounts = {
+  entry30: 4,
+  entry50: 10,
+  aVista: 12.5,
+};
+
+export const getProposalDiscounts = (proposal: any): PaymentDiscounts => {
+  if (proposal?.theme?.payment_discounts) {
+    const d = proposal.theme.payment_discounts;
+    return {
+      entry30: typeof d.entry30 === "number" ? d.entry30 : DEFAULT_PAYMENT_DISCOUNTS.entry30,
+      entry50: typeof d.entry50 === "number" ? d.entry50 : DEFAULT_PAYMENT_DISCOUNTS.entry50,
+      aVista: typeof d.aVista === "number" ? d.aVista : DEFAULT_PAYMENT_DISCOUNTS.aVista,
+    };
+  }
+  if (proposal?.payment_discounts) {
+    const d = proposal.payment_discounts;
+    return {
+      entry30: typeof d.entry30 === "number" ? d.entry30 : DEFAULT_PAYMENT_DISCOUNTS.entry30,
+      entry50: typeof d.entry50 === "number" ? d.entry50 : DEFAULT_PAYMENT_DISCOUNTS.entry50,
+      aVista: typeof d.aVista === "number" ? d.aVista : DEFAULT_PAYMENT_DISCOUNTS.aVista,
+    };
+  }
+  const firstPlan = proposal?.pricing_plans?.[0];
+  if (firstPlan && typeof firstPlan.discount30 === "number") {
+    return {
+      entry30: firstPlan.discount30,
+      entry50: typeof firstPlan.discount50 === "number" ? firstPlan.discount50 : DEFAULT_PAYMENT_DISCOUNTS.entry50,
+      aVista: typeof firstPlan.discountAVista === "number" ? firstPlan.discountAVista : DEFAULT_PAYMENT_DISCOUNTS.aVista,
+    };
+  }
+  return DEFAULT_PAYMENT_DISCOUNTS;
+};
+
+export const recalcPlanDiscounts = (total: number, discounts?: PaymentDiscounts) => {
+  const d30 = (discounts?.entry30 ?? DEFAULT_PAYMENT_DISCOUNTS.entry30) / 100;
+  const d50 = (discounts?.entry50 ?? DEFAULT_PAYMENT_DISCOUNTS.entry50) / 100;
+  const dAV = (discounts?.aVista ?? DEFAULT_PAYMENT_DISCOUNTS.aVista) / 100;
+
+  return {
+    discount30: discounts?.entry30 ?? DEFAULT_PAYMENT_DISCOUNTS.entry30,
+    discount50: discounts?.entry50 ?? DEFAULT_PAYMENT_DISCOUNTS.entry50,
+    discountAVista: discounts?.aVista ?? DEFAULT_PAYMENT_DISCOUNTS.aVista,
+    entry30: +(total * (1 - d30)).toFixed(2),
+    savings30: +(total * d30).toFixed(2),
+    entry50: +(total * (1 - d50)).toFixed(2),
+    savings50: +(total * d50).toFixed(2),
+    aVista: +(total * (1 - dAV)).toFixed(2),
+    savingsAVista: +(total * dAV).toFixed(2),
+  };
+};

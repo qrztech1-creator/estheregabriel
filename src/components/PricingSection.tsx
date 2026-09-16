@@ -8,6 +8,7 @@ import AnimatedBorderCard from "./AnimatedBorderCard";
 import { useProposal } from "@/contexts/ProposalContext";
 import carolPhoto from "@/assets/carol-suhet.png";
 import { getSectionCopy } from "@/data/templates";
+import { getProposalDiscounts } from "@/data/proposalTemplate";
 import MediaGallery from "./MediaGallery";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -99,9 +100,14 @@ const PricingSection = () => {
     return () => clearInterval(interval);
   }, [proposal?.proposal_deadline]);
 
-  const e30 = formatBRL(selectedTotal * 0.96);
-  const e50 = formatBRL(selectedTotal * 0.90);
-  const eAV = formatBRL(selectedTotal * 0.875);
+  const discounts = getProposalDiscounts(proposal);
+  const rate30 = discounts.entry30 / 100;
+  const rate50 = discounts.entry50 / 100;
+  const rateAV = discounts.aVista / 100;
+
+  const e30 = formatBRL(selectedTotal * (1 - rate30));
+  const e50 = formatBRL(selectedTotal * (1 - rate50));
+  const eAV = formatBRL(selectedTotal * (1 - rateAV));
 
   // Use uploaded photo URL, or fallback to local carol-suhet asset if partnership is Carol Suhet
   const partnerPhotoSrc: string | null = partnershipPhotoUrl || (partnershipName?.includes("Carol Suhet") ? carolPhoto : null);
@@ -243,7 +249,10 @@ const PricingSection = () => {
                     <div className="p-5 text-center hover:bg-secondary/20 transition-colors duration-150 rounded-sm">
                       <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">Entrada de 30%</p>
                       <p className="font-display text-2xl md:text-3xl text-foreground font-light">R$ {e30.int}<span className="text-base">,{e30.dec}</span></p>
-                      <p className="font-body text-xs text-primary mt-2">Economia de R$ {formatBRL(selectedTotal * 0.04).int},{formatBRL(selectedTotal * 0.04).dec}</p>
+                      <p className="font-body text-xs text-primary mt-2">
+                        Economia de R$ {formatBRL(selectedTotal * rate30).int},{formatBRL(selectedTotal * rate30).dec}
+                        <span className="opacity-80 text-[11px] ml-1">({String(discounts.entry30).replace(".", ",")}%)</span>
+                      </p>
                     </div>
                   </AnimatedBorderCard>
                   <AnimatedBorderCard delay={0.2}>
@@ -251,7 +260,10 @@ const PricingSection = () => {
                       <div className="absolute top-0 right-0 bg-primary px-2 py-0.5"><p className="font-ui text-[9px] tracking-wider uppercase text-primary-foreground">Mais popular</p></div>
                       <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">Entrada de 50%</p>
                       <p className="font-display text-2xl md:text-3xl text-foreground font-light">R$ {e50.int}<span className="text-base">,{e50.dec}</span></p>
-                      <p className="font-body text-xs text-primary mt-2">Economia de R$ {formatBRL(selectedTotal * 0.10).int},{formatBRL(selectedTotal * 0.10).dec}</p>
+                      <p className="font-body text-xs text-primary mt-2">
+                        Economia de R$ {formatBRL(selectedTotal * rate50).int},{formatBRL(selectedTotal * rate50).dec}
+                        <span className="opacity-80 text-[11px] ml-1">({String(discounts.entry50).replace(".", ",")}%)</span>
+                      </p>
                     </div>
                   </AnimatedBorderCard>
                   <AnimatedBorderCard delay={0.3}>
@@ -259,7 +271,10 @@ const PricingSection = () => {
                       <div className="absolute top-0 right-0 bg-primary px-2 py-0.5"><p className="font-ui text-[9px] tracking-wider uppercase text-primary-foreground flex items-center gap-1"><Banknote className="w-3 h-3" /> Melhor preço</p></div>
                       <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">À Vista</p>
                       <p className="font-display text-2xl md:text-3xl text-foreground font-light">R$ {eAV.int}<span className="text-base">,{eAV.dec}</span></p>
-                      <p className="font-body text-xs text-primary mt-2">Economia de R$ {formatBRL(selectedTotal * 0.125).int},{formatBRL(selectedTotal * 0.125).dec}</p>
+                      <p className="font-body text-xs text-primary mt-2">
+                        Economia de R$ {formatBRL(selectedTotal * rateAV).int},{formatBRL(selectedTotal * rateAV).dec}
+                        <span className="opacity-80 text-[11px] ml-1">({String(discounts.aVista).replace(".", ",")}%)</span>
+                      </p>
                     </div>
                   </AnimatedBorderCard>
                 </div>

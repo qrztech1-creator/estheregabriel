@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { recalcPlanDiscounts } from "@/data/proposalTemplate";
+import { recalcPlanDiscounts, getProposalDiscounts, DEFAULT_PAYMENT_DISCOUNTS, type PaymentDiscounts } from "@/data/proposalTemplate";
 import SortableList from "./SortableList";
 import AiTextButton from "./AiTextButton";
 import MediaEditor from "./MediaEditor";
@@ -35,6 +35,8 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
     event_timeline: [] as any[], process_steps: [] as any[], showcase_songs: [] as any[],
     optional_extras: [] as any[], extras_bundle_title: "", extras_bundle_price: 0, audio_url: "",
     show_partnership: true, show_optionals: true, region: "gv", event_type: "",
+    payment_discounts: { ...DEFAULT_PAYMENT_DISCOUNTS } as PaymentDiscounts,
+    theme: {} as any,
   });
 
   useEffect(() => { loadProposal(); }, [proposalId]);
@@ -43,6 +45,12 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
     const { data } = await supabase.from("proposals").select("*").eq("id", proposalId).maybeSingle();
     if (!data) { toast.error("Proposta não encontrada"); onBack(); return; }
     const d = data as any;
+    const discounts = getProposalDiscounts(d);
+    const loadedPlans = (d.pricing_plans || []).map((p: any) => ({
+      ...p,
+      ...recalcPlanDiscounts(Number(p.total) || 0, discounts),
+    }));
+
     setForm({
       bride_name: d.bride_name || "", groom_name: d.groom_name || "", event_date: d.event_date || "",
       event_start_time: d.event_start_time || "18:00", event_end_time: d.event_end_time || "22:00",
@@ -52,12 +60,14 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
       whatsapp_number: d.whatsapp_number || "", slug: d.slug || "",
       partnership_name: d.partnership_name || "", partnership_instagram: d.partnership_instagram || "",
       partnership_photo_url: d.partnership_photo_url || "", created_by: d.created_by || "",
-      pricing_plans: d.pricing_plans || [], included_services: d.included_services || [],
+      pricing_plans: loadedPlans, included_services: d.included_services || [],
       tech_details: d.tech_details || [], event_timeline: d.event_timeline || [],
       process_steps: d.process_steps || [], showcase_songs: (d.showcase_songs?.length ? d.showcase_songs : defaultSongs),
       optional_extras: d.optional_extras || [], extras_bundle_title: d.extras_bundle_title || "",
       extras_bundle_price: Number(d.extras_bundle_price) || 0, audio_url: d.audio_url || "",
       show_partnership: d.show_partnership !== false, show_optionals: d.show_optionals !== false,
+      payment_discounts: discounts,
+      theme: d.theme || {},
     });
     setLoading(false);
   };
@@ -66,9 +76,18 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
   const aiLabel = `Casamento de ${form.bride_name} & ${form.groom_name} em ${form.venue_name}`;
   const toggle = (key: string) => { const s = new Set(openSections); s.has(key) ? s.delete(key) : s.add(key); setOpenSections(s); };
 
+  const updateDiscounts = (key: keyof PaymentDiscounts, val: number) => {
+    const updated = { ...form.payment_discounts, [key]: val };
+    const plans = form.pricing_plans.map((p: any) => ({
+      ...p,
+      ...recalcPlanDiscounts(Number(p.total) || 0, updated),
+    }));
+    setForm(f => ({ ...f, payment_discounts: updated, pricing_plans: plans }));
+  };
+
   const updatePlanTotal = (i: number, total: number) => {
     const plans = [...form.pricing_plans];
-    plans[i] = { ...plans[i], total, ...recalcPlanDiscounts(total) };
+    plans[i] = { ...plans[i], total, ...recalcPlanDiscounts(total, form.payment_discounts) };
     set("pricing_plans", plans);
   };
   const updatePlan = (i: number, field: string, value: any) => {
@@ -106,6 +125,10 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
         process_steps: form.process_steps as any, showcase_songs: form.showcase_songs as any,
         optional_extras: form.optional_extras as any, extras_bundle_title: form.extras_bundle_title || null,
         extras_bundle_price: form.extras_bundle_price || null, audio_url,
+        theme: {
+          ...(form.theme || {}),
+          payment_discounts: form.payment_discounts,
+        },
         updated_at: new Date().toISOString(),
       };
 
@@ -236,6 +259,48 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
 
         {renderSection("pricing", `💰 Planos de Preço (${form.pricing_plans.length}) — arraste para reordenar`,
           <>
+            <div className="bg-secondary/40 border border-border/80 rounded-lg p-4 mb-4 space-y-3">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Descontos por Condição de Pagamento (%)</p>
+                <p className="text-xs text-muted-foreground">Defina a porcentagem de desconto para cada opção. Os valores abaixo recalculam automaticamente.</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <Label className="text-xs">Entrada de 30% (% desc.)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={form.payment_discounts.entry30}
+                    onChange={e => updateDiscounts("entry30", Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Entrada de 50% (% desc.)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={form.payment_discounts.entry50}
+                    onChange={e => updateDiscounts("entry50", Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">À Vista (% desc.)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={form.payment_discounts.aVista}
+                    onChange={e => updateDiscounts("aVista", Number(e.target.value))}
+                  />
+                </div>
+              </div>
+            </div>
+
             <SortableList
               items={form.pricing_plans}
               getId={(p: any, i) => p.id || `plan-${i}`}
@@ -254,6 +319,11 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
                     <div><Label>Valor Total (R$)</Label><Input type="number" value={plan.total} onChange={e => updatePlanTotal(i, Number(e.target.value))} /></div>
                     <div className="flex items-end"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={plan.recommended || false} onChange={e => updatePlan(i, "recommended", e.target.checked)} /> Recomendado</label></div>
                   </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
+                    <span>30% (-{form.payment_discounts.entry30}%): R$ {plan.entry30?.toFixed(2)}</span>
+                    <span>50% (-{form.payment_discounts.entry50}%): R$ {plan.entry50?.toFixed(2)}</span>
+                    <span>À vista (-{form.payment_discounts.aVista}%): R$ {plan.aVista?.toFixed(2)}</span>
+                  </div>
                    <MediaEditor
                      media={Array.isArray(plan.media) ? plan.media : []}
                      onChange={media => updatePlan(i, "media", media)}
@@ -262,7 +332,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
                 </div>
               )}
             />
-            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("pricing_plans", [...form.pricing_plans, { id: `plano-${Date.now()}`, label: "", description: "", total: 0, ...recalcPlanDiscounts(0), recommended: false }])}>+ Adicionar plano</Button>
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("pricing_plans", [...form.pricing_plans, { id: `plano-${Date.now()}`, label: "", description: "", total: 0, ...recalcPlanDiscounts(0, form.payment_discounts), recommended: false }])}>+ Adicionar plano</Button>
           </>
         )}
 

@@ -70,6 +70,7 @@ export interface ProposalTheme {
   primary?: string;
   hero_image_url?: string;
   gallery_image_urls?: string[];
+  payment_discounts?: any;
 }
 
 export const SECTION_KEYS = [

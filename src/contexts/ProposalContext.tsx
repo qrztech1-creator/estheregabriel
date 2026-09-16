@@ -34,6 +34,8 @@ export interface ProposalData {
   accepted_plan: any | null;
   accepted_payment_method: string | null;
   accepted_notes: string | null;
+  theme?: any;
+  payment_discounts?: any;
 }
 
 const ProposalContext = createContext<ProposalData | null>(null);
