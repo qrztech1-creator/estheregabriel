@@ -9,6 +9,7 @@ export const proposalTemplate = {
       id: "banda-2h",
       label: "Banda 2h",
       description: "Show ao vivo 2h + música ambiente no restante",
+      service_count: 1,
       total: 8532,
       entry30: 8190.72, savings30: 341.28,
       entry50: 7678.80, savings50: 853.20,
@@ -19,6 +20,7 @@ export const proposalTemplate = {
       id: "banda-2h-dj-2h",
       label: "Banda 2h + DJ 2h",
       description: "Show ao vivo 2h + DJ com playlist personalizada 2h",
+      service_count: 2,
       total: 9480,
       entry30: 8974.50, savings30: 505.50,
       entry50: 8498.53, savings50: 981.47,
@@ -29,6 +31,7 @@ export const proposalTemplate = {
       id: "banda-2h-dj-3h",
       label: "Banda 2h + DJ 3h",
       description: "Show ao vivo 2h + DJ com playlist personalizada 3h",
+      service_count: 2,
       total: 10353,
       entry30: 9938.88, savings30: 414.12,
       entry50: 9317.70, savings50: 1035.30,
@@ -39,6 +42,7 @@ export const proposalTemplate = {
       id: "banda-3h-dj-2h",
       label: "Banda 3h + DJ 2h",
       description: "Show ao vivo 3h + DJ com playlist personalizada 2h",
+      service_count: 2,
       total: 11984,
       entry30: 11504.64, savings30: 479.36,
       entry50: 10785.60, savings50: 1198.40,
@@ -167,40 +171,46 @@ export interface PaymentDiscounts {
   entry30: number; // % desconto para entrada de 30
   entry50: number; // % desconto para entrada de 50
   aVista: number;  // % desconto para à vista
+  enabled30?: boolean; // exibir opção de entrada 30%
+  enabled50?: boolean; // exibir opção de entrada 50%
+  enabledAVista?: boolean; // exibir opção à vista
+  requireCombo?: boolean; // exigir mais de 1 serviço para liberar desconto
 }
 
 export const DEFAULT_PAYMENT_DISCOUNTS: PaymentDiscounts = {
   entry30: 4,
   entry50: 10,
   aVista: 12.5,
+  enabled30: true,
+  enabled50: true,
+  enabledAVista: true,
+  requireCombo: true,
+};
+
+export const getPlanServiceCount = (plan: any): number => {
+  if (typeof plan?.service_count === "number" && plan.service_count > 0) {
+    return plan.service_count;
+  }
+  const text = `${plan?.label || ""} ${plan?.description || ""}`.toLowerCase();
+  if (text.includes("+") || text.includes("dj") || text.includes("cerimônia") || text.includes("cerimonia")) {
+    return 2;
+  }
+  return 1;
 };
 
 export const getProposalDiscounts = (proposal: any): PaymentDiscounts => {
-  if (proposal?.theme?.payment_discounts) {
-    const d = proposal.theme.payment_discounts;
-    return {
-      entry30: typeof d.entry30 === "number" ? d.entry30 : DEFAULT_PAYMENT_DISCOUNTS.entry30,
-      entry50: typeof d.entry50 === "number" ? d.entry50 : DEFAULT_PAYMENT_DISCOUNTS.entry50,
-      aVista: typeof d.aVista === "number" ? d.aVista : DEFAULT_PAYMENT_DISCOUNTS.aVista,
-    };
-  }
-  if (proposal?.payment_discounts) {
-    const d = proposal.payment_discounts;
-    return {
-      entry30: typeof d.entry30 === "number" ? d.entry30 : DEFAULT_PAYMENT_DISCOUNTS.entry30,
-      entry50: typeof d.entry50 === "number" ? d.entry50 : DEFAULT_PAYMENT_DISCOUNTS.entry50,
-      aVista: typeof d.aVista === "number" ? d.aVista : DEFAULT_PAYMENT_DISCOUNTS.aVista,
-    };
-  }
+  const raw = proposal?.theme?.payment_discounts || proposal?.payment_discounts || {};
   const firstPlan = proposal?.pricing_plans?.[0];
-  if (firstPlan && typeof firstPlan.discount30 === "number") {
-    return {
-      entry30: firstPlan.discount30,
-      entry50: typeof firstPlan.discount50 === "number" ? firstPlan.discount50 : DEFAULT_PAYMENT_DISCOUNTS.entry50,
-      aVista: typeof firstPlan.discountAVista === "number" ? firstPlan.discountAVista : DEFAULT_PAYMENT_DISCOUNTS.aVista,
-    };
-  }
-  return DEFAULT_PAYMENT_DISCOUNTS;
+
+  return {
+    entry30: typeof raw.entry30 === "number" ? raw.entry30 : (typeof firstPlan?.discount30 === "number" ? firstPlan.discount30 : DEFAULT_PAYMENT_DISCOUNTS.entry30),
+    entry50: typeof raw.entry50 === "number" ? raw.entry50 : (typeof firstPlan?.discount50 === "number" ? firstPlan.discount50 : DEFAULT_PAYMENT_DISCOUNTS.entry50),
+    aVista: typeof raw.aVista === "number" ? raw.aVista : (typeof firstPlan?.discountAVista === "number" ? firstPlan.discountAVista : DEFAULT_PAYMENT_DISCOUNTS.aVista),
+    enabled30: raw.enabled30 !== false,
+    enabled50: raw.enabled50 !== false,
+    enabledAVista: raw.enabledAVista !== false,
+    requireCombo: raw.requireCombo !== false,
+  };
 };
 
 export const recalcPlanDiscounts = (total: number, discounts?: PaymentDiscounts) => {

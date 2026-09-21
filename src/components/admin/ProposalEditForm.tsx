@@ -76,7 +76,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
   const aiLabel = `Casamento de ${form.bride_name} & ${form.groom_name} em ${form.venue_name}`;
   const toggle = (key: string) => { const s = new Set(openSections); s.has(key) ? s.delete(key) : s.add(key); setOpenSections(s); };
 
-  const updateDiscounts = (key: keyof PaymentDiscounts, val: number) => {
+  const updateDiscounts = (key: keyof PaymentDiscounts, val: any) => {
     const updated = { ...form.payment_discounts, [key]: val };
     const plans = form.pricing_plans.map((p: any) => ({
       ...p,
@@ -259,43 +259,95 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
 
         {renderSection("pricing", `💰 Planos de Preço (${form.pricing_plans.length}) — arraste para reordenar`,
           <>
-            <div className="bg-secondary/40 border border-border/80 rounded-lg p-4 mb-4 space-y-3">
+            <div className="bg-secondary/40 border border-border/80 rounded-lg p-4 mb-4 space-y-4">
               <div>
-                <p className="text-sm font-semibold text-foreground">Descontos por Condição de Pagamento (%)</p>
-                <p className="text-xs text-muted-foreground">Defina a porcentagem de desconto para cada opção. Os valores abaixo recalculam automaticamente.</p>
+                <p className="text-sm font-semibold text-foreground">Condições de Pagamento e Descontos (%)</p>
+                <p className="text-xs text-muted-foreground">Escolha quais condições serão exibidas ao casal e a porcentagem de desconto de cada uma.</p>
               </div>
+
+              <label className="flex items-start gap-2.5 p-3 rounded-md bg-background/60 border border-border/60 cursor-pointer hover:bg-background/80 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={form.payment_discounts.requireCombo !== false}
+                  onChange={e => updateDiscounts("requireCombo", e.target.checked)}
+                  className="rounded border-border text-primary focus:ring-primary h-4 w-4 mt-0.5"
+                />
+                <div className="text-xs leading-relaxed">
+                  <span className="font-semibold text-foreground">Exigir 2 ou mais serviços para liberar desconto</span>
+                  <p className="text-muted-foreground mt-0.5">Se o cliente selecionar apenas 1 serviço (ex: apenas banda), não há desconto (o valor fica puro nas entradas). Se selecionar 2 ou mais, os descontos são desbloqueados.</p>
+                </div>
+              </label>
+
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <Label className="text-xs">Entrada de 30% (% desc.)</Label>
+                {/* 30% */}
+                <div className={`p-3 rounded-md border transition-all ${form.payment_discounts.enabled30 !== false ? 'border-primary/50 bg-primary/5' : 'border-border/60 bg-muted/20 opacity-60'}`}>
+                  <label className="flex items-center justify-between gap-2 cursor-pointer mb-2">
+                    <span className="text-xs font-semibold text-foreground">Entrada de 30%</span>
+                    <input
+                      type="checkbox"
+                      checked={form.payment_discounts.enabled30 !== false}
+                      onChange={e => updateDiscounts("enabled30", e.target.checked)}
+                      className="rounded border-border text-primary focus:ring-primary h-4 w-4"
+                    />
+                  </label>
+                  <Label className="text-[11px] text-muted-foreground">Desconto (%)</Label>
                   <Input
                     type="number"
                     step="0.1"
                     min="0"
                     max="100"
+                    disabled={form.payment_discounts.enabled30 === false}
                     value={form.payment_discounts.entry30}
                     onChange={e => updateDiscounts("entry30", Number(e.target.value))}
+                    className="mt-1"
                   />
                 </div>
-                <div>
-                  <Label className="text-xs">Entrada de 50% (% desc.)</Label>
+
+                {/* 50% */}
+                <div className={`p-3 rounded-md border transition-all ${form.payment_discounts.enabled50 !== false ? 'border-primary/50 bg-primary/5' : 'border-border/60 bg-muted/20 opacity-60'}`}>
+                  <label className="flex items-center justify-between gap-2 cursor-pointer mb-2">
+                    <span className="text-xs font-semibold text-foreground">Entrada de 50%</span>
+                    <input
+                      type="checkbox"
+                      checked={form.payment_discounts.enabled50 !== false}
+                      onChange={e => updateDiscounts("enabled50", e.target.checked)}
+                      className="rounded border-border text-primary focus:ring-primary h-4 w-4"
+                    />
+                  </label>
+                  <Label className="text-[11px] text-muted-foreground">Desconto (%)</Label>
                   <Input
                     type="number"
                     step="0.1"
                     min="0"
                     max="100"
+                    disabled={form.payment_discounts.enabled50 === false}
                     value={form.payment_discounts.entry50}
                     onChange={e => updateDiscounts("entry50", Number(e.target.value))}
+                    className="mt-1"
                   />
                 </div>
-                <div>
-                  <Label className="text-xs">À Vista (% desc.)</Label>
+
+                {/* À Vista */}
+                <div className={`p-3 rounded-md border transition-all ${form.payment_discounts.enabledAVista !== false ? 'border-primary/50 bg-primary/5' : 'border-border/60 bg-muted/20 opacity-60'}`}>
+                  <label className="flex items-center justify-between gap-2 cursor-pointer mb-2">
+                    <span className="text-xs font-semibold text-foreground">À Vista</span>
+                    <input
+                      type="checkbox"
+                      checked={form.payment_discounts.enabledAVista !== false}
+                      onChange={e => updateDiscounts("enabledAVista", e.target.checked)}
+                      className="rounded border-border text-primary focus:ring-primary h-4 w-4"
+                    />
+                  </label>
+                  <Label className="text-[11px] text-muted-foreground">Desconto (%)</Label>
                   <Input
                     type="number"
                     step="0.1"
                     min="0"
                     max="100"
+                    disabled={form.payment_discounts.enabledAVista === false}
                     value={form.payment_discounts.aVista}
                     onChange={e => updateDiscounts("aVista", Number(e.target.value))}
+                    className="mt-1"
                   />
                 </div>
               </div>
@@ -308,7 +360,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
               renderItem={(plan: any, i: number) => (
                 <div className="border border-border rounded-lg p-4 space-y-3 relative">
                   <button onClick={() => set("pricing_plans", form.pricing_plans.filter((_: any, j: number) => j !== i))} className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"><X className="w-4 h-4" /></button>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div><Label>Nome</Label><Input value={plan.label} onChange={e => updatePlan(i, "label", e.target.value)} /></div>
                     <div>
                       <div className="flex items-center justify-between"><Label>Descrição</Label>
@@ -317,12 +369,33 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
                       <Input value={plan.description} onChange={e => updatePlan(i, "description", e.target.value)} />
                     </div>
                     <div><Label>Valor Total (R$)</Label><Input type="number" value={plan.total} onChange={e => updatePlanTotal(i, Number(e.target.value))} /></div>
-                    <div className="flex items-end"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={plan.recommended || false} onChange={e => updatePlan(i, "recommended", e.target.checked)} /> Recomendado</label></div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
-                    <span>30% (-{form.payment_discounts.entry30}%): R$ {plan.entry30?.toFixed(2)}</span>
-                    <span>50% (-{form.payment_discounts.entry50}%): R$ {plan.entry50?.toFixed(2)}</span>
-                    <span>À vista (-{form.payment_discounts.aVista}%): R$ {plan.aVista?.toFixed(2)}</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+                    <div>
+                      <Label className="text-xs">Qtd. de Serviços deste plano</Label>
+                      <select
+                        value={plan.service_count ?? (plan.label?.toLowerCase().includes("dj") || plan.label?.includes("+") ? 2 : 1)}
+                        onChange={e => updatePlan(i, "service_count", Number(e.target.value))}
+                        className="w-full bg-card border border-border rounded px-3 py-2 text-sm mt-1"
+                      >
+                        <option value={1}>1 Serviço (ex: Apenas Banda — sem desconto sozinho)</option>
+                        <option value={2}>2 Serviços (ex: Banda + DJ — Combo com desconto)</option>
+                        <option value={3}>3 ou mais Serviços (Combo completo com desconto)</option>
+                      </select>
+                    </div>
+                    <div className="flex items-end pt-5">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" checked={plan.recommended || false} onChange={e => updatePlan(i, "recommended", e.target.checked)} /> Recomendado
+                      </label>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground pt-1 border-t border-border/40">
+                    {form.payment_discounts.enabled30 !== false && <span>30% (-{form.payment_discounts.entry30}%): R$ {plan.entry30?.toFixed(2)}</span>}
+                    {form.payment_discounts.enabled50 !== false && <span>50% (-{form.payment_discounts.entry50}%): R$ {plan.entry50?.toFixed(2)}</span>}
+                    {form.payment_discounts.enabledAVista !== false && <span>À vista (-{form.payment_discounts.aVista}%): R$ {plan.aVista?.toFixed(2)}</span>}
+                    <span className="text-primary font-medium ml-auto">
+                      {(plan.service_count ?? (plan.label?.toLowerCase().includes("dj") || plan.label?.includes("+") ? 2 : 1)) === 1 ? "1 serviço" : `${plan.service_count || 2} serviços (combo)`}
+                    </span>
                   </div>
                    <MediaEditor
                      media={Array.isArray(plan.media) ? plan.media : []}
@@ -332,7 +405,7 @@ const ProposalEditForm = ({ proposalId, onSaved, onBack, onDelete }: Props) => {
                 </div>
               )}
             />
-            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("pricing_plans", [...form.pricing_plans, { id: `plano-${Date.now()}`, label: "", description: "", total: 0, ...recalcPlanDiscounts(0, form.payment_discounts), recommended: false }])}>+ Adicionar plano</Button>
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => set("pricing_plans", [...form.pricing_plans, { id: `plano-${Date.now()}`, label: "", description: "", total: 0, service_count: 1, ...recalcPlanDiscounts(0, form.payment_discounts), recommended: false }])}>+ Adicionar plano</Button>
           </>
         )}
 

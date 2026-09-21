@@ -8,7 +8,7 @@ import AnimatedBorderCard from "./AnimatedBorderCard";
 import { useProposal } from "@/contexts/ProposalContext";
 import carolPhoto from "@/assets/carol-suhet.png";
 import { getSectionCopy } from "@/data/templates";
-import { getProposalDiscounts } from "@/data/proposalTemplate";
+import { getProposalDiscounts, getPlanServiceCount } from "@/data/proposalTemplate";
 import MediaGallery from "./MediaGallery";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -101,13 +101,49 @@ const PricingSection = () => {
   }, [proposal?.proposal_deadline]);
 
   const discounts = getProposalDiscounts(proposal);
-  const rate30 = discounts.entry30 / 100;
-  const rate50 = discounts.entry50 / 100;
-  const rateAV = discounts.aVista / 100;
+  const totalServices = selectedEntries.reduce((sum, current) => sum + getPlanServiceCount(current), 0);
+  const qualifiesForDiscount = discounts.requireCombo === false || totalServices >= 2;
 
-  const e30 = formatBRL(selectedTotal * (1 - rate30));
-  const e50 = formatBRL(selectedTotal * (1 - rate50));
-  const eAV = formatBRL(selectedTotal * (1 - rateAV));
+  const rate30 = qualifiesForDiscount ? discounts.entry30 / 100 : 0;
+  const rate50 = qualifiesForDiscount ? discounts.entry50 / 100 : 0;
+  const rateAV = qualifiesForDiscount ? discounts.aVista / 100 : 0;
+
+  const allPaymentCards = [
+    {
+      id: "entry30",
+      label: "Entrada de 30%",
+      badge: null,
+      enabled: discounts.enabled30 !== false,
+      rate: rate30,
+      pct: discounts.entry30,
+      entryPct: 0.30,
+      delay: 0.1,
+    },
+    {
+      id: "entry50",
+      label: "Entrada de 50%",
+      badge: "Mais popular",
+      enabled: discounts.enabled50 !== false,
+      rate: rate50,
+      pct: discounts.entry50,
+      entryPct: 0.50,
+      delay: 0.2,
+    },
+    {
+      id: "aVista",
+      label: "À Vista",
+      badge: "Melhor preço",
+      hasIcon: true,
+      enabled: discounts.enabledAVista !== false,
+      rate: rateAV,
+      pct: discounts.aVista,
+      entryPct: 1,
+      delay: 0.3,
+    },
+  ];
+
+  const activePaymentCards = allPaymentCards.filter(c => c.enabled);
+  const displayPaymentCards = activePaymentCards.length > 0 ? activePaymentCards : allPaymentCards;
 
   // Use uploaded photo URL, or fallback to local carol-suhet asset if partnership is Carol Suhet
   const partnerPhotoSrc: string | null = partnershipPhotoUrl || (partnershipName?.includes("Carol Suhet") ? carolPhoto : null);
@@ -244,39 +280,58 @@ const PricingSection = () => {
                   <p ref={priceRef} className="font-display text-5xl md:text-7xl font-light text-gold-gradient tabular-nums">R$ {selectedTotal.toLocaleString("pt-BR")}</p>
                 </div>
 
-                <div className="grid sm:grid-cols-3 gap-4 mb-6 max-w-3xl mx-auto">
-                  <AnimatedBorderCard delay={0.1}>
-                    <div className="p-5 text-center hover:bg-secondary/20 transition-colors duration-150 rounded-sm">
-                      <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">Entrada de 30%</p>
-                      <p className="font-display text-2xl md:text-3xl text-foreground font-light">R$ {e30.int}<span className="text-base">,{e30.dec}</span></p>
-                      <p className="font-body text-xs text-primary mt-2">
-                        Economia de R$ {formatBRL(selectedTotal * rate30).int},{formatBRL(selectedTotal * rate30).dec}
-                        <span className="opacity-80 text-[11px] ml-1">({String(discounts.entry30).replace(".", ",")}%)</span>
-                      </p>
-                    </div>
-                  </AnimatedBorderCard>
-                  <AnimatedBorderCard delay={0.2}>
-                    <div className="p-5 text-center relative overflow-hidden hover:bg-secondary/20 transition-colors duration-150 rounded-sm">
-                      <div className="absolute top-0 right-0 bg-primary px-2 py-0.5"><p className="font-ui text-[9px] tracking-wider uppercase text-primary-foreground">Mais popular</p></div>
-                      <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">Entrada de 50%</p>
-                      <p className="font-display text-2xl md:text-3xl text-foreground font-light">R$ {e50.int}<span className="text-base">,{e50.dec}</span></p>
-                      <p className="font-body text-xs text-primary mt-2">
-                        Economia de R$ {formatBRL(selectedTotal * rate50).int},{formatBRL(selectedTotal * rate50).dec}
-                        <span className="opacity-80 text-[11px] ml-1">({String(discounts.entry50).replace(".", ",")}%)</span>
-                      </p>
-                    </div>
-                  </AnimatedBorderCard>
-                  <AnimatedBorderCard delay={0.3}>
-                    <div className="p-5 text-center relative overflow-hidden hover:bg-secondary/20 transition-colors duration-150 rounded-sm">
-                      <div className="absolute top-0 right-0 bg-primary px-2 py-0.5"><p className="font-ui text-[9px] tracking-wider uppercase text-primary-foreground flex items-center gap-1"><Banknote className="w-3 h-3" /> Melhor preço</p></div>
-                      <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">À Vista</p>
-                      <p className="font-display text-2xl md:text-3xl text-foreground font-light">R$ {eAV.int}<span className="text-base">,{eAV.dec}</span></p>
-                      <p className="font-body text-xs text-primary mt-2">
-                        Economia de R$ {formatBRL(selectedTotal * rateAV).int},{formatBRL(selectedTotal * rateAV).dec}
-                        <span className="opacity-80 text-[11px] ml-1">({String(discounts.aVista).replace(".", ",")}%)</span>
-                      </p>
-                    </div>
-                  </AnimatedBorderCard>
+                {!qualifiesForDiscount && discounts.requireCombo !== false && (
+                  <div className="mb-6 p-3 rounded-sm border border-primary/20 bg-primary/5 text-center max-w-2xl mx-auto">
+                    <p className="font-body text-xs text-primary/90">
+                      💡 <strong>Condição individual:</strong> O desconto especial é aplicado a partir de 2 serviços (ex: Banda + DJ ou pacotes adicionais).
+                    </p>
+                  </div>
+                )}
+
+                <div className={`mb-6 ${
+                  displayPaymentCards.length === 1
+                    ? "flex justify-center max-w-sm mx-auto"
+                    : displayPaymentCards.length === 2
+                    ? "grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto"
+                    : "grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto"
+                }`}>
+                  {displayPaymentCards.map((card) => {
+                    const finalVal = selectedTotal * (1 - card.rate);
+                    const formattedFinal = formatBRL(finalVal);
+                    const savings = selectedTotal * card.rate;
+                    const formattedSavings = formatBRL(savings);
+                    const entryVal = formatBRL(finalVal * card.entryPct);
+
+                    return (
+                      <AnimatedBorderCard key={card.id} delay={card.delay} className={displayPaymentCards.length === 1 ? "w-full" : ""}>
+                        <div className="p-5 text-center relative overflow-hidden hover:bg-secondary/20 transition-colors duration-150 rounded-sm">
+                          {card.badge && (
+                            <div className="absolute top-0 right-0 bg-primary px-2 py-0.5">
+                              <p className="font-ui text-[9px] tracking-wider uppercase text-primary-foreground flex items-center gap-1">
+                                {card.hasIcon && <Banknote className="w-3 h-3" />} {card.badge}
+                              </p>
+                            </div>
+                          )}
+                          <p className="font-ui text-xs tracking-[0.2em] uppercase text-muted-foreground mb-1">{card.label}</p>
+                          <p className="font-display text-2xl md:text-3xl text-foreground font-light">
+                            R$ {formattedFinal.int}<span className="text-base">,{formattedFinal.dec}</span>
+                          </p>
+                          {qualifiesForDiscount && card.rate > 0 ? (
+                            <p className="font-body text-xs text-primary mt-2">
+                              Economia de R$ {formattedSavings.int},{formattedSavings.dec}
+                              <span className="opacity-80 text-[11px] ml-1">({String(card.pct).replace(".", ",")}%)</span>
+                            </p>
+                          ) : (
+                            <p className="font-body text-xs text-muted-foreground mt-2">
+                              {card.entryPct < 1
+                                ? `Entrada de R$ ${entryVal.int},${entryVal.dec} + saldo parcelado`
+                                : "Pagamento integral sem desconto"}
+                            </p>
+                          )}
+                        </div>
+                      </AnimatedBorderCard>
+                    );
+                  })}
                 </div>
 
                 {proposal?.proposal_deadline && (

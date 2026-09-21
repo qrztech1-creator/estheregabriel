@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import MediaGallery from "@/components/MediaGallery";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import logo from "@/assets/logo-homemusic.png";
-import { getProposalDiscounts } from "@/data/proposalTemplate";
+import { getProposalDiscounts, getPlanServiceCount } from "@/data/proposalTemplate";
 
 const formatBRL = (val: number) => `R$ ${val.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
@@ -110,10 +110,16 @@ const ProposalSummaryPage = () => {
     const plansTotal = chosenPlans.reduce((sum: number, p: any) => sum + (p.total || 0), 0);
     const baseTotal = plansTotal + chosenExtrasTotal + packagesTotal;
     const discounts = getProposalDiscounts(proposal);
+    const plansServices = chosenPlans.reduce((sum: number, p: any) => sum + getPlanServiceCount(p), 0);
+    const extrasServices = chosenExtras.length;
+    const pkgsServices = selectedPackages.length;
+    const totalServices = plansServices + extrasServices + pkgsServices;
+    const qualifiesForDiscount = discounts.requireCombo === false || totalServices >= 2;
+
     const discountRates: Record<string, number> = {
-      entry30: discounts.entry30 / 100,
-      entry50: discounts.entry50 / 100,
-      aVista: discounts.aVista / 100,
+      entry30: qualifiesForDiscount ? discounts.entry30 / 100 : 0,
+      entry50: qualifiesForDiscount ? discounts.entry50 / 100 : 0,
+      aVista: qualifiesForDiscount ? discounts.aVista / 100 : 0,
     };
     const rate = discountRates[paymentMethod] || 0;
     const finalValue = +(baseTotal * (1 - rate)).toFixed(2);
@@ -173,10 +179,17 @@ const ProposalSummaryPage = () => {
   const packages: any[] = (proposal as any).packages || [];
 
   const discounts = getProposalDiscounts(proposal);
+
+  const plansServices = chosenPlans.reduce((sum: number, p: any) => sum + getPlanServiceCount(p), 0);
+  const extrasServices = summaryExtras.filter((_: any, i: number) => selectedExtras[`extra-${i}`]).length;
+  const pkgsServices = packages.filter((p: any) => selectedPkgIds[p.id]).length;
+  const totalServices = plansServices + extrasServices + pkgsServices;
+  const qualifiesForDiscount = discounts.requireCombo === false || totalServices >= 2;
+
   const discountRates: Record<string, number> = {
-    entry30: discounts.entry30 / 100,
-    entry50: discounts.entry50 / 100,
-    aVista: discounts.aVista / 100,
+    entry30: qualifiesForDiscount ? discounts.entry30 / 100 : 0,
+    entry50: qualifiesForDiscount ? discounts.entry50 / 100 : 0,
+    aVista: qualifiesForDiscount ? discounts.aVista / 100 : 0,
   };
   const rate = discountRates[paymentMethod] || 0;
 
@@ -186,6 +199,21 @@ const ProposalSummaryPage = () => {
   const baseTotal = plansTotal + chosenExtrasTotal + packagesTotal;
   const grandTotal = +(baseTotal * (1 - rate)).toFixed(2);
   const totalSavings = +(baseTotal * rate).toFixed(2);
+
+  const rawConditionOptions = [
+    { key: "entry30", label: "Entrada de 30%", pct: discounts.entry30, enabled: discounts.enabled30 !== false, entryPct: 0.3 },
+    { key: "entry50", label: "Entrada de 50%", pct: discounts.entry50, enabled: discounts.enabled50 !== false, entryPct: 0.5 },
+    { key: "aVista", label: "À Vista", pct: discounts.aVista, enabled: discounts.enabledAVista !== false, entryPct: 1 },
+  ];
+  const conditionOptions = rawConditionOptions.filter(opt => opt.enabled).length > 0
+    ? rawConditionOptions.filter(opt => opt.enabled)
+    : rawConditionOptions;
+
+  useEffect(() => {
+    if (conditionOptions.length > 0 && !conditionOptions.some(opt => opt.key === paymentMethod)) {
+      setPaymentMethod(conditionOptions[0].key);
+    }
+  }, [conditionOptions, paymentMethod]);
 
   const paymentTypeOptions = [
     { key: "pix", label: "Pix" },
@@ -372,28 +400,42 @@ const ProposalSummaryPage = () => {
 
         {/* Payment discount */}
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-          <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Condição de Pagamento</h2>
-          <div className="grid gap-2">
-            {[
-              { key: "entry30", label: "Entrada de 30%", pct: discounts.entry30 },
-              { key: "entry50", label: "Entrada de 50%", pct: discounts.entry50 },
-              { key: "aVista", label: "À Vista", pct: discounts.aVista },
-            ].map(opt => {
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Condição de Pagamento</h2>
+            {!qualifiesForDiscount && discounts.requireCombo !== false && (
+              <span className="text-[11px] text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded">
+                Individual: sem desconto (disponível em combos)
+              </span>
+            )}
+          </div>
+          {!qualifiesForDiscount && discounts.requireCombo !== false && (
+            <p className="text-xs text-primary/80 bg-primary/5 p-2.5 rounded-lg border border-primary/20">
+              💡 <strong>Dica de Desconto:</strong> Ao incluir 2 ou mais serviços (ex: Banda + DJ ou opcionais), os descontos especiais são ativados automaticamente!
+            </p>
+          )}
+          <div className={`grid gap-2 ${conditionOptions.length === 1 ? 'max-w-md mx-auto' : ''}`}>
+            {conditionOptions.map(opt => {
               const r = discountRates[opt.key] || 0;
               const val = +(baseTotal * (1 - r)).toFixed(2);
               const sav = +(baseTotal * r).toFixed(2);
               const formattedPct = String(opt.pct).replace(".", ",");
               return (
                 <button key={opt.key} onClick={() => setPaymentMethod(opt.key)}
-                  className={`p-4 rounded-lg border text-left transition-all ${paymentMethod === opt.key ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"}`}>
+                  className={`p-4 rounded-lg border text-left transition-all ${paymentMethod === opt.key ? "border-primary bg-primary/10 shadow-sm" : "border-border hover:border-primary/40"}`}>
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="font-medium text-sm">{opt.label}</p>
-                      {opt.pct > 0 && <span className="text-[11px] text-primary/80 font-normal">({formattedPct}% de desconto)</span>}
+                      {qualifiesForDiscount && opt.pct > 0 ? (
+                        <span className="text-[11px] text-primary/80 font-normal">({formattedPct}% de desconto)</span>
+                      ) : (
+                        <span className="text-[11px] text-muted-foreground font-normal">
+                          {opt.entryPct < 1 ? `Entrada de ${formatBRL(val * opt.entryPct)} + saldo parcelado` : "Pagamento integral sem desconto"}
+                        </span>
+                      )}
                     </div>
                     <div className="text-right">
                       <p className="font-display text-lg">{formatBRL(val)}</p>
-                      {sav > 0 && <p className="text-xs text-primary">Economia: {formatBRL(sav)}</p>}
+                      {qualifiesForDiscount && sav > 0 && <p className="text-xs text-primary">Economia: {formatBRL(sav)}</p>}
                     </div>
                   </div>
                 </button>
@@ -457,7 +499,9 @@ const ProposalSummaryPage = () => {
               <span className="font-semibold text-lg">Total do Investimento</span>
               <div className="text-right">
                 <span className="font-display text-3xl text-primary">{formatBRL(grandTotal)}</span>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">Valor Final com Desconto</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">
+                  {qualifiesForDiscount && totalSavings > 0 ? "Valor Final com Desconto" : "Valor do Investimento"}
+                </p>
               </div>
             </div>
           </div>
