@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import MediaGallery from "@/components/MediaGallery";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import logo from "@/assets/logo-homemusic.png";
-import { getProposalDiscounts, getPlanServiceCount } from "@/data/proposalTemplate";
+import { proposalTemplate, getProposalDiscounts, getPlanServiceCount } from "@/data/proposalTemplate";
 
 const formatBRL = (val: number) => `R$ ${val.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
@@ -30,10 +30,15 @@ const ProposalSummaryPage = () => {
   useEffect(() => {
     if (!slug) { navigate("/"); return; }
     supabase.rpc("get_public_proposal", { p_slug: slug })
-      .then(({ data }) => {
-        if (!data) { navigate("/"); return; }
+      .then(({ data, error }) => {
+        if (error || !data) {
+          console.error("Error loading proposal:", error);
+          navigate("/");
+          return;
+        }
         setProposal(data);
-        const plans = (data as any).pricing_plans || [];
+        const rawPlans = (data as any).pricing_plans;
+        const plans = (Array.isArray(rawPlans) && rawPlans.length > 0) ? rawPlans : (proposalTemplate.pricing_plans || []);
         
         // Try to get selected plans from URL query params
         const params = new URLSearchParams(window.location.search);
@@ -56,7 +61,22 @@ const ProposalSummaryPage = () => {
         setSelectedPkgIds(pkgDefaults);
         if ((data as any).accepted_at) setAccepted(true);
 
+        const discounts = getProposalDiscounts(data);
+        const availableOptions: string[] = [];
+        if (discounts.enabled30 !== false) availableOptions.push("entry30");
+        if (discounts.enabled50 !== false) availableOptions.push("entry50");
+        if (discounts.enabledAVista !== false) availableOptions.push("aVista");
+
+        if (availableOptions.length > 0 && !availableOptions.includes("entry50")) {
+          setPaymentMethod(availableOptions[0]);
+        }
+
         setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error in get_public_proposal:", err);
+        setLoading(false);
+        navigate("/");
       });
   }, [slug, navigate]);
 
@@ -86,8 +106,9 @@ const ProposalSummaryPage = () => {
     if (paymentTypes.length === 0) { toast.error("Selecione pelo menos uma forma de pagamento"); return; }
     setSubmitting(true);
     
-    const plans = proposal.pricing_plans || [];
-    const chosenPlans = selectedPlanIndices.map(i => plans[i]);
+    const rawPlans = proposal.pricing_plans;
+    const plans = (Array.isArray(rawPlans) && rawPlans.length > 0) ? rawPlans : (proposalTemplate.pricing_plans || []);
+    const chosenPlans = selectedPlanIndices.map(i => plans[i]).filter(Boolean);
     
     const paymentLabels: Record<string, string> = {
       entry30: "Entrada de 30%",
@@ -164,15 +185,19 @@ const ProposalSummaryPage = () => {
 
   if (!proposal) return null;
 
-  const plans = proposal.pricing_plans || [];
-  const chosenPlans = selectedPlanIndices.map(i => plans[i]) || [];
-  const eventDate = new Date(proposal.event_date + "T12:00:00");
+  const rawPlans = proposal.pricing_plans;
+  const plans = (Array.isArray(rawPlans) && rawPlans.length > 0) ? rawPlans : (proposalTemplate.pricing_plans || []);
+  const chosenPlans = selectedPlanIndices.map(i => plans[i]).filter(Boolean);
+  const eventDate = proposal.event_date ? new Date(proposal.event_date + "T12:00:00") : null;
+  const formattedEventDate = eventDate && !isNaN(eventDate.getTime())
+    ? eventDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
+    : (proposal.event_date || "A definir");
   const extras = (proposal as any).show_optionals === false ? [] : (proposal.optional_extras || []);
 
   const getSummaryExtras = (dbExtras: any[], prop: any) => {
-    const bundle = Number(prop.extras_bundle_price) || 0;
-    const perItem = bundle > 0 && dbExtras.length > 0 ? bundle / dbExtras.length : 0;
-    return dbExtras.map((e: any) => ({ ...e, price: Number(e.price) || perItem }));
+    const bundle = Number(prop?.extras_bundle_price) || 0;
+    const perItem = bundle > 0 && (dbExtras || []).length > 0 ? bundle / dbExtras.length : 0;
+    return (dbExtras || []).map((e: any) => ({ ...e, price: Number(e.price) || perItem }));
   };
 
   const summaryExtras = getSummaryExtras(extras, proposal);
@@ -201,19 +226,13 @@ const ProposalSummaryPage = () => {
   const totalSavings = +(baseTotal * rate).toFixed(2);
 
   const rawConditionOptions = [
-    { key: "entry30", label: "Entrada de 30%", pct: discounts.entry30, enabled: discounts.enabled30 !== false, entryPct: 0.3 },
-    { key: "entry50", label: "Entrada de 50%", pct: discounts.entry50, enabled: discounts.enabled50 !== false, entryPct: 0.5 },
-    { key: "aVista", label: "À Vista", pct: discounts.aVista, enabled: discounts.enabledAVista !== false, entryPct: 1 },
+    { key: "entry30", label: "Entrada de 30%", enabled: discounts.enabled30 !== false, entryPct: 0.3 },
+    { key: "entry50", label: "Entrada de 50%", enabled: discounts.enabled50 !== false, entryPct: 0.5 },
+    { key: "aVista", label: "À Vista", enabled: discounts.enabledAVista !== false, entryPct: 1 },
   ];
   const conditionOptions = rawConditionOptions.filter(opt => opt.enabled).length > 0
     ? rawConditionOptions.filter(opt => opt.enabled)
     : rawConditionOptions;
-
-  useEffect(() => {
-    if (conditionOptions.length > 0 && !conditionOptions.some(opt => opt.key === paymentMethod)) {
-      setPaymentMethod(conditionOptions[0].key);
-    }
-  }, [conditionOptions, paymentMethod]);
 
   const paymentTypeOptions = [
     { key: "pix", label: "Pix" },
@@ -265,7 +284,7 @@ const ProposalSummaryPage = () => {
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
           <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Detalhes do Evento</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div><span className="text-muted-foreground">Data:</span> <strong>{eventDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}</strong></div>
+            <div><span className="text-muted-foreground">Data:</span> <strong>{formattedEventDate}</strong></div>
             <div><span className="text-muted-foreground">Local:</span> <strong>{proposal.venue_name}</strong></div>
             <div><span className="text-muted-foreground">Horário:</span> <strong>{proposal.event_start_time} — {proposal.event_end_time}</strong></div>
             <div><span className="text-muted-foreground">Convidados:</span> <strong>{proposal.guest_count}</strong></div>
@@ -398,44 +417,25 @@ const ProposalSummaryPage = () => {
         </div>
         )}
 
-        {/* Payment discount */}
+        {/* Payment condition */}
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-            <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Condição de Pagamento</h2>
-            {!qualifiesForDiscount && discounts.requireCombo !== false && (
-              <span className="text-[11px] text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded">
-                Individual: sem desconto (disponível em combos)
-              </span>
-            )}
-          </div>
-          {!qualifiesForDiscount && discounts.requireCombo !== false && (
-            <p className="text-xs text-primary/80 bg-primary/5 p-2.5 rounded-lg border border-primary/20">
-              💡 <strong>Dica de Desconto:</strong> Ao incluir 2 ou mais serviços (ex: Banda + DJ ou opcionais), os descontos especiais são ativados automaticamente!
-            </p>
-          )}
+          <h2 className="font-semibold text-sm uppercase tracking-wider text-primary">Condição de Pagamento</h2>
           <div className={`grid gap-2 ${conditionOptions.length === 1 ? 'max-w-md mx-auto' : ''}`}>
             {conditionOptions.map(opt => {
               const r = discountRates[opt.key] || 0;
               const val = +(baseTotal * (1 - r)).toFixed(2);
-              const sav = +(baseTotal * r).toFixed(2);
-              const formattedPct = String(opt.pct).replace(".", ",");
               return (
                 <button key={opt.key} onClick={() => setPaymentMethod(opt.key)}
                   className={`p-4 rounded-lg border text-left transition-all ${paymentMethod === opt.key ? "border-primary bg-primary/10 shadow-sm" : "border-border hover:border-primary/40"}`}>
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="font-medium text-sm">{opt.label}</p>
-                      {qualifiesForDiscount && opt.pct > 0 ? (
-                        <span className="text-[11px] text-primary/80 font-normal">({formattedPct}% de desconto)</span>
-                      ) : (
-                        <span className="text-[11px] text-muted-foreground font-normal">
-                          {opt.entryPct < 1 ? `Entrada de ${formatBRL(val * opt.entryPct)} + saldo parcelado` : "Pagamento integral sem desconto"}
-                        </span>
-                      )}
+                      <span className="text-[11px] text-muted-foreground font-normal">
+                        {opt.entryPct < 1 ? `Entrada de ${formatBRL(val * opt.entryPct)} + saldo parcelado` : "Pagamento à vista"}
+                      </span>
                     </div>
                     <div className="text-right">
                       <p className="font-display text-lg">{formatBRL(val)}</p>
-                      {qualifiesForDiscount && sav > 0 && <p className="text-xs text-primary">Economia: {formatBRL(sav)}</p>}
                     </div>
                   </div>
                 </button>
@@ -481,27 +481,11 @@ const ProposalSummaryPage = () => {
               <span className="text-muted-foreground">Subtotal (Itens Selecionados)</span>
               <span>{formatBRL(baseTotal)}</span>
             </div>
-            {totalSavings > 0 && (
-              <div className="flex justify-between text-sm text-primary">
-                <span>
-                  Desconto (
-                  {paymentMethod === "aVista"
-                    ? `${String(discounts.aVista).replace(".", ",")}%`
-                    : paymentMethod === "entry50"
-                    ? `${String(discounts.entry50).replace(".", ",")}%`
-                    : `${String(discounts.entry30).replace(".", ",")}%`}
-                  )
-                </span>
-                <span>- {formatBRL(totalSavings)}</span>
-              </div>
-            )}
             <div className="pt-3 border-t border-primary/20 flex justify-between items-baseline">
               <span className="font-semibold text-lg">Total do Investimento</span>
               <div className="text-right">
                 <span className="font-display text-3xl text-primary">{formatBRL(grandTotal)}</span>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">
-                  {qualifiesForDiscount && totalSavings > 0 ? "Valor Final com Desconto" : "Valor do Investimento"}
-                </p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">Valor do Investimento</p>
               </div>
             </div>
           </div>

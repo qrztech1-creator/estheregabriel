@@ -280,14 +280,6 @@ const PricingSection = () => {
                   <p ref={priceRef} className="font-display text-5xl md:text-7xl font-light text-gold-gradient tabular-nums">R$ {selectedTotal.toLocaleString("pt-BR")}</p>
                 </div>
 
-                {!qualifiesForDiscount && discounts.requireCombo !== false && (
-                  <div className="mb-6 p-3 rounded-sm border border-primary/20 bg-primary/5 text-center max-w-2xl mx-auto">
-                    <p className="font-body text-xs text-primary/90">
-                      💡 <strong>Condição individual:</strong> O desconto especial é aplicado a partir de 2 serviços (ex: Banda + DJ ou pacotes adicionais).
-                    </p>
-                  </div>
-                )}
-
                 <div className={`mb-6 ${
                   displayPaymentCards.length === 1
                     ? "flex justify-center max-w-sm mx-auto"
@@ -298,8 +290,6 @@ const PricingSection = () => {
                   {displayPaymentCards.map((card) => {
                     const finalVal = selectedTotal * (1 - card.rate);
                     const formattedFinal = formatBRL(finalVal);
-                    const savings = selectedTotal * card.rate;
-                    const formattedSavings = formatBRL(savings);
                     const entryVal = formatBRL(finalVal * card.entryPct);
 
                     return (
@@ -316,18 +306,11 @@ const PricingSection = () => {
                           <p className="font-display text-2xl md:text-3xl text-foreground font-light">
                             R$ {formattedFinal.int}<span className="text-base">,{formattedFinal.dec}</span>
                           </p>
-                          {qualifiesForDiscount && card.rate > 0 ? (
-                            <p className="font-body text-xs text-primary mt-2">
-                              Economia de R$ {formattedSavings.int},{formattedSavings.dec}
-                              <span className="opacity-80 text-[11px] ml-1">({String(card.pct).replace(".", ",")}%)</span>
-                            </p>
-                          ) : (
-                            <p className="font-body text-xs text-muted-foreground mt-2">
-                              {card.entryPct < 1
-                                ? `Entrada de R$ ${entryVal.int},${entryVal.dec} + saldo parcelado`
-                                : "Pagamento integral sem desconto"}
-                            </p>
-                          )}
+                          <p className="font-body text-xs text-muted-foreground mt-2">
+                            {card.entryPct < 1
+                              ? `Entrada de R$ ${entryVal.int},${entryVal.dec} + saldo parcelado`
+                              : "Pagamento à vista"}
+                          </p>
                         </div>
                       </AnimatedBorderCard>
                     );
